@@ -716,24 +716,57 @@ html, body {
 #menu-stats {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02));
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  padding: 10px 20px;
+  gap: 10px;
+  background: linear-gradient(135deg, rgba(251, 191, 36, 0.18), rgba(245, 158, 11, 0.08));
+  border: 1px solid rgba(251, 191, 36, 0.45);
+  padding: 12px 24px;
   border-radius: 50px;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 700;
-  color: #e2e8f0;
-  letter-spacing: 0.3px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(10px);
-  transition: all 0.3s var(--ease-smooth);
+  color: #fff;
+  letter-spacing: 0.4px;
+  box-shadow: 0 6px 25px rgba(245, 158, 11, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(12px);
+  animation: rankGlowPulse 2.5s infinite ease-in-out;
+  transition: all 0.3s var(--ease-spring);
 }
 
 #menu-stats:hover {
-  border-color: rgba(124, 111, 238, 0.5);
-  box-shadow: 0 6px 25px rgba(124, 111, 238, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.25);
-  transform: translateY(-2px);
+  transform: scale(1.05) translateY(-2px);
+  border-color: #fbbf24;
+  box-shadow: 0 10px 35px rgba(245, 158, 11, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+.trophy-icon {
+  font-style: normal;
+  font-size: 18px;
+  display: inline-block;
+  animation: trophyBounce 2s infinite ease-in-out;
+}
+
+.rank-highlight {
+  color: #fbbf24;
+  font-weight: 900;
+  text-shadow: 0 0 12px rgba(251, 191, 36, 0.6);
+  font-size: 15px;
+}
+
+/* Keyframe animations for Top Rank */
+@keyframes rankGlowPulse {
+  0%, 100% {
+    box-shadow: 0 6px 25px rgba(245, 158, 11, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    border-color: rgba(251, 191, 36, 0.45);
+  }
+  50% {
+    box-shadow: 0 8px 32px rgba(245, 158, 11, 0.55), 0 0 15px rgba(251, 191, 36, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+    border-color: #fbbf24;
+  }
+}
+
+@keyframes trophyBounce {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  25% { transform: translateY(-4px) rotate(-8deg); }
+  75% { transform: translateY(-2px) rotate(8deg); }
 }
 
 /* ── Level Select Overlay ─────────────────────────────────────── */

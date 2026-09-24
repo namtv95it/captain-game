@@ -884,7 +884,7 @@ function showMenu() {
     if (window.getMyRank) {
       window.getMyRank('xep-hinh').then(rank => {
         if (rank && rank <= 1000) {
-          statsEl.innerHTML = `<span style="color:#fbbf24; font-weight:800;">🏆 Thứ Hạng Của Bạn: Top ${rank}</span>`;
+          statsEl.innerHTML = `<i class="trophy-icon">🏆</i> <span>Thứ Hạng Của Bạn: <strong class="rank-highlight">Top ${rank}</strong></span>`;
           statsEl.style.display = 'inline-flex';
         }
       });
