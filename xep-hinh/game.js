@@ -935,7 +935,7 @@ function init() {
   const authSub = document.getElementById('auth-btn-sub');
   const authIcon = document.getElementById('auth-btn-icon');
 
-  window.onUserAuthChanged = (user) => {
+  window.onUserAuthChanged = async (user) => {
     if (user) {
       if (authTitle) authTitle.textContent = user.displayName || 'Đã đăng nhập';
       if (authSub) authSub.textContent = 'Đăng xuất tài khoản';
@@ -944,6 +944,21 @@ function init() {
           authIcon.innerHTML = `<img src="${user.photoURL}" style="width:24px;height:24px;border-radius:50%;object-fit:cover;" />`;
         } else {
           authIcon.innerHTML = `<i class="fa-solid fa-user-check"></i>`;
+        }
+      }
+      // Tự động đồng bộ tiến trình (2 chiều Cloud <-> Local)
+      let { maxLevel } = loadGameData();
+      if (window.getUserScoreFromFirebase) {
+        const cloudData = await window.getUserScoreFromFirebase('xep-hinh');
+        if (cloudData && Number(cloudData.level) > maxLevel) {
+          // Cloud có level cao hơn -> Cập nhật local
+          saveGameData(Number(cloudData.level));
+          maxLevel = Number(cloudData.level);
+          startLevel(maxLevel);
+          showToast(`☁️ Đã khôi phục tiến trình Level ${maxLevel} từ tài khoản!`);
+        } else if (window.saveScoreToFirebase) {
+          // Local có level cao hơn hoặc bằng -> Đẩy lên Cloud
+          await window.saveScoreToFirebase(user.displayName, maxLevel, 0, 'xep-hinh');
         }
       }
     } else {
@@ -964,16 +979,20 @@ function init() {
           const res = await window.loginWithGoogle();
           if (res.success) {
             showToast(`👋 Xin chào, ${res.user.displayName}!`);
-            // Tự động đồng bộ điểm số hiện tại với tên Google vừa đăng nhập
+            const { maxLevel } = loadGameData();
             if (window.saveScoreToFirebase) {
-              window.saveScoreToFirebase(res.user.displayName, G.level, G.moveCount || 0, 'xep-hinh');
+              await window.saveScoreToFirebase(res.user.displayName, maxLevel, 0, 'xep-hinh');
             }
+            showMenu();
           }
         }
       } else {
         if (window.logoutGoogle) {
           await window.logoutGoogle();
-          showToast('🚪 Đã đăng xuất!');
+          localStorage.removeItem(SAVE_KEY); // Reset tiến trình local về Level 1 khi đăng xuất
+          startLevel(1);
+          showMenu();
+          showToast('🚪 Đã đăng xuất! Tiến trình đã đặt lại Level 1');
         }
       }
     });

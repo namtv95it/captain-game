@@ -3,7 +3,7 @@ import { getFirestore, doc, setDoc, getDoc, collection, getDocs, query, orderBy,
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyBPRP43YeHZOyYzq_wpJDX7XoHJhgor2IE",
+  apiKey: "AIzaSyApcZd718BoEh0-8A3QrXJrs3dV2CeMz4w",
   authDomain: "captain-game-14c88.firebaseapp.com",
   projectId: "captain-game-14c88",
   storageBucket: "captain-game-14c88.firebasestorage.app",
@@ -190,9 +190,30 @@ export async function getMyRank(gameId = "xep-hinh") {
   }
 }
 
+/**
+ * Lấy dữ liệu lưu trữ của người dùng hiện tại từ Firebase
+ * @param {string} gameId 
+ */
+export async function getUserScoreFromFirebase(gameId = "xep-hinh") {
+  try {
+    if (!currentUser) return null;
+    const userId = 'user_' + currentUser.uid;
+    const docRef = doc(db, `leaderboard_${gameId}`, userId);
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      return docSnap.data();
+    }
+    return null;
+  } catch (error) {
+    console.error("Lỗi khi lấy dữ liệu tiến trình từ Firebase:", error);
+    return null;
+  }
+}
+
 // Gắn hàm vào window để game.js dễ dàng gọi
 window.saveScoreToFirebase = saveScoreToFirebase;
 window.getTopScoresFromFirebase = getTopScoresFromFirebase;
 window.getMyRank = getMyRank;
+window.getUserScoreFromFirebase = getUserScoreFromFirebase;
 window.loginWithGoogle = loginWithGoogle;
 window.logoutGoogle = logoutGoogle;

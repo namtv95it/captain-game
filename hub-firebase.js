@@ -2,7 +2,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebas
 import { getFirestore, doc, getDoc, collection, getDocs, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyBPRP43YeHZOyYzq_wpJDX7XoHJhgor2IE",
+  apiKey: "AIzaSyApcZd718BoEh0-8A3QrXJrs3dV2CeMz4w",
   authDomain: "captain-game-14c88.firebaseapp.com",
   projectId: "captain-game-14c88",
   storageBucket: "captain-game-14c88.firebasestorage.app",
