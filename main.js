@@ -14,6 +14,18 @@ const GAMES_DATA = [
     isReady: true
   },
   {
+    id: 'xep-so',
+    title: 'Xếp Số',
+    category: 'puzzle',
+    categoryName: 'Trí Tuệ',
+    description: 'Trò chơi xếp số kinh điển! Trượt các ô số về đúng thứ tự từ 1 đến N với ít bước nhất. 3 độ khó: 3×3, 4×4, 5×5.',
+    path: './xep-so/index.html',
+    thumbnail: './xep-so/xep-so.jpg',
+    tags: ['Xếp số', 'Sliding Puzzle', 'Logic', 'Trí Tuệ'],
+    status: 'Sẵn sàng',
+    isReady: true
+  },
+  {
     id: 'snake-retro',
     title: 'Retro Snake Master',
     category: 'arcade',

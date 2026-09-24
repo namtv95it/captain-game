@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Xếp Số - Captain Áo Xanh</title>
+  <meta name="description" content="Trò chơi xếp số – Sắp xếp các ô số về đúng thứ tự từ 1 đến N!" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800;900&display=swap&subset=vietnamese"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <link rel="icon" type="image/png" href="../captain.png" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+
+  <!-- Animated background -->
+  <div class="bg-scene" aria-hidden="true">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+    <div class="grid-overlay"></div>
+  </div>
+
+  <!-- Main Game Container -->
+  <div class="game-container">
+
+    <!-- Header -->
+    <header class="header">
+      <div class="header-left">
+        <button class="btn-home" id="btn-home" aria-label="Màn hình chính" title="Màn hình chính">
+          <i class="fa-solid fa-house"></i>
+        </button>
+        <div class="level-info">
+          <div class="level-badge" id="level-badge">3x3</div>
+          <div class="meta-row">
+            <span class="difficulty-label" id="difficulty-name">DỄ</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="header-center">
+        <div class="game-logo">
+          <img src="../captain.png" alt="Logo" class="logo-img" />
+          <span class="logo-text">Captain Áo Xanh</span>
+        </div>
+      </div>
+
+      <div class="header-right">
+        <div class="stats-box">
+          <div class="stat-item">
+            <span class="stat-num" id="move-count">0</span>
+            <span class="stat-lbl">bước</span>
+          </div>
+          <div class="stat-divider"></div>
+          <div class="stat-item">
+            <span class="stat-num" id="timer-display">0:00</span>
+            <span class="stat-lbl">thời gian</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Puzzle Board -->
+    <main class="board-area">
+      <div class="board-wrapper">
+        <button class="btn-pause-large" id="btn-pause" aria-label="Tạm dừng" title="Tạm dừng game">
+          <i class="fa-solid fa-pause"></i> Tạm Dừng
+        </button>
+        <div class="puzzle-board" id="puzzle-board" role="grid"></div>
+      </div>
+    </main>
+
+  </div>
+
+  <!-- Main Menu Overlay -->
+  <div class="menu-overlay" id="menu-overlay" role="dialog" aria-modal="true">
+    <div class="menu-card">
+      <div class="menu-decor">
+        <span class="decor-num decor-num-1">1</span>
+        <span class="decor-num decor-num-2">5</span>
+        <span class="decor-num decor-num-3">9</span>
+      </div>
+      <div class="menu-logo-box">
+        <img src="../captain.png" alt="Logo" class="menu-logo-img" />
+        <h1 class="menu-title">Captain Áo Xanh</h1>
+        <p class="menu-subtitle">Xếp Số</p>
+      </div>
+
+      <div class="menu-actions">
+        <button class="menu-btn menu-btn-continue" id="btn-menu-start">
+          <span class="menu-btn-icon"><i class="fa-solid fa-play"></i></span>
+          <span class="menu-btn-text">
+            <strong>Chơi Ngay</strong>
+            <small id="menu-continue-desc">Chọn mức độ &amp; Bắt đầu</small>
+          </span>
+        </button>
+
+        <button class="menu-btn menu-btn-leaderboard" id="btn-menu-leaderboard">
+          <span class="menu-btn-icon"><i class="fa-solid fa-trophy"></i></span>
+          <span class="menu-btn-text">
+            <strong>Bảng Xếp Hạng</strong>
+            <small>Top cao thủ xếp số</small>
+          </span>
+        </button>
+
+        <button class="menu-btn menu-btn-auth" id="btn-menu-auth">
+          <span class="menu-btn-icon" id="auth-btn-icon"><i class="fa-brands fa-google"></i></span>
+          <span class="menu-btn-text">
+            <strong id="auth-btn-title">Đăng nhập Google</strong>
+            <small id="auth-btn-sub">Đồng bộ tên &amp; avatar</small>
+          </span>
+        </button>
+
+        <a href="../index.html" class="menu-btn menu-btn-hub" style="text-decoration: none;">
+          <span class="menu-btn-icon"><i class="fa-solid fa-house"></i></span>
+          <span class="menu-btn-text">
+            <strong>Về Captain Game Hub</strong>
+            <small>Chọn trò chơi khác</small>
+          </span>
+        </a>
+      </div>
+
+      <div class="menu-footer">
+        <span id="menu-stats" style="display: none;"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Difficulty Selection Overlay -->
+  <div class="diff-modal-overlay" id="diff-modal-overlay" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="diff-modal-card">
+      <div class="diff-modal-header">
+        <button class="btn-back" id="btn-diff-back" aria-label="Quay lại">
+          <i class="fa-solid fa-arrow-left"></i>
+        </button>
+        <h2 class="diff-modal-title">Chọn Mức Độ Chơi</h2>
+      </div>
+      <p class="diff-modal-subtitle">Thử thách bộ não của bạn với các kích thước bảng khác nhau</p>
+      
+      <div class="difficulty-picker">
+        <div class="diff-btns">
+          <button class="diff-btn active" id="diff-3" data-size="3">
+            <span class="diff-grid-icon">3x3</span>
+            <span class="diff-name">Dễ</span>
+            <span class="diff-sub">8 ô số</span>
+          </button>
+          <button class="diff-btn" id="diff-4" data-size="4">
+            <span class="diff-grid-icon">4x4</span>
+            <span class="diff-name">Trung Bình</span>
+            <span class="diff-sub">15 ô số</span>
+          </button>
+          <button class="diff-btn" id="diff-5" data-size="5">
+            <span class="diff-grid-icon">5x5</span>
+            <span class="diff-name">Khó</span>
+            <span class="diff-sub">24 ô số</span>
+          </button>
+          <button class="diff-btn" id="diff-6" data-size="6">
+            <span class="diff-grid-icon">6x6</span>
+            <span class="diff-name">Thách Thức</span>
+            <span class="diff-sub">35 ô số</span>
+          </button>
+          <button class="diff-btn" id="diff-7" data-size="7">
+            <span class="diff-grid-icon">7x7</span>
+            <span class="diff-name">Siêu Cấp</span>
+            <span class="diff-sub">48 ô số</span>
+          </button>
+          <button class="diff-btn" id="diff-8" data-size="8">
+            <span class="diff-grid-icon">8x8</span>
+            <span class="diff-name">Chuyên Gia</span>
+            <span class="diff-sub">63 ô số</span>
+          </button>
+          <button class="diff-btn" id="diff-9" data-size="9">
+            <span class="diff-grid-icon">9x9</span>
+            <span class="diff-name">Huyền Thoại</span>
+            <span class="diff-sub">80 ô số</span>
+          </button>
+          <button class="diff-btn" id="diff-10" data-size="10">
+            <span class="diff-grid-icon">10x10</span>
+            <span class="diff-name">Thần Thoại</span>
+            <span class="diff-sub">99 ô số</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Win Overlay -->
+  <div class="win-overlay" id="win-overlay" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="win-card">
+      <img src="../captain.png" alt="Logo" class="win-logo-img" />
+      <h2 class="win-title">Xuất Sắc!</h2>
+      <p class="win-subtitle" id="win-info">Hoàn thành trong 0 bước!</p>
+      <div class="win-stars" id="win-stars"></div>
+      <div class="win-actions">
+        <button class="btn-play-again" id="btn-play-again">
+          <i class="fa-solid fa-rotate-right"></i> Chơi lại
+        </button>
+        <button class="btn-harder" id="btn-harder">
+          Khó hơn <i class="fa-solid fa-arrow-right"></i>
+        </button>
+        <button class="btn-win-home" id="btn-win-home" title="Màn hình chính">
+          <i class="fa-solid fa-house"></i> Trang chủ
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Leaderboard Overlay -->
+  <div class="leaderboard-overlay" id="leaderboard-overlay" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="leaderboard-card">
+      <div class="leaderboard-header">
+        <button class="btn-back" id="btn-leaderboard-back" aria-label="Quay lại">
+          <i class="fa-solid fa-arrow-left"></i>
+        </button>
+        <h2 class="leaderboard-title">
+          <i class="fa-solid fa-trophy" style="color: #f1c40f; margin-right: 8px;"></i>Bảng Xếp Hạng
+        </h2>
+        <div class="leaderboard-size-tabs" id="lb-size-tabs">
+          <button class="lb-tab active" data-size="3">3x3</button>
+          <button class="lb-tab" data-size="4">4x4</button>
+          <button class="lb-tab" data-size="5">5x5</button>
+          <button class="lb-tab" data-size="6">6x6</button>
+          <button class="lb-tab" data-size="7">7x7</button>
+          <button class="lb-tab" data-size="8">8x8</button>
+          <button class="lb-tab" data-size="9">9x9</button>
+          <button class="lb-tab" data-size="10">10x10</button>
+        </div>
+      </div>
+      <p class="leaderboard-subtitle">Top 10 cao thủ hoàn thành nhanh nhất</p>
+      <div class="leaderboard-list-container">
+        <ul class="leaderboard-list" id="leaderboard-list">
+          <li class="lb-loading">Đang tải bảng xếp hạng...</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pause Overlay -->
+  <div class="pause-overlay" id="pause-overlay" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="pause-card">
+      <div class="pause-icon"><i class="fa-solid fa-pause"></i></div>
+      <h2 class="pause-title">Tạm Dừng</h2>
+      <p class="pause-msg">Trò chơi đang được tạm dừng</p>
+      <div class="pause-actions">
+        <button class="pause-btn btn-resume" id="btn-resume">
+          <i class="fa-solid fa-play"></i> Tiếp tục
+        </button>
+        <button class="pause-btn btn-restart" id="btn-pause-restart">
+          <i class="fa-solid fa-rotate-right"></i> Chơi lại
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Confirm Logout -->
+  <div class="confirm-overlay" id="confirm-overlay" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="confirm-card">
+      <div class="confirm-icon"><i class="fa-solid fa-right-from-bracket"></i></div>
+      <h3 class="confirm-title">Đăng xuất?</h3>
+      <p class="confirm-msg">Kỷ lục vẫn được giữ trên đám mây. Bạn có chắc muốn đăng xuất không?</p>
+      <div class="confirm-actions">
+        <button class="confirm-btn confirm-btn-cancel" id="btn-confirm-cancel">
+          <i class="fa-solid fa-xmark"></i> Hủy
+        </button>
+        <button class="confirm-btn confirm-btn-ok" id="btn-confirm-ok">
+          <i class="fa-solid fa-check"></i> Đăng xuất
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast" role="alert" aria-live="polite"></div>
+
+  <!-- Firebase Modular SDK -->
+  <script type="module" src="firebase-config.js"></script>
+  <script src="game.js"></script>
+</body>
+
+</html>

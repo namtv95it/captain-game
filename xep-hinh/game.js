@@ -413,15 +413,32 @@ function render() {
 
 function applyLevelSizing() {
   const cap = getTubeCapacity();
+  const totalTubes = G.tubes.length || (G.config ? G.config.colors + G.config.emptyTubes : 7);
   const root = document.documentElement;
 
-  // Chiều cao khả dụng cho khu vực chơi (khoảng 60-68vh do đã bỏ footer controls)
-  const isMobile = window.innerWidth <= 420 || window.innerHeight <= 700;
-  
-  // Tính kích thước bóng lý tưởng theo dung tích ống (cap: 4, 5, 6, 7, 8, ...)
-  const maxAvailHeight = Math.max(260, window.innerHeight * 0.65);
-  let ballSize = Math.floor((maxAvailHeight - 20) / cap);
-  ballSize = Math.max(28, Math.min(isMobile ? 50 : 58, ballSize));
+  // Compute max height available for tubes area (taking header and padding into account)
+  const isMobile = window.innerWidth <= 600 || window.innerHeight <= 750;
+  const availH = Math.max(220, window.innerHeight - (isMobile ? 120 : 160));
+  const availW = Math.max(280, Math.min(window.innerWidth - 24, 960));
+
+  // Determine row layout: on small screens, if totalTubes > 6, split into 2 rows evenly (e.g. 7 tubes -> 4 top, 3 bottom)
+  let rows = 1;
+  if (isMobile && totalTubes >= 6) {
+    rows = 2;
+  }
+  const tubesPerRow = Math.ceil(totalTubes / rows);
+
+  // Calculate ballSize based on Height constraint
+  // tubeH = cap * ballSize + (cap - 1) * ballGap + 12  =>  approx: cap * ballSize * 1.1 + 12
+  const maxBallH = Math.floor((availH / rows - 30) / (cap + 0.5));
+
+  // Calculate ballSize based on Width constraint
+  // tubeW = ballSize + 12, gap between tubes = ~10px => per tube = ballSize + 22
+  const maxBallW = Math.floor((availW - (tubesPerRow * 12)) / tubesPerRow) - 12;
+
+  // Pick optimal ball size fitting both dimensions
+  let ballSize = Math.min(maxBallH, maxBallW);
+  ballSize = Math.max(22, Math.min(isMobile ? 44 : 56, ballSize));
 
   const ballGap = Math.max(2, Math.min(4, Math.floor(ballSize / 12)));
   const tubeW = ballSize + 12;
@@ -1154,5 +1171,9 @@ function escapeHtml(str) {
     tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
   );
 }
+
+window.addEventListener('resize', () => {
+  if (G.config) applyLevelSizing();
+});
 
 document.addEventListener('DOMContentLoaded', init);
