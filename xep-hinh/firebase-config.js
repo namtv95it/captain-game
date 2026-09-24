@@ -78,7 +78,7 @@ function getUserId() {
  * @param {number} moves 
  * @param {string} gameId 
  */
-export async function saveScoreToFirebase(name, level, moves, gameId = "xep-hinh") {
+export async function saveScoreToFirebase(name, level, moves, gameId = "xep-bong") {
   try {
     const userId = getUserId();
     const docRef = doc(db, `leaderboard_${gameId}`, userId);
@@ -126,7 +126,7 @@ export async function saveScoreToFirebase(name, level, moves, gameId = "xep-hinh
  * Lấy danh sách Top 10 cao thủ từ Firestore theo từng Game
  * @param {string} gameId
  */
-export async function getTopScoresFromFirebase(gameId = "xep-hinh") {
+export async function getTopScoresFromFirebase(gameId = "xep-bong") {
   try {
     const q = query(
       collection(db, `leaderboard_${gameId}`),
@@ -158,7 +158,7 @@ export async function getTopScoresFromFirebase(gameId = "xep-hinh") {
  * Kiểm tra xem người dùng hiện tại có thuộc Top 1000 không
  * @param {string} gameId 
  */
-export async function getMyRank(gameId = "xep-hinh") {
+export async function getMyRank(gameId = "xep-bong") {
   try {
     const userId = getUserId();
     if (!userId) return null;
@@ -194,7 +194,7 @@ export async function getMyRank(gameId = "xep-hinh") {
  * Lấy dữ liệu lưu trữ của người dùng hiện tại từ Firebase
  * @param {string} gameId 
  */
-export async function getUserScoreFromFirebase(gameId = "xep-hinh") {
+export async function getUserScoreFromFirebase(gameId = "xep-bong") {
   try {
     if (!currentUser) return null;
     const userId = 'user_' + currentUser.uid;

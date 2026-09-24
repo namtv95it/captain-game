@@ -27,7 +27,7 @@ const COLORS = [
   { bg: 'linear-gradient(155deg,#d4fc79,#96e6a1)', shadow: 'rgba(212,252,121,.70)' }, // 11 mint
 ];
 
-const DIFFICULTY_NAME = { 1:'EASY', 2:'EASY', 3:'NORMAL', 4:'HARD', 5:'EXPERT', 6:'MASTER' };
+const DIFFICULTY_NAME = { 1:'DỄ', 2:'DỄ', 3:'VỪA', 4:'KHÓ', 5:'CHUYÊN GIA', 6:'CAO THỦ' };
 
 // ── Sound System (Web Audio API – no external files) ──────────────────────────
 let _ctx = null;
@@ -409,21 +409,19 @@ function cloneTubes(tubes) {
 function render() {
   renderHeader();
   renderTubes();
-  document.getElementById('btn-undo').disabled = !G.undoStack.length;
 }
 
 function applyLevelSizing() {
   const cap = getTubeCapacity();
   const root = document.documentElement;
 
-  // Chiều cao khả dụng cho khu vực chơi (khoảng 50-55vh)
+  // Chiều cao khả dụng cho khu vực chơi (khoảng 60-68vh do đã bỏ footer controls)
   const isMobile = window.innerWidth <= 420 || window.innerHeight <= 700;
   
   // Tính kích thước bóng lý tưởng theo dung tích ống (cap: 4, 5, 6, 7, 8, ...)
-  // Chiều cao ống khả dụng tối đa khoảng 52vh (trừ header + controls)
-  const maxAvailHeight = Math.max(220, window.innerHeight * 0.52);
+  const maxAvailHeight = Math.max(260, window.innerHeight * 0.65);
   let ballSize = Math.floor((maxAvailHeight - 20) / cap);
-  ballSize = Math.max(26, Math.min(isMobile ? 48 : 54, ballSize));
+  ballSize = Math.max(28, Math.min(isMobile ? 50 : 58, ballSize));
 
   const ballGap = Math.max(2, Math.min(4, Math.floor(ballSize / 12)));
   const tubeW = ballSize + 12;
@@ -439,9 +437,12 @@ function applyLevelSizing() {
 
 function renderHeader() {
   applyLevelSizing();
-  document.getElementById('level-badge').textContent     = `Level ${G.level}`;
-  document.getElementById('move-count').textContent      = G.moveCount;
-  document.getElementById('difficulty-name').textContent = DIFFICULTY_NAME[G.config.difficulty] || 'EASY';
+  const levelBadge = document.getElementById('level-badge');
+  if (levelBadge) levelBadge.textContent = `Màn ${G.level}`;
+  const moveEl = document.getElementById('move-count');
+  if (moveEl) moveEl.textContent = G.moveCount;
+  const diffEl = document.getElementById('difficulty-name');
+  if (diffEl) diffEl.textContent = DIFFICULTY_NAME[G.config.difficulty] || 'DỄ';
   const fogEl = document.getElementById('fog-badge');
   if (fogEl) fogEl.style.display = 'none';
 }
@@ -690,7 +691,7 @@ function onHint() {
   if (G.isAnimating) return;
   clearHint();
   const hint = getHint();
-  if (!hint) { showToast('⚠️ Không còn nước đi hợp lệ!'); return; }
+  if (!hint) { showToast('<i class="fa-solid fa-triangle-exclamation" style="color:#e74c3c;margin-right:6px;"></i> Không còn nước đi hợp lệ!'); return; }
   G.hintsUsed++;
   G.selectedTube = null;
   render();
@@ -765,7 +766,7 @@ function showWin() {
   for (let i = 1; i <= 3; i++) {
     const s = document.createElement('span');
     s.className   = 'win-star' + (i <= stars ? ' active' : '');
-    s.textContent = i <= stars ? '⭐' : '☆';
+    s.innerHTML   = i <= stars ? '<i class="fa-solid fa-star" style="color: #f1c40f;"></i>' : '<i class="fa-regular fa-star" style="color: rgba(255,255,255,0.3);"></i>';
     starsEl.appendChild(s);
   }
 
@@ -781,9 +782,9 @@ function showWin() {
   // Tự động lưu điểm lên Firebase (G.level = Màn vừa vượt qua)
   const savedName = localStorage.getItem('captain_player_name') || 'Chưa cập nhật';
   if (window.saveScoreToFirebase) {
-    window.saveScoreToFirebase(savedName, G.level, G.moveCount || 0, 'xep-hinh').then(res => {
+    window.saveScoreToFirebase(savedName, G.level, G.moveCount || 0, 'xep-bong').then(res => {
       if (res.success && res.updated) {
-        showToast('🏆 Kỷ lục mới đã được lưu tự động!');
+        showToast('<i class="fa-solid fa-trophy" style="color:#f1c40f;margin-right:6px;"></i> Kỷ lục mới đã được lưu tự động!');
       }
     });
   }
@@ -819,7 +820,8 @@ function launchConfetti() {
 // ── Toast ─────────────────────────────────────────────────────────────────────
 function showToast(msg) {
   const t = document.getElementById('toast');
-  t.textContent = msg;
+  if (!t) return;
+  t.innerHTML = msg;
   t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 2600);
 }
@@ -886,15 +888,15 @@ function showMenu() {
   const descEl = document.getElementById('menu-continue-desc');
   const statsEl = document.getElementById('menu-stats');
 
-  if (descEl) descEl.textContent = `Level ${displayLevel}`;
+  if (descEl) descEl.textContent = `Màn ${displayLevel}`;
 
   // Kiểm tra thứ hạng trên Firebase (chỉ hiển thị riêng thứ hạng nếu thuộc Top 1000)
   if (statsEl) {
     statsEl.style.display = 'none'; // Tạm ẩn mặc định
     if (window.getMyRank) {
-      window.getMyRank('xep-hinh').then(rank => {
+      window.getMyRank('xep-bong').then(rank => {
         if (rank && rank <= 1000) {
-          statsEl.innerHTML = `<i class="trophy-icon">🏆</i> <span>Thứ Hạng Của Bạn: <strong class="rank-highlight">Top ${rank}</strong></span>`;
+          statsEl.innerHTML = `<i class="fa-solid fa-trophy trophy-icon" style="color:#f1c40f;"></i> <span>Thứ Hạng Của Bạn: <strong class="rank-highlight">Top ${rank}</strong></span>`;
           statsEl.style.display = 'inline-flex';
         }
       });
@@ -913,10 +915,8 @@ function hideMenu() {
 
 // ── Bootstrap ─────────────────────────────────────────────────────────────────
 function init() {
-  document.getElementById('btn-hint').addEventListener('click',  onHint);
-  document.getElementById('btn-undo').addEventListener('click',  onUndo);
-  document.getElementById('btn-reset').addEventListener('click', onReset);
-  document.getElementById('btn-next').addEventListener('click',  onNextLevel);
+  const btnNext = document.getElementById('btn-next');
+  if (btnNext) btnNext.addEventListener('click', onNextLevel);
 
   // Home button
   const btnHome = document.getElementById('btn-home');
@@ -936,7 +936,7 @@ function init() {
       const { maxLevel, currentLevel } = loadGameData();
       const playLevel = Math.max(maxLevel, currentLevel);
       startLevel(playLevel);
-      setTimeout(() => showToast(`▶ Tiếp tục Level ${playLevel}`), 300);
+      setTimeout(() => showToast(`<i class="fa-solid fa-play" style="margin-right:6px;"></i> Tiếp tục Màn ${playLevel}`), 300);
     });
   }
 
@@ -963,7 +963,7 @@ function init() {
       let localMax = Math.max(maxLevel, currentLevel);
 
       if (window.getUserScoreFromFirebase) {
-        const cloudData = await window.getUserScoreFromFirebase('xep-hinh');
+        const cloudData = await window.getUserScoreFromFirebase('xep-bong');
         const cloudPassedLevel = cloudData ? Number(cloudData.level) || 0 : 0;
         // Nếu đã vượt qua màn X trên cloud -> Màn hiện tại cần chơi sẽ là X + 1
         const cloudNextLevel = cloudPassedLevel > 0 ? cloudPassedLevel + 1 : 1;
@@ -975,7 +975,7 @@ function init() {
             currentLevel: cloudNextLevel
           }));
           startLevel(cloudNextLevel);
-          showToast(`☁️ Đã khôi phục tiến trình Level ${cloudNextLevel} từ tài khoản!`);
+          showToast(`<i class="fa-solid fa-cloud-arrow-down" style="margin-right:6px;"></i> Đã khôi phục tiến trình Màn ${cloudNextLevel} từ tài khoản!`);
         } else {
           // Local có tiến trình bằng hoặc cao hơn -> Đẩy màn đã vượt qua (localMax - 1) lên Cloud
           localStorage.setItem(SAVE_KEY, JSON.stringify({
@@ -984,7 +984,7 @@ function init() {
           }));
           const passedLevelToSave = Math.max(1, localMax - 1);
           if (window.saveScoreToFirebase && passedLevelToSave >= 1) {
-            await window.saveScoreToFirebase(user.displayName, passedLevelToSave, 0, 'xep-hinh');
+            await window.saveScoreToFirebase(user.displayName, passedLevelToSave, 0, 'xep-bong');
           }
         }
       }
@@ -1002,23 +1002,56 @@ function init() {
       SFX.select();
       if (authTitle && authTitle.textContent.includes('Đăng nhập')) {
         if (window.loginWithGoogle) {
-          showToast('⏳ Đang mở trang đăng nhập Google...');
+          showToast('<i class="fa-solid fa-spinner fa-spin" style="margin-right:6px;"></i> Đang mở trang đăng nhập Google...');
           const res = await window.loginWithGoogle();
           if (res.success) {
-            showToast(`👋 Xin chào, ${res.user.displayName}!`);
+            showToast(`<i class="fa-solid fa-hand" style="margin-right:6px;"></i> Xin chào, ${res.user.displayName}!`);
           }
         }
       } else {
-        if (window.logoutGoogle) {
-          await window.logoutGoogle();
-          localStorage.removeItem(SAVE_KEY); // Reset tiến trình local về Level 1 khi đăng xuất
-          startLevel(1);
-          showMenu();
-          showToast('🚪 Đã đăng xuất! Tiến trình đã đặt lại Level 1');
+        // Hiển thị dialog xác nhận trước khi đăng xuất
+        const confirmOverlay = document.getElementById('confirm-overlay');
+        if (confirmOverlay) {
+          confirmOverlay.classList.add('show');
+          confirmOverlay.removeAttribute('aria-hidden');
         }
       }
     });
   }
+
+  // Confirm dialog: Hủy
+  const btnConfirmCancel = document.getElementById('btn-confirm-cancel');
+  if (btnConfirmCancel) {
+    btnConfirmCancel.addEventListener('click', () => {
+      SFX.select();
+      const confirmOverlay = document.getElementById('confirm-overlay');
+      if (confirmOverlay) {
+        confirmOverlay.classList.remove('show');
+        confirmOverlay.setAttribute('aria-hidden', 'true');
+      }
+    });
+  }
+
+  // Confirm dialog: Xác nhận đăng xuất
+  const btnConfirmOk = document.getElementById('btn-confirm-ok');
+  if (btnConfirmOk) {
+    btnConfirmOk.addEventListener('click', async () => {
+      SFX.select();
+      const confirmOverlay = document.getElementById('confirm-overlay');
+      if (confirmOverlay) {
+        confirmOverlay.classList.remove('show');
+        confirmOverlay.setAttribute('aria-hidden', 'true');
+      }
+      if (window.logoutGoogle) {
+        await window.logoutGoogle();
+        localStorage.removeItem(SAVE_KEY); // Reset tiến trình local về Màn 1 khi đăng xuất
+        startLevel(1);
+        showMenu();
+        showToast('<i class="fa-solid fa-right-from-bracket" style="margin-right:6px;"></i> Đã đăng xuất! Tiến trình đã đặt lại Màn 1');
+      }
+    });
+  }
+
 
   // Menu: Nút Bảng Xếp Hạng
   const btnLeaderboard = document.getElementById('btn-menu-leaderboard');
@@ -1079,7 +1112,7 @@ async function showLeaderboardOverlay() {
   listEl.innerHTML = '<li class="lb-loading">Đang tải dữ liệu từ Firebase...</li>';
 
   if (window.getTopScoresFromFirebase) {
-    const scores = await window.getTopScoresFromFirebase('xep-hinh');
+    const scores = await window.getTopScoresFromFirebase('xep-bong');
     if (!scores || scores.length === 0) {
       listEl.innerHTML = '<li class="lb-loading">Chưa có điểm số nào. Hãy là người đầu tiên!</li>';
       return;
@@ -1097,7 +1130,7 @@ async function showLeaderboardOverlay() {
             <span class="lb-name">${escapeHtml(item.name || 'Chưa cập nhật')}</span>
             <span class="lb-meta">${item.moves} bước đi</span>
           </div>
-          <div class="lb-badge">Level ${item.level}</div>
+          <div class="lb-badge">Màn ${item.level}</div>
         </li>
       `;
     }).join('');
