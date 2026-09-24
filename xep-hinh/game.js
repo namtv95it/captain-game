@@ -17,7 +17,7 @@ const COLORS = [
   { bg: 'linear-gradient(155deg,#74b9ff,#2980b9)', shadow: 'rgba(116,185,255,.70)' }, // 1 azure
   { bg: 'linear-gradient(155deg,#55efc4,#00b894)', shadow: 'rgba( 85,239,196,.70)' }, // 2 emerald
   { bg: 'linear-gradient(155deg,#ffeaa7,#f39c12)', shadow: 'rgba(255,234,167,.70)' }, // 3 amber
-  { bg: 'linear-gradient(155deg,#a29bfe,#6c5ce7)', shadow: 'rgba(162,155,254,.70)' }, // 4 violet
+  { bg: 'linear-gradient(155deg,#be2edd,#8e44ad)', shadow: 'rgba(190,46,221,.70)' }, // 4 royal purple
   { bg: 'linear-gradient(155deg,#fd79a8,#e17055)', shadow: 'rgba(253,121,168,.70)' }, // 5 coral
   { bg: 'linear-gradient(155deg,#ff9ff3,#f368e0)', shadow: 'rgba(255,159,243,.70)' }, // 6 orchid
   { bg: 'linear-gradient(155deg,#81ecec,#00cec9)', shadow: 'rgba(129,236,236,.70)' }, // 7 cyan
@@ -769,7 +769,16 @@ function showWin() {
     starsEl.appendChild(s);
   }
 
-  // Tự động lưu điểm lên Firebase khi người chơi chiến thắng (qua màn)
+  // Cập nhật màn chơi mở khóa tiếp theo vào LocalStorage ngay khi chiến thắng
+  const nextLvl = G.level + 1;
+  const currentData = loadGameData();
+  const newMax = Math.max(currentData.maxLevel, nextLvl);
+  localStorage.setItem(SAVE_KEY, JSON.stringify({
+    maxLevel: newMax,
+    currentLevel: nextLvl
+  }));
+
+  // Tự động lưu điểm lên Firebase (G.level = Màn vừa vượt qua)
   const savedName = localStorage.getItem('captain_player_name') || 'Chưa cập nhật';
   if (window.saveScoreToFirebase) {
     window.saveScoreToFirebase(savedName, G.level, G.moveCount || 0, 'xep-hinh').then(res => {
@@ -872,11 +881,12 @@ function saveGame() {
 function showMenu() {
   const overlay = document.getElementById('menu-overlay');
   const { maxLevel, currentLevel } = loadGameData();
+  const displayLevel = Math.max(maxLevel, currentLevel);
 
   const descEl = document.getElementById('menu-continue-desc');
   const statsEl = document.getElementById('menu-stats');
 
-  if (descEl) descEl.textContent = `Level ${currentLevel}`;
+  if (descEl) descEl.textContent = `Level ${displayLevel}`;
 
   // Kiểm tra thứ hạng trên Firebase (chỉ hiển thị riêng thứ hạng nếu thuộc Top 1000)
   if (statsEl) {
@@ -923,9 +933,10 @@ function init() {
     btnContinue.addEventListener('click', () => {
       SFX.select();
       hideMenu();
-      const { currentLevel } = loadGameData();
-      startLevel(currentLevel);
-      setTimeout(() => showToast(`▶ Tiếp tục Level ${currentLevel}`), 300);
+      const { maxLevel, currentLevel } = loadGameData();
+      const playLevel = Math.max(maxLevel, currentLevel);
+      startLevel(playLevel);
+      setTimeout(() => showToast(`▶ Tiếp tục Level ${playLevel}`), 300);
     });
   }
 
@@ -947,18 +958,34 @@ function init() {
         }
       }
       // Tự động đồng bộ tiến trình (2 chiều Cloud <-> Local)
-      let { maxLevel } = loadGameData();
+      // Lưu ý: level trên Cloud đại diện cho "Màn đã vượt qua" (Passed Level)
+      let { maxLevel, currentLevel } = loadGameData();
+      let localMax = Math.max(maxLevel, currentLevel);
+
       if (window.getUserScoreFromFirebase) {
         const cloudData = await window.getUserScoreFromFirebase('xep-hinh');
-        if (cloudData && Number(cloudData.level) > maxLevel) {
-          // Cloud có level cao hơn -> Cập nhật local
-          saveGameData(Number(cloudData.level));
-          maxLevel = Number(cloudData.level);
-          startLevel(maxLevel);
-          showToast(`☁️ Đã khôi phục tiến trình Level ${maxLevel} từ tài khoản!`);
-        } else if (window.saveScoreToFirebase) {
-          // Local có level cao hơn hoặc bằng -> Đẩy lên Cloud
-          await window.saveScoreToFirebase(user.displayName, maxLevel, 0, 'xep-hinh');
+        const cloudPassedLevel = cloudData ? Number(cloudData.level) || 0 : 0;
+        // Nếu đã vượt qua màn X trên cloud -> Màn hiện tại cần chơi sẽ là X + 1
+        const cloudNextLevel = cloudPassedLevel > 0 ? cloudPassedLevel + 1 : 1;
+
+        if (cloudNextLevel > localMax) {
+          // Cloud có tiến trình cao hơn -> Cập nhật local màn chơi hiện tại là cloudNextLevel
+          localStorage.setItem(SAVE_KEY, JSON.stringify({
+            maxLevel: cloudNextLevel,
+            currentLevel: cloudNextLevel
+          }));
+          startLevel(cloudNextLevel);
+          showToast(`☁️ Đã khôi phục tiến trình Level ${cloudNextLevel} từ tài khoản!`);
+        } else {
+          // Local có tiến trình bằng hoặc cao hơn -> Đẩy màn đã vượt qua (localMax - 1) lên Cloud
+          localStorage.setItem(SAVE_KEY, JSON.stringify({
+            maxLevel: localMax,
+            currentLevel: localMax
+          }));
+          const passedLevelToSave = Math.max(1, localMax - 1);
+          if (window.saveScoreToFirebase && passedLevelToSave >= 1) {
+            await window.saveScoreToFirebase(user.displayName, passedLevelToSave, 0, 'xep-hinh');
+          }
         }
       }
     } else {
@@ -979,11 +1006,6 @@ function init() {
           const res = await window.loginWithGoogle();
           if (res.success) {
             showToast(`👋 Xin chào, ${res.user.displayName}!`);
-            const { maxLevel } = loadGameData();
-            if (window.saveScoreToFirebase) {
-              await window.saveScoreToFirebase(res.user.displayName, maxLevel, 0, 'xep-hinh');
-            }
-            showMenu();
           }
         }
       } else {
