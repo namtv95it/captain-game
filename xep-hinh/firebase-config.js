@@ -1,5 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
 import { getFirestore, doc, setDoc, getDoc, collection, getDocs, query, orderBy, limit, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBPRP43YeHZOyYzq_wpJDX7XoHJhgor2IE",
@@ -14,9 +15,54 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+const auth = getAuth(app);
+const googleProvider = new GoogleAuthProvider();
 
-// Khởi tạo/Lấy Device ID định danh cho thiết bị này
-function getDeviceId() {
+// User state
+let currentUser = null;
+
+// Theo dõi trạng thái đăng nhập
+onAuthStateChanged(auth, (user) => {
+  currentUser = user;
+  if (window.onUserAuthChanged) {
+    window.onUserAuthChanged(user);
+  }
+});
+
+/**
+ * Đăng nhập bằng Google Popup
+ */
+export async function loginWithGoogle() {
+  try {
+    const result = await signInWithPopup(auth, googleProvider);
+    const user = result.user;
+    localStorage.setItem('captain_player_name', user.displayName || 'Gamer');
+    return { success: true, user };
+  } catch (error) {
+    console.error("Lỗi đăng nhập Google:", error);
+    return { success: false, error };
+  }
+}
+
+/**
+ * Đăng xuất
+ */
+export async function logoutGoogle() {
+  try {
+    await signOut(auth);
+    localStorage.removeItem('captain_player_name');
+    return { success: true };
+  } catch (error) {
+    console.error("Lỗi đăng xuất:", error);
+    return { success: false, error };
+  }
+}
+
+// Khởi tạo/Lấy ID định danh cho tài khoản hoặc thiết bị
+function getUserId() {
+  if (currentUser) {
+    return 'user_' + currentUser.uid;
+  }
   let devId = localStorage.getItem('captain_device_id');
   if (!devId) {
     devId = 'dev_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now();
@@ -26,7 +72,7 @@ function getDeviceId() {
 }
 
 /**
- * Lưu/Cập nhật điểm kỷ lục người chơi lên Firestore theo thiết bị (Device ID)
+ * Lưu/Cập nhật điểm kỷ lục người chơi lên Firestore
  * @param {string} name 
  * @param {number} level 
  * @param {number} moves 
@@ -34,10 +80,13 @@ function getDeviceId() {
  */
 export async function saveScoreToFirebase(name, level, moves, gameId = "xep-hinh") {
   try {
-    const deviceId = getDeviceId();
-    const docRef = doc(db, `leaderboard_${gameId}`, deviceId);
+    const userId = getUserId();
+    const docRef = doc(db, `leaderboard_${gameId}`, userId);
 
-    // Kiểm tra kỷ lục cũ của thiết bị này trên Firebase
+    const displayName = currentUser ? (currentUser.displayName || "Gamer") : "Chưa cập nhật";
+    const avatarUrl = currentUser ? currentUser.photoURL : null;
+
+    // Kiểm tra kỷ lục cũ của người chơi/thiết bị này trên Firebase
     const existingDoc = await getDoc(docRef);
     if (existingDoc.exists()) {
       const oldData = existingDoc.data();
@@ -47,10 +96,10 @@ export async function saveScoreToFirebase(name, level, moves, gameId = "xep-hinh
       const newLevel = Number(level) || 1;
       const newMoves = Number(moves) || 0;
 
-      // Nếu điểm mới không vượt qua kỷ lục cũ -> chỉ cập nhật lại Tên nếu tên thay đổi
+      // Nếu điểm mới không vượt qua kỷ lục cũ -> chỉ cập nhật lại Tên/Avatar nếu đã đăng nhập
       if (newLevel < oldLevel || (newLevel === oldLevel && newMoves >= oldMoves)) {
-        if (name && name !== oldData.name) {
-          await setDoc(docRef, { name: name }, { merge: true });
+        if (currentUser && displayName !== oldData.name) {
+          await setDoc(docRef, { name: displayName, avatar: avatarUrl }, { merge: true });
         }
         return { success: true, updated: false, msg: "Kỷ lục cũ tốt hơn!" };
       }
@@ -58,8 +107,9 @@ export async function saveScoreToFirebase(name, level, moves, gameId = "xep-hinh
 
     // Cập nhật kỷ lục mới
     await setDoc(docRef, {
-      deviceId: deviceId,
-      name: name || "Chưa cập nhật",
+      userId: userId,
+      name: displayName,
+      avatar: avatarUrl,
       level: Number(level) || 1,
       moves: Number(moves) || 0,
       timestamp: serverTimestamp()
@@ -110,8 +160,8 @@ export async function getTopScoresFromFirebase(gameId = "xep-hinh") {
  */
 export async function getMyRank(gameId = "xep-hinh") {
   try {
-    const devId = localStorage.getItem('captain_device_id');
-    if (!devId) return null;
+    const userId = getUserId();
+    if (!userId) return null;
 
     const q = query(
       collection(db, `leaderboard_${gameId}`),
@@ -129,7 +179,7 @@ export async function getMyRank(gameId = "xep-hinh") {
       return a.moves - b.moves;
     });
 
-    const index = scores.findIndex(s => s.deviceId === devId);
+    const index = scores.findIndex(s => (s.userId && s.deviceId) ? (s.userId === userId || s.deviceId === userId) : (s.userId === userId || s.deviceId === userId));
     if (index !== -1) {
       return index + 1; // Trả về thứ hạng (1 -> 1000)
     }
@@ -144,3 +194,5 @@ export async function getMyRank(gameId = "xep-hinh") {
 window.saveScoreToFirebase = saveScoreToFirebase;
 window.getTopScoresFromFirebase = getTopScoresFromFirebase;
 window.getMyRank = getMyRank;
+window.loginWithGoogle = loginWithGoogle;
+window.logoutGoogle = logoutGoogle;

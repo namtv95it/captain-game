@@ -929,6 +929,56 @@ function init() {
     });
   }
 
+  // Menu: Nút Đăng Nhập / Đăng Xuất Google
+  const btnAuth = document.getElementById('btn-menu-auth');
+  const authTitle = document.getElementById('auth-btn-title');
+  const authSub = document.getElementById('auth-btn-sub');
+  const authIcon = document.getElementById('auth-btn-icon');
+
+  window.onUserAuthChanged = (user) => {
+    if (user) {
+      if (authTitle) authTitle.textContent = user.displayName || 'Đã đăng nhập';
+      if (authSub) authSub.textContent = 'Đăng xuất tài khoản';
+      if (authIcon) {
+        if (user.photoURL) {
+          authIcon.innerHTML = `<img src="${user.photoURL}" style="width:24px;height:24px;border-radius:50%;object-fit:cover;" />`;
+        } else {
+          authIcon.innerHTML = `<i class="fa-solid fa-user-check"></i>`;
+        }
+      }
+    } else {
+      if (authTitle) authTitle.textContent = 'Đăng nhập Google';
+      if (authSub) authSub.textContent = 'Đồng bộ tên & avatar';
+      if (authIcon) authIcon.innerHTML = `<i class="fa-brands fa-google"></i>`;
+    }
+    // Cập nhật lại UI menu nếu đang mở
+    showMenu();
+  };
+
+  if (btnAuth) {
+    btnAuth.addEventListener('click', async () => {
+      SFX.select();
+      if (authTitle && authTitle.textContent.includes('Đăng nhập')) {
+        if (window.loginWithGoogle) {
+          showToast('⏳ Đang mở trang đăng nhập Google...');
+          const res = await window.loginWithGoogle();
+          if (res.success) {
+            showToast(`👋 Xin chào, ${res.user.displayName}!`);
+            // Tự động đồng bộ điểm số hiện tại với tên Google vừa đăng nhập
+            if (window.saveScoreToFirebase) {
+              window.saveScoreToFirebase(res.user.displayName, G.level, G.moveCount || 0, 'xep-hinh');
+            }
+          }
+        }
+      } else {
+        if (window.logoutGoogle) {
+          await window.logoutGoogle();
+          showToast('🚪 Đã đăng xuất!');
+        }
+      }
+    });
+  }
+
   // Menu: Nút Bảng Xếp Hạng
   const btnLeaderboard = document.getElementById('btn-menu-leaderboard');
   if (btnLeaderboard) {
@@ -997,11 +1047,13 @@ async function showLeaderboardOverlay() {
     listEl.innerHTML = scores.map((item, idx) => {
       const rank = idx + 1;
       const rankClass = rank <= 3 ? `lb-rank-${rank}` : '';
+      const avatarHtml = item.avatar ? `<img src="${item.avatar}" class="lb-avatar" alt="${escapeHtml(item.name)}" />` : '';
       return `
         <li class="lb-item">
           <div class="lb-rank ${rankClass}">${rank}</div>
+          ${avatarHtml}
           <div class="lb-info">
-            <span class="lb-name">${escapeHtml(item.name || 'Ẩn danh')}</span>
+            <span class="lb-name">${escapeHtml(item.name || 'Chưa cập nhật')}</span>
             <span class="lb-meta">${item.moves} bước đi</span>
           </div>
           <div class="lb-badge">Level ${item.level}</div>
