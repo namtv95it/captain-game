@@ -181,28 +181,37 @@ function updateTimerDisplay() {
 function applyBoardSizing() {
   const root = document.documentElement;
   const size = G.size || 3;
-  
-  // Available viewport space (leaving padding for header and margins)
-  const isMobile = window.innerWidth <= 600 || window.innerHeight <= 750;
-  const availW = Math.min(window.innerWidth - 32, 500);
-  const availH = Math.min(window.innerHeight - 150, 600);
+  const board = document.getElementById('puzzle-board');
+  const boardArea = document.querySelector('.board-area');
+  const pauseBtn = document.getElementById('btn-pause');
 
-  const gap = size >= 8 ? 2 : size >= 6 ? 3 : size >= 5 ? 4 : 6;
+  if (!boardArea) return;
+
+  // Use clientWidth/clientHeight for reliable measurement even before layout
+  const areaW = boardArea.clientWidth || boardArea.offsetWidth || window.innerWidth;
+  const areaH = boardArea.clientHeight || boardArea.offsetHeight || (window.innerHeight - 60);
+  const pauseH = pauseBtn ? (pauseBtn.offsetHeight || 32) + 8 : 0;
+
+  // Available space: full area minus pause button height and small padding
+  const availW = Math.max(60, areaW - 8);
+  const availH = Math.max(60, areaH - pauseH - 8);
+
+  const gap = size >= 9 ? 2 : size >= 7 ? 3 : size >= 5 ? 4 : size >= 4 ? 5 : 7;
+
   const maxTileW = Math.floor((availW - (size - 1) * gap) / size);
   const maxTileH = Math.floor((availH - (size - 1) * gap) / size);
 
   let tileSize = Math.min(maxTileW, maxTileH);
-  tileSize = Math.max(26, Math.min(tileSize, isMobile ? 85 : 95));
+  tileSize = Math.max(20, tileSize);
 
-  const fontSize = Math.max(10, Math.floor(tileSize * (size >= 8 ? 0.38 : size >= 5 ? 0.42 : 0.46)));
-  const radius = Math.max(4, Math.floor(tileSize * 0.18));
+  const fontRatio = size >= 9 ? 0.38 : size >= 7 ? 0.42 : 0.48;
+  const fontSize = Math.max(11, Math.floor(tileSize * fontRatio));
+  const radius = Math.max(4, Math.floor(tileSize * 0.14));
 
   root.style.setProperty('--tile-size', `${tileSize}px`);
   root.style.setProperty('--tile-gap', `${gap}px`);
   root.style.setProperty('--tile-radius', `${radius}px`);
 
-  // Dynamically set font-size on board container so all tiles scale perfectly
-  const board = document.getElementById('puzzle-board');
   if (board) board.style.fontSize = `${fontSize}px`;
 }
 
@@ -210,10 +219,7 @@ function renderBoard() {
   const board = document.getElementById('puzzle-board');
   if (!board) return;
 
-  applyBoardSizing();
-
   board.className = 'puzzle-board';
-  if (G.size >= 4) board.classList.add(`board-size-${G.size}`);
   board.style.gridTemplateColumns = `repeat(${G.size}, var(--tile-size))`;
 
   board.innerHTML = '';
@@ -228,7 +234,7 @@ function renderBoard() {
       tile.className = 'tile';
       tile.dataset.val = val;
       tile.dataset.idx = idx;
-      tile.dataset.mod = (val - 1) % 8;
+      tile.dataset.row = Math.floor((val - 1) / G.size) % 8;
       tile.textContent = val;
       tile.setAttribute('role', 'gridcell');
       tile.setAttribute('aria-label', `Ô số ${val}`);
@@ -241,6 +247,9 @@ function renderBoard() {
       board.appendChild(tile);
     }
   });
+
+  // Apply sizing after DOM is in place so measurements are accurate
+  requestAnimationFrame(() => applyBoardSizing());
 
   updateMoveCount();
 }
@@ -376,6 +385,11 @@ function startNewGame(size) {
   renderBoard();
   updateHeader();
   saveGame();
+
+  // Re-apply sizing after a short delay so overlays have closed and board-area
+  // has its real dimensions available
+  setTimeout(() => applyBoardSizing(), 50);
+  setTimeout(() => applyBoardSizing(), 200);
 
   // Update menu desc
   updateMenuContinueDesc();
