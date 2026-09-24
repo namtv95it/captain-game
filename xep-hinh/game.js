@@ -769,6 +769,16 @@ function showWin() {
     starsEl.appendChild(s);
   }
 
+  // Tự động lưu điểm lên Firebase khi người chơi chiến thắng (qua màn)
+  const savedName = localStorage.getItem('captain_player_name') || 'Chưa cập nhật';
+  if (window.saveScoreToFirebase) {
+    window.saveScoreToFirebase(savedName, G.level, G.moveCount || 0, 'xep-hinh').then(res => {
+      if (res.success && res.updated) {
+        showToast('🏆 Kỷ lục mới đã được lưu tự động!');
+      }
+    });
+  }
+
   const overlay = document.getElementById('win-overlay');
   overlay.classList.add('show');
   overlay.setAttribute('aria-hidden', 'false');
@@ -881,55 +891,6 @@ function hideMenu() {
   overlay.setAttribute('aria-hidden', 'true');
 }
 
-// ── Level Select Screen ────────────────────────────────────────────────────────
-function showLevelsOverlay() {
-  const overlay = document.getElementById('levels-overlay');
-  const grid = document.getElementById('levels-grid');
-  const { maxLevel, currentLevel } = loadGameData();
-
-  // Hiển thị danh sách màn chơi: các màn đã mở + thêm 2 màn kế tiếp (hiển thị khóa)
-  const totalToShow = Math.max(12, Math.ceil((maxLevel + 3) / 4) * 4);
-  grid.innerHTML = '';
-
-  for (let i = 1; i <= totalToShow; i++) {
-    const item = document.createElement('div');
-    const isUnlocked = i <= maxLevel;
-    const isCurrent = i === currentLevel;
-
-    item.className = 'level-item' + (!isUnlocked ? ' locked' : '') + (isCurrent ? ' current' : '');
-
-    const cfg = getLevelConfig(i);
-    const diffName = DIFFICULTY_NAME[cfg.difficulty] || 'EASY';
-    const diffTag = diffName.slice(0, 3);
-
-    item.innerHTML = `
-      <div class="level-num">${isUnlocked ? i : '🔒'}</div>
-      <div class="level-badge-tag">${isUnlocked ? diffTag : 'Khóa'}</div>
-    `;
-
-    if (isUnlocked) {
-      item.addEventListener('click', () => {
-        SFX.select();
-        hideLevelsOverlay();
-        hideMenu();
-        startLevel(i);
-        setTimeout(() => showToast(`▶ Bắt đầu Level ${i}`), 300);
-      });
-    }
-
-    grid.appendChild(item);
-  }
-
-  overlay.classList.add('show');
-  overlay.setAttribute('aria-hidden', 'false');
-}
-
-function hideLevelsOverlay() {
-  const overlay = document.getElementById('levels-overlay');
-  overlay.classList.remove('show');
-  overlay.setAttribute('aria-hidden', 'true');
-}
-
 // ── Bootstrap ─────────────────────────────────────────────────────────────────
 function init() {
   document.getElementById('btn-hint').addEventListener('click',  onHint);
@@ -958,12 +919,21 @@ function init() {
     });
   }
 
-  // Menu: Chọn màn chơi
-  const btnSelect = document.getElementById('btn-menu-select');
-  if (btnSelect) {
-    btnSelect.addEventListener('click', () => {
+  // Menu: Nút Bảng Xếp Hạng
+  const btnLeaderboard = document.getElementById('btn-menu-leaderboard');
+  if (btnLeaderboard) {
+    btnLeaderboard.addEventListener('click', () => {
       SFX.select();
-      showLevelsOverlay();
+      showLeaderboardOverlay();
+    });
+  }
+
+  // Leaderboard: Nút quay lại Menu
+  const btnLeaderboardBack = document.getElementById('btn-leaderboard-back');
+  if (btnLeaderboardBack) {
+    btnLeaderboardBack.addEventListener('click', () => {
+      SFX.select();
+      hideLeaderboardOverlay();
     });
   }
 
@@ -995,6 +965,58 @@ function init() {
 
   // Hiển thị màn hình chính lúc ban đầu
   showMenu();
+}
+
+/** Hiển thị Leaderboard Overlay */
+async function showLeaderboardOverlay() {
+  const overlay = document.getElementById('leaderboard-overlay');
+  const listEl = document.getElementById('leaderboard-list');
+  if (!overlay || !listEl) return;
+
+  overlay.classList.add('show');
+  overlay.setAttribute('aria-hidden', 'false');
+  listEl.innerHTML = '<li class="lb-loading">Đang tải dữ liệu từ Firebase...</li>';
+
+  if (window.getTopScoresFromFirebase) {
+    const scores = await window.getTopScoresFromFirebase('xep-hinh');
+    if (!scores || scores.length === 0) {
+      listEl.innerHTML = '<li class="lb-loading">Chưa có điểm số nào. Hãy là người đầu tiên!</li>';
+      return;
+    }
+
+    listEl.innerHTML = scores.map((item, idx) => {
+      const rank = idx + 1;
+      const rankClass = rank <= 3 ? `lb-rank-${rank}` : '';
+      return `
+        <li class="lb-item">
+          <div class="lb-rank ${rankClass}">${rank}</div>
+          <div class="lb-info">
+            <span class="lb-name">${escapeHtml(item.name || 'Ẩn danh')}</span>
+            <span class="lb-meta">${item.moves} bước đi</span>
+          </div>
+          <div class="lb-badge">Level ${item.level}</div>
+        </li>
+      `;
+    }).join('');
+  } else {
+    listEl.innerHTML = '<li class="lb-loading">Lỗi kết nối SDK Firebase!</li>';
+  }
+}
+
+/** Ẩn Leaderboard Overlay */
+function hideLeaderboardOverlay() {
+  const overlay = document.getElementById('leaderboard-overlay');
+  if (overlay) {
+    overlay.classList.remove('show');
+    overlay.setAttribute('aria-hidden', 'true');
+  }
+}
+
+/** Helper escape HTML tránh XSS */
+function escapeHtml(str) {
+  return str.replace(/[&<>'"]/g, 
+    tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
+  );
 }
 
 document.addEventListener('DOMContentLoaded', init);

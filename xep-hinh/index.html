@@ -103,11 +103,11 @@
           </span>
         </button>
 
-        <button class="menu-btn menu-btn-select" id="btn-menu-select">
-          <span class="menu-btn-icon">🗺️</span>
+        <button class="menu-btn menu-btn-leaderboard" id="btn-menu-leaderboard">
+          <span class="menu-btn-icon">🏆</span>
           <span class="menu-btn-text">
-            <strong>Chọn màn chơi</strong>
-            <small id="menu-select-desc">Đã mở: 1 màn</small>
+            <strong>Bảng Xếp Hạng</strong>
+            <small>Top cao thủ xếp bóng</small>
           </span>
         </button>
 
@@ -126,19 +126,6 @@
     </div>
   </div>
 
-  <!-- ── Level Select Overlay ── -->
-  <div class="levels-overlay" id="levels-overlay" role="dialog" aria-modal="true" aria-hidden="true">
-    <div class="levels-card">
-      <div class="levels-header">
-        <button class="btn-back" id="btn-levels-back" aria-label="Quay lại">←</button>
-        <h2 class="levels-title">Chọn Màn Chơi</h2>
-        <div class="levels-placeholder"></div>
-      </div>
-      <p class="levels-subtitle" id="levels-subtitle">Chọn màn bạn muốn thử sức lại</p>
-      <div class="levels-grid" id="levels-grid"></div>
-    </div>
-  </div>
-
   <!-- ── Win Overlay ── -->
   <div class="win-overlay" id="win-overlay" role="dialog" aria-modal="true" aria-hidden="true">
     <div class="win-card">
@@ -146,7 +133,26 @@
       <h2 class="win-title">Xuất Sắc!</h2>
       <p class="win-subtitle" id="win-moves">Hoàn thành trong 0 bước!</p>
       <div class="win-stars" id="win-stars" aria-label="Điểm sao"></div>
+      
       <button class="btn-next" id="btn-next">Level tiếp theo →</button>
+    </div>
+  </div>
+
+  <!-- ── Leaderboard Overlay ── -->
+  <div class="leaderboard-overlay" id="leaderboard-overlay" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="leaderboard-card">
+      <div class="leaderboard-header">
+        <button class="btn-back" id="btn-leaderboard-back" aria-label="Quay lại">←</button>
+        <h2 class="leaderboard-title">🏆 Bảng Xếp Hạng</h2>
+        <div class="levels-placeholder"></div>
+      </div>
+      <p class="leaderboard-subtitle">Top 10 người chơi xuất sắc nhất</p>
+      
+      <div class="leaderboard-list-container">
+        <ul class="leaderboard-list" id="leaderboard-list">
+          <li class="lb-loading">Đang tải bảng xếp hạng...</li>
+        </ul>
+      </div>
     </div>
   </div>
 
@@ -173,6 +179,8 @@
   <!-- ── Toast ── -->
   <div class="toast" id="toast" role="alert" aria-live="polite"></div>
 
+  <!-- Firebase Modular SDK -->
+  <script type="module" src="firebase-config.js"></script>
   <script src="game.js"></script>
 </body>
 
