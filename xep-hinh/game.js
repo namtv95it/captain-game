@@ -416,29 +416,25 @@ function applyLevelSizing() {
   const totalTubes = G.tubes.length || (G.config ? G.config.colors + G.config.emptyTubes : 7);
   const root = document.documentElement;
 
-  // Compute max height available for tubes area (taking header and padding into account)
-  const isMobile = window.innerWidth <= 600 || window.innerHeight <= 750;
-  const availH = Math.max(220, window.innerHeight - (isMobile ? 120 : 160));
-  const availW = Math.max(280, Math.min(window.innerWidth - 24, 960));
+  // Lấy kích thước thực của tubes-area
+  const tubesArea = document.querySelector('.tubes-area');
+  const areaW = tubesArea ? tubesArea.clientWidth : Math.min(window.innerWidth, 960);
+  const areaH = tubesArea ? tubesArea.clientHeight : window.innerHeight - 80;
 
-  // Determine row layout: on small screens, if totalTubes > 6, split into 2 rows evenly (e.g. 7 tubes -> 4 top, 3 bottom)
-  let rows = 1;
-  if (isMobile && totalTubes >= 6) {
-    rows = 2;
-  }
-  const tubesPerRow = Math.ceil(totalTubes / rows);
+  // Luôn 1 hàng – tính ball size sao cho tất cả ống vừa ngang màn hình
+  const gapBetween = 10; // px giữa các ống
+  const totalGap = (totalTubes - 1) * gapBetween + 16; // + padding
+  const perTubeW = Math.floor((areaW - totalGap) / totalTubes);
 
-  // Calculate ballSize based on Height constraint
-  // tubeH = cap * ballSize + (cap - 1) * ballGap + 12  =>  approx: cap * ballSize * 1.1 + 12
-  const maxBallH = Math.floor((availH / rows - 30) / (cap + 0.5));
+  // Chiều cao: ball size theo height
+  const maxBallH = Math.floor((areaH - 20) / (cap + 0.5));
 
-  // Calculate ballSize based on Width constraint
-  // tubeW = ballSize + 12, gap between tubes = ~10px => per tube = ballSize + 22
-  const maxBallW = Math.floor((availW - (tubesPerRow * 12)) / tubesPerRow) - 12;
+  // Tính ball size từ chiều rộng mỗi ống (tube width = ballSize + 12)
+  const maxBallW = perTubeW - 12;
 
   // Pick optimal ball size fitting both dimensions
   let ballSize = Math.min(maxBallH, maxBallW);
-  ballSize = Math.max(22, Math.min(isMobile ? 44 : 56, ballSize));
+  ballSize = Math.max(18, ballSize); // tối thiểu 18px
 
   const ballGap = Math.max(2, Math.min(4, Math.floor(ballSize / 12)));
   const tubeW = ballSize + 12;
@@ -859,6 +855,9 @@ function startLevel(level) {
   clearHint();
   render();
   saveGame();
+  // Re-apply sizing after overlays close so tubes-area has real dimensions
+  setTimeout(() => { applyLevelSizing(); renderTubes(); }, 80);
+  setTimeout(() => { applyLevelSizing(); renderTubes(); }, 300);
 }
 
 // ── Persistence ────────────────────────────────────────────────────────────────
@@ -1173,7 +1172,7 @@ function escapeHtml(str) {
 }
 
 window.addEventListener('resize', () => {
-  if (G.config) applyLevelSizing();
+  if (G.config) { applyLevelSizing(); renderTubes(); }
 });
 
 document.addEventListener('DOMContentLoaded', init);

@@ -241,12 +241,13 @@ html, body {
 
 .tubes-container {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   justify-content: center;
   align-items: flex-end;
-  gap: 14px;
+  gap: 10px;
   max-width: 100%;
-  padding: 8px;
+  padding: 8px 4px;
+  width: 100%;
 }
 
 /* ── Tube Wrapper ─────────────────────────────────────────────── */
