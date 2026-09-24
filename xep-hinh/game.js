@@ -1,0 +1,1000 @@
+'use strict';
+
+/* ═══════════════════════════════════════════════════════════════
+   Xếp bóng – game.js
+   ═══════════════════════════════════════════════════════════════ */
+
+// ── Constants ─────────────────────────────────────────────────────────────────
+const DEFAULT_CAPACITY = 4;
+const BALL_SIZE        = 52;   // px – base size, dynamically scaled in applyLevelSizing
+const BALL_GAP         = 4;    // px – gap inside .tube
+const TUBE_PAD_TOP     = 4;    // px – padding-top inside .tube
+const MAX_UNDO         = 40;
+const SAVE_KEY         = 'bsp_v1';   // bump version if save format changes
+
+const COLORS = [
+  { bg: 'linear-gradient(155deg,#ff6b6b,#c0392b)', shadow: 'rgba(255,107,107,.70)' }, // 0 crimson
+  { bg: 'linear-gradient(155deg,#74b9ff,#2980b9)', shadow: 'rgba(116,185,255,.70)' }, // 1 azure
+  { bg: 'linear-gradient(155deg,#55efc4,#00b894)', shadow: 'rgba( 85,239,196,.70)' }, // 2 emerald
+  { bg: 'linear-gradient(155deg,#ffeaa7,#f39c12)', shadow: 'rgba(255,234,167,.70)' }, // 3 amber
+  { bg: 'linear-gradient(155deg,#a29bfe,#6c5ce7)', shadow: 'rgba(162,155,254,.70)' }, // 4 violet
+  { bg: 'linear-gradient(155deg,#fd79a8,#e17055)', shadow: 'rgba(253,121,168,.70)' }, // 5 coral
+  { bg: 'linear-gradient(155deg,#ff9ff3,#f368e0)', shadow: 'rgba(255,159,243,.70)' }, // 6 orchid
+  { bg: 'linear-gradient(155deg,#81ecec,#00cec9)', shadow: 'rgba(129,236,236,.70)' }, // 7 cyan
+  { bg: 'linear-gradient(155deg,#b8e994,#6ab04c)', shadow: 'rgba(184,233,148,.70)' }, // 8 lime
+  { bg: 'linear-gradient(155deg,#a0c3ff,#4a69bd)', shadow: 'rgba(160,195,255,.70)' }, // 9 sky
+  { bg: 'linear-gradient(155deg,#ffccbc,#ff7043)', shadow: 'rgba(255,204,188,.70)' }, // 10 peach
+  { bg: 'linear-gradient(155deg,#d4fc79,#96e6a1)', shadow: 'rgba(212,252,121,.70)' }, // 11 mint
+];
+
+const DIFFICULTY_NAME = { 1:'EASY', 2:'EASY', 3:'NORMAL', 4:'HARD', 5:'EXPERT', 6:'MASTER' };
+
+// ── Sound System (Web Audio API – no external files) ──────────────────────────
+let _ctx = null;
+
+/** Lazily create / resume the AudioContext (required by browser autoplay policy). */
+function getCtx() {
+  if (!_ctx) _ctx = new (window.AudioContext || window.webkitAudioContext)();
+  if (_ctx.state === 'suspended') _ctx.resume();
+  return _ctx;
+}
+
+/** Safe wrapper – swallows any errors so sounds never break gameplay. */
+function snd(fn) { try { fn(getCtx()); } catch (_) {} }
+
+const SFX = {
+  /** Short bright tick – tube selected */
+  select() {
+    snd(ctx => {
+      const t = ctx.currentTime;
+      const osc = ctx.createOscillator(), g = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(850, t);
+      osc.frequency.exponentialRampToValueAtTime(1050, t + 0.06);
+      g.gain.setValueAtTime(0.10, t);
+      g.gain.exponentialRampToValueAtTime(0.001, t + 0.09);
+      osc.connect(g); g.connect(ctx.destination);
+      osc.start(t); osc.stop(t + 0.10);
+    });
+  },
+
+  /** Soft downward tick – tube deselected */
+  deselect() {
+    snd(ctx => {
+      const t = ctx.currentTime;
+      const osc = ctx.createOscillator(), g = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(1050, t);
+      osc.frequency.exponentialRampToValueAtTime(750, t + 0.07);
+      g.gain.setValueAtTime(0.08, t);
+      g.gain.exponentialRampToValueAtTime(0.001, t + 0.09);
+      osc.connect(g); g.connect(ctx.destination);
+      osc.start(t); osc.stop(t + 0.10);
+    });
+  },
+
+  /** Airy whoosh – ball(s) in flight */
+  move() {
+    snd(ctx => {
+      const t = ctx.currentTime;
+      const size = Math.floor(ctx.sampleRate * 0.18);
+      const buf  = ctx.createBuffer(1, size, ctx.sampleRate);
+      const data = buf.getChannelData(0);
+      for (let i = 0; i < size; i++) data[i] = (Math.random() * 2 - 1) * (1 - i / size) ** 2;
+      const src = ctx.createBufferSource();
+      src.buffer = buf;
+      const bpf = ctx.createBiquadFilter();
+      bpf.type = 'bandpass'; bpf.Q.value = 1.8;
+      bpf.frequency.setValueAtTime(2800, t);
+      bpf.frequency.exponentialRampToValueAtTime(500, t + 0.18);
+      const g = ctx.createGain();
+      g.gain.setValueAtTime(0.30, t);
+      g.gain.exponentialRampToValueAtTime(0.001, t + 0.18);
+      src.connect(bpf); bpf.connect(g); g.connect(ctx.destination);
+      src.start(t);
+    });
+  },
+
+  /** Soft thud – ball(s) land in tube */
+  land() {
+    snd(ctx => {
+      const t = ctx.currentTime;
+      const osc = ctx.createOscillator(), g = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(340, t);
+      osc.frequency.exponentialRampToValueAtTime(140, t + 0.10);
+      g.gain.setValueAtTime(0.22, t);
+      g.gain.exponentialRampToValueAtTime(0.001, t + 0.13);
+      osc.connect(g); g.connect(ctx.destination);
+      osc.start(t); osc.stop(t + 0.14);
+    });
+  },
+
+  /** Low buzz – invalid move attempt */
+  invalid() {
+    snd(ctx => {
+      const t = ctx.currentTime;
+      const osc = ctx.createOscillator(), g = ctx.createGain();
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(160, t);
+      g.gain.setValueAtTime(0.07, t);
+      g.gain.exponentialRampToValueAtTime(0.001, t + 0.18);
+      osc.connect(g); g.connect(ctx.destination);
+      osc.start(t); osc.stop(t + 0.18);
+    });
+  },
+
+  /** Rising 3-note chime – tube solved */
+  complete() {
+    snd(ctx => {
+      const t = ctx.currentTime;
+      [523, 659, 784].forEach((freq, i) => {
+        const osc = ctx.createOscillator(), g = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, t + i * 0.10);
+        g.gain.setValueAtTime(0, t + i * 0.10);
+        g.gain.linearRampToValueAtTime(0.18, t + i * 0.10 + 0.02);
+        g.gain.exponentialRampToValueAtTime(0.001, t + i * 0.10 + 0.36);
+        osc.connect(g); g.connect(ctx.destination);
+        osc.start(t + i * 0.10); osc.stop(t + i * 0.10 + 0.37);
+      });
+    });
+  },
+
+  /** Celebratory 5-note ascending arpeggio – level cleared */
+  win() {
+    snd(ctx => {
+      const t = ctx.currentTime;
+      [523, 659, 784, 1047, 1319].forEach((freq, i) => {
+        const osc = ctx.createOscillator(), g = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, t + i * 0.13);
+        g.gain.setValueAtTime(0, t + i * 0.13);
+        g.gain.linearRampToValueAtTime(0.20, t + i * 0.13 + 0.02);
+        g.gain.exponentialRampToValueAtTime(0.001, t + i * 0.13 + 0.55);
+        osc.connect(g); g.connect(ctx.destination);
+        osc.start(t + i * 0.13); osc.stop(t + i * 0.13 + 0.56);
+      });
+    });
+  },
+
+  /** Descending tone – no moves left (stuck) */
+  stuck() {
+    snd(ctx => {
+      const t = ctx.currentTime;
+      [360, 280, 220].forEach((freq, i) => {
+        const osc = ctx.createOscillator(), g = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, t + i * 0.12);
+        g.gain.setValueAtTime(0, t + i * 0.12);
+        g.gain.linearRampToValueAtTime(0.14, t + i * 0.12 + 0.02);
+        g.gain.exponentialRampToValueAtTime(0.001, t + i * 0.12 + 0.28);
+        osc.connect(g); g.connect(ctx.destination);
+        osc.start(t + i * 0.12); osc.stop(t + i * 0.12 + 0.29);
+      });
+    });
+  },
+};
+
+// ── Game State ─────────────────────────────────────────────────────────────────
+const G = {
+  level: 1, tubes: [], selectedTube: null, moveCount: 0,
+  hintsUsed: 0, undoStack: [], config: null, initialTubes: null,
+  isAnimating: false, hintTimer: null,
+};
+
+// ── Tube Capacity Helper ───────────────────────────────────────────────────────
+function getTubeCapacity() {
+  return (G.config && G.config.capacity) ? G.config.capacity : DEFAULT_CAPACITY;
+}
+
+// ── Level Configuration ────────────────────────────────────────────────────────
+/**
+ * Quy định độ khó theo màn:
+ * - Số màu bóng TỐI ĐA là 5 màu.
+ * - Khởi đầu là 4 bóng, mỗi 10 level tăng thêm 1 bóng:
+ *   + Level 1 – 10:  4 bóng / ống
+ *   + Level 11 – 20: 5 bóng / ống
+ *   + Level 21 – 30: 6 bóng / ống
+ *   + Level 31 – 40: 7 bóng / ống
+ *   + Level 41 – 50: 8 bóng / ống
+ *   + ...
+ * - Toàn bộ bóng luôn hiển thị rõ ràng (không ẩn bóng).
+ */
+function getLevelConfig(level) {
+  // Số bóng mỗi ống (hàng dọc): khởi đầu 4 bóng, mỗi 10 level tăng thêm 1 bóng
+  const capacity = 4 + Math.floor((level - 1) / 10);
+
+  // Số màu: Level 1-3 có 3 màu, Level 4-7 có 4 màu, từ Level 8 trở đi đạt 5 màu tối đa
+  const colors = level <= 3 ? 3 : (level <= 7 ? 4 : 5);
+
+  const emptyTubes = 2;
+  const shuffles = Math.min(300, 20 + capacity * 14 + (level * 2));
+  const difficulty = Math.min(6, 1 + Math.floor((level - 1) / 8));
+
+  return { colors, capacity, emptyTubes, fogOfWar: false, shuffles, difficulty };
+}
+
+// ── Level Generation ───────────────────────────────────────────────────────────
+function generateLevel(cfg) {
+  const cap = cfg.capacity || DEFAULT_CAPACITY;
+
+  // Lặp lại việc xáo bài nếu ván tạo ra bị kẹt (không có nước đi nào) hoặc đã tự giải
+  for (let attempt = 0; attempt < 50; attempt++) {
+    // Khởi tạo từ trạng thái đã giải: mỗi màu nằm gọn trong 1 ống
+    const tubes = Array.from({ length: cfg.colors }, (_, i) =>
+      Array.from({ length: cap }, () => ({ colorIndex: i, revealed: true }))
+    );
+    for (let i = 0; i < cfg.emptyTubes; i++) tubes.push([]);
+
+    for (let s = 0; s < cfg.shuffles; s++) {
+      const nonEmpty = tubes.map((_, i) => i).filter(i => tubes[i].length > 0);
+      const notFull  = tubes.map((_, i) => i).filter(i => tubes[i].length < cap);
+      if (!nonEmpty.length) break;
+      const from = nonEmpty[Math.floor(Math.random() * nonEmpty.length)];
+      const valid = notFull.filter(i => i !== from);
+      if (!valid.length) continue;
+      const to = valid[Math.floor(Math.random() * valid.length)];
+      tubes[to].push({ ...tubes[from].pop(), revealed: true });
+    }
+
+    // Luôn đảm bảo có ít nhất 1 ống hoàn toàn trống lúc bắt đầu
+    const emptyCount = tubes.filter(t => t.length === 0).length;
+    if (emptyCount === 0) {
+      // Tìm ống có ít bóng nhất để dồn sang các ống khác còn chỗ
+      const sortedIdx = tubes.map((t, idx) => ({ idx, len: t.length }))
+                             .sort((a, b) => a.len - b.len);
+      const emptiest = sortedIdx[0].idx;
+      while (tubes[emptiest].length > 0) {
+        const ball = tubes[emptiest].pop();
+        const receiver = tubes.find((t, i) => i !== emptiest && t.length < cap);
+        if (receiver) {
+          receiver.push(ball);
+        } else {
+          tubes[emptiest].push(ball);
+          break;
+        }
+      }
+    }
+
+    // Kiểm tra xem ván chơi này có ít nhất 1 nước đi hợp lệ không
+    let hasMove = false;
+    for (let from = 0; from < tubes.length; from++) {
+      const f = tubes[from];
+      if (!f.length) continue;
+      // Nếu ống này đã giải xong (đầy và cùng màu), không cần xét chuyển đi
+      if (f.length === cap && f.every(b => b.colorIndex === f[0].colorIndex)) continue;
+
+      // Tính stack size ở đỉnh ống from
+      const topColor = f[f.length - 1].colorIndex;
+      let stackSize = 0;
+      for (let i = f.length - 1; i >= 0 && f[i].colorIndex === topColor; i--) stackSize++;
+
+      for (let to = 0; to < tubes.length; to++) {
+        if (from === to) continue;
+        const t = tubes[to];
+        if (t.length >= cap || t.length + stackSize > cap) continue;
+        if (!t.length || t[t.length - 1].colorIndex === topColor) {
+          hasMove = true;
+          break;
+        }
+      }
+      if (hasMove) break;
+    }
+
+    // Kiểm tra xem màn có bị rơi vào trạng thái đã thắng luôn không
+    const alreadyWon = tubes.every(t => !t.length || (t.length === cap && t.every(b => b.colorIndex === t[0].colorIndex)));
+
+    if (hasMove && !alreadyWon) {
+      return tubes;
+    }
+  }
+
+  // Fallback an toàn nếu sau nhiều lần shuffle vẫn không đạt:
+  const tubes = Array.from({ length: cfg.colors }, (_, i) =>
+    Array.from({ length: cap }, () => ({ colorIndex: i, revealed: true }))
+  );
+  for (let i = 0; i < cfg.emptyTubes; i++) tubes.push([]);
+  // Hoán đổi bóng đỉnh của ống 0 và ống 1 để tạo 1 câu đố hợp lệ
+  if (tubes.length >= 2 && tubes[0].length && tubes[1].length) {
+    const b0 = tubes[0].pop();
+    const b1 = tubes[1].pop();
+    tubes[0].push(b1);
+    tubes[1].push(b0);
+  }
+  return tubes;
+}
+
+// ── Stack Helper ──────────────────────────────────────────────────────────────
+/**
+ * Counts consecutive same-colored balls at the TOP of a tube.
+ * @param {number} tubeIdx
+ * @returns {number}
+ */
+function getStackSize(tubeIdx) {
+  const tube = G.tubes[tubeIdx];
+  if (!tube.length) return 0;
+  const topColor = tube[tube.length - 1].colorIndex;
+  let n = 0;
+  for (let i = tube.length - 1; i >= 0 && tube[i].colorIndex === topColor; i--) {
+    n++;
+  }
+  return n;
+}
+
+// ── Core Game Logic ───────────────────────────────────────────────────────────
+
+/**
+ * Returns true if moving the entire same-color stack from→to is valid.
+ * The whole stack must fit in the destination tube.
+ */
+function canMove(from, to) {
+  const f = G.tubes[from], t = G.tubes[to];
+  const cap = getTubeCapacity();
+  if (from === to || !f.length || t.length >= cap) return false;
+  const stackSize = getStackSize(from);
+  if (t.length + stackSize > cap) return false;   // stack won't fit
+  if (!t.length) return true;                     // empty tube: ok
+  return f[f.length - 1].colorIndex === t[t.length - 1].colorIndex;
+}
+
+function isSolved(tube) {
+  const cap = getTubeCapacity();
+  return tube.length === cap &&
+    tube.every(b => b.colorIndex === tube[0].colorIndex);
+}
+
+function checkWin() {
+  return G.tubes.every(t => !t.length || isSolved(t));
+}
+
+/**
+ * Executes a move: transfers the entire same-color stack from→to.
+ * Must be called AFTER the animation finishes.
+ */
+function doMove(from, to) {
+  G.undoStack.push(cloneTubes(G.tubes));
+  if (G.undoStack.length > MAX_UNDO) G.undoStack.shift();
+
+  const stackSize = getStackSize(from);
+  // splice the top `stackSize` balls from source (they're at the end of the array)
+  const stack = G.tubes[from].splice(G.tubes[from].length - stackSize, stackSize);
+  G.tubes[to].push(...stack);
+
+  G.moveCount++;
+}
+
+function getHint() {
+  let best = null;
+  for (let from = 0; from < G.tubes.length; from++) {
+    if (!G.tubes[from].length || isSolved(G.tubes[from])) continue;
+    for (let to = 0; to < G.tubes.length; to++) {
+      if (!canMove(from, to)) continue;
+      // Skip a lone ball going to an empty tube (rarely useful)
+      if (!G.tubes[to].length && G.tubes[from].length === 1) continue;
+      if (!best || G.tubes[to].length > 0) best = { from, to };
+    }
+  }
+  return best;
+}
+
+/**
+ * Kiểm tra xem còn bất kỳ nước đi hợp lệ nào trên bàn cờ hay không.
+ * @returns {boolean} true nếu còn ít nhất 1 nước đi hợp lệ
+ */
+function hasAnyValidMoves() {
+  for (let from = 0; from < G.tubes.length; from++) {
+    if (!G.tubes[from].length || isSolved(G.tubes[from])) continue;
+    for (let to = 0; to < G.tubes.length; to++) {
+      if (canMove(from, to)) return true;
+    }
+  }
+  return false;
+}
+
+function calcStars() {
+  const cap = getTubeCapacity();
+  const est = G.config.colors * cap * 1.5;
+  const r = G.moveCount / est;
+  if (r <= 1.5) return 3;
+  if (r <= 2.5) return 2;
+  return 1;
+}
+
+function cloneTubes(tubes) {
+  return tubes.map(t => t.map(b => ({ ...b })));
+}
+
+// ── Rendering ──────────────────────────────────────────────────────────────────
+function render() {
+  renderHeader();
+  renderTubes();
+  document.getElementById('btn-undo').disabled = !G.undoStack.length;
+}
+
+function applyLevelSizing() {
+  const cap = getTubeCapacity();
+  const root = document.documentElement;
+
+  // Chiều cao khả dụng cho khu vực chơi (khoảng 50-55vh)
+  const isMobile = window.innerWidth <= 420 || window.innerHeight <= 700;
+  
+  // Tính kích thước bóng lý tưởng theo dung tích ống (cap: 4, 5, 6, 7, 8, ...)
+  // Chiều cao ống khả dụng tối đa khoảng 52vh (trừ header + controls)
+  const maxAvailHeight = Math.max(220, window.innerHeight * 0.52);
+  let ballSize = Math.floor((maxAvailHeight - 20) / cap);
+  ballSize = Math.max(26, Math.min(isMobile ? 48 : 54, ballSize));
+
+  const ballGap = Math.max(2, Math.min(4, Math.floor(ballSize / 12)));
+  const tubeW = ballSize + 12;
+  const tubeH = cap * ballSize + (cap - 1) * ballGap + 12;
+  const radius = Math.round(tubeW / 2);
+
+  root.style.setProperty('--ball-size', `${ballSize}px`);
+  root.style.setProperty('--ball-gap', `${ballGap}px`);
+  root.style.setProperty('--tube-w', `${tubeW}px`);
+  root.style.setProperty('--tube-h', `${tubeH}px`);
+  root.style.setProperty('--radius-tube', `${radius}px`);
+}
+
+function renderHeader() {
+  applyLevelSizing();
+  document.getElementById('level-badge').textContent     = `Level ${G.level}`;
+  document.getElementById('move-count').textContent      = G.moveCount;
+  document.getElementById('difficulty-name').textContent = DIFFICULTY_NAME[G.config.difficulty] || 'EASY';
+  const fogEl = document.getElementById('fog-badge');
+  if (fogEl) fogEl.style.display = 'none';
+}
+
+function renderTubes() {
+  const container = document.getElementById('tubes-container');
+  container.innerHTML = '';
+
+  G.tubes.forEach((tube, idx) => {
+    const isSelected = G.selectedTube === idx;
+    const stackSize  = isSelected ? getStackSize(idx) : 0;
+
+    const wrapper = document.createElement('div');
+    wrapper.className = 'tube-wrapper' + (isSelected ? ' selected' : '');
+    wrapper.id = `tube-wrapper-${idx}`;
+
+    const cap = document.createElement('div');
+    cap.className = 'tube-cap';
+
+    const tubeEl = document.createElement('div');
+    tubeEl.className = ['tube', isSolved(tube) ? 'tube-complete' : ''].filter(Boolean).join(' ');
+    tubeEl.id = `tube-${idx}`;
+
+    // Render balls reversed (top game-ball → first DOM element)
+    // This works with flex-direction:column + justify-content:flex-end
+    [...tube].reverse().forEach((ball, domIdx) => {
+      const isTopBall   = isSelected && domIdx === 0;
+      const isStackBall = isSelected && domIdx > 0 && domIdx < stackSize;
+      tubeEl.appendChild(makeBallEl(ball, isTopBall, isStackBall));
+    });
+
+    wrapper.appendChild(cap);
+    wrapper.appendChild(tubeEl);
+    wrapper.addEventListener('click', () => onTubeClick(idx));
+    container.appendChild(wrapper);
+  });
+}
+
+/**
+ * Creates a single ball DOM element.
+ * @param {{colorIndex, revealed}} ball
+ * @param {boolean} isTopBall   – the selected tube's top ball (lifted)
+ * @param {boolean} isStackBall – part of the stack but NOT the top (also lifted)
+ */
+function makeBallEl(ball, isTopBall = false, isStackBall = false) {
+  const el = document.createElement('div');
+  el.className = ['ball',
+    isTopBall   ? 'ball-lifted' : '',
+    isStackBall ? 'ball-stack'  : '',
+  ].filter(Boolean).join(' ');
+
+  const c = COLORS[ball.colorIndex];
+  if (c) {
+    el.style.background = c.bg;
+    el.style.boxShadow  = `0 5px 14px ${c.shadow}, inset 0 1px 0 rgba(255,255,255,.32)`;
+  }
+  return el;
+}
+
+// ── Animation ──────────────────────────────────────────────────────────────────
+/**
+ * Animates each ball in the stack with a staggered start (STAGGER ms apart),
+ * so they overlap in flight and create a smooth "flowing stream" into the tube.
+ *
+ * All balls are in motion simultaneously (with offset) – each follows its own
+ * ⊓-arc (Rise → Slide → Drop). A shared counter triggers afterCb() once the
+ * last ball has landed.
+ *
+ * Landing order: ball[0] (top source ball) → lowest dest slot first,
+ *                last ball                 → highest slot.
+ * This gives a natural "filling from the bottom" look.
+ *
+ * @param {number}   fromIdx
+ * @param {number}   toIdx
+ * @param {Function} afterCb – called once ALL balls have landed
+ */
+function animateAndMove(fromIdx, toIdx, afterCb) {
+  G.isAnimating = true;
+
+  const fromTubeEl    = document.getElementById(`tube-${fromIdx}`);
+  const toTubeEl      = document.getElementById(`tube-${toIdx}`);
+  const fromWrapperEl = document.getElementById(`tube-wrapper-${fromIdx}`);
+  const toWrapperEl   = document.getElementById(`tube-wrapper-${toIdx}`);
+
+  if (!fromTubeEl || !toTubeEl) { G.isAnimating = false; afterCb(); return; }
+
+  const stackSize = getStackSize(fromIdx);
+  const ballEls   = [...fromTubeEl.querySelectorAll('.ball')].slice(0, stackSize);
+  if (!ballEls.length) { G.isAnimating = false; afterCb(); return; }
+
+  const toRect    = toTubeEl.getBoundingClientRect();
+  const N         = G.tubes[toIdx].length;
+  const cap       = getTubeCapacity();
+  const sampleBall = ballEls[0];
+  const ballH     = sampleBall ? sampleBall.offsetHeight : BALL_SIZE;
+  const STEP      = ballH + BALL_GAP;
+  const srcTube   = G.tubes[fromIdx];
+  // stack[0] = top ball of source, stack[last] = bottom of stack
+  const stack     = srcTube.slice(srcTube.length - stackSize).reverse();
+
+  // Cruising altitude – clear both tube caps by ≥ 28 px
+  const fromCapTop = fromWrapperEl ? fromWrapperEl.getBoundingClientRect().top : 0;
+  const toCapTop   = toWrapperEl   ? toWrapperEl.getBoundingClientRect().top   : 0;
+  const highY  = Math.min(fromCapTop, toCapTop) - ballH - 28;
+  const destX  = toRect.left + (toRect.width - ballH) / 2;
+
+  // ── Timing ───────────────────────────────────────────────────────────────
+  const T_RISE  = 80;    // ms – rise phase
+  const T_SLIDE = 110;   // ms – horizontal slide
+  const T_DROP  = 105;   // ms – drop into tube
+  const STAGGER = 110;   // ms between starting each ball (wider gap = more visible separation)
+
+  const flyEls  = [];
+  let doneCount = 0;     // incremented each time a ball lands; triggers cleanup at stackSize
+  SFX.move();
+
+  /**
+   * Kick off the ⊓-arc animation for ball at index `i`.
+   * Called via staggered setTimeout so balls overlap in motion.
+   */
+  function startBall(i) {
+    const ball     = stack[i];
+    const domEl    = ballEls[i];
+    const ballRect = domEl.getBoundingClientRect();
+
+    // i=0 (top ball) → lowest dest slot (N);  i=last → highest slot (N+stackSize-1)
+    const slotIdx = N + i;
+    const destY   = toRect.top + TUBE_PAD_TOP + (cap - 1 - slotIdx) * STEP;
+
+    const fly = document.createElement('div');
+    const c   = COLORS[ball.colorIndex];
+    fly.className = 'ball';   // inherits CSS shine via ::after
+    fly.style.cssText = `
+      position:fixed; z-index:${9999 - i}; pointer-events:none;
+      left:${ballRect.left}px; top:${ballRect.top}px;
+      width:${ballRect.width}px; height:${ballRect.height}px;
+      background:${c.bg};
+      box-shadow:0 6px 18px ${c.shadow},inset 0 1px 0 rgba(255,255,255,.35);
+    `;
+    document.body.appendChild(fly);
+    flyEls.push(fly);
+    domEl.style.opacity = '0';
+
+    // ── Phase 1 · Rise ────────────────────────────────────────────────────
+    requestAnimationFrame(() => {
+      fly.style.transition = `top ${T_RISE}ms ease-out`;
+      fly.style.top = `${highY}px`;
+
+      setTimeout(() => {
+        // ── Phase 2 · Slide ───────────────────────────────────────────────
+        fly.style.transition = `left ${T_SLIDE}ms ease-in-out`;
+        fly.style.left = `${destX}px`;
+
+        setTimeout(() => {
+          // ── Phase 3 · Drop into tube mouth ────────────────────────────
+          fly.style.transition = `top ${T_DROP}ms ease-in`;
+          fly.style.top = `${destY}px`;
+
+          setTimeout(() => {
+            // Landing squish + intermediate land sound
+            toTubeEl.classList.add('tube-bounce');
+            setTimeout(() => toTubeEl.classList.remove('tube-bounce'), 300);
+            if (i < stackSize - 1) SFX.land();
+
+            // When all balls have landed, clean up and hand off
+            doneCount++;
+            if (doneCount === stackSize) {
+              flyEls.forEach(el => el.remove());
+              ballEls.forEach(el => (el.style.opacity = ''));
+              G.isAnimating = false;
+              afterCb();
+            }
+          }, T_DROP + 20);
+        }, T_SLIDE + 20);
+      }, T_RISE + 20);
+    });
+  }
+
+  // Launch all balls with a stagger so they flow continuously rather than waiting
+  for (let i = 0; i < stackSize; i++) {
+    setTimeout(() => startBall(i), i * STAGGER);
+  }
+}
+
+// ── Event Handlers ─────────────────────────────────────────────────────────────
+function onTubeClick(idx) {
+  if (G.isAnimating) return;
+  clearHint();
+
+  // ── Nothing selected ─────────────────────────────────────────────────────
+  if (G.selectedTube === null) {
+    const tube = G.tubes[idx];
+    if (tube.length > 0 && !isSolved(tube)) {
+      G.selectedTube = idx;
+      SFX.select();
+      render();
+    }
+    return;
+  }
+
+  // ── Tap same tube → deselect ──────────────────────────────────────────────
+  if (G.selectedTube === idx) {
+    G.selectedTube = null;
+    SFX.deselect();
+    render();
+    return;
+  }
+
+  // ── Attempt move ──────────────────────────────────────────────────────────
+  if (canMove(G.selectedTube, idx)) {
+    const from     = G.selectedTube;
+    G.selectedTube = null;
+    render();  // remove selection highlight before animation starts
+
+    animateAndMove(from, idx, () => {
+      doMove(from, idx);
+      const justCompleted = isSolved(G.tubes[idx]);
+      render();
+
+      if (checkWin()) {
+        setTimeout(showWin, 480);
+      } else {
+        justCompleted ? SFX.complete() : SFX.land();
+        // Kiểm tra xem còn nước đi nào không (bị kẹt / hết nước đi)
+        if (!hasAnyValidMoves()) {
+          setTimeout(showNoMoves, 600);
+        }
+      }
+    });
+  } else {
+    // Invalid target – buzz and optionally switch selection
+    SFX.invalid();
+    const tube = G.tubes[idx];
+    if (tube.length > 0 && !isSolved(tube)) {
+      G.selectedTube = idx;
+      SFX.select();
+    } else {
+      G.selectedTube = null;
+      SFX.deselect();
+    }
+    render();
+  }
+}
+
+function onHint() {
+  if (G.isAnimating) return;
+  clearHint();
+  const hint = getHint();
+  if (!hint) { showToast('⚠️ Không còn nước đi hợp lệ!'); return; }
+  G.hintsUsed++;
+  G.selectedTube = null;
+  render();
+  const ft = document.getElementById(`tube-${hint.from}`);
+  const tt = document.getElementById(`tube-${hint.to}`);
+  if (ft) ft.classList.add('hint-from');
+  if (tt) tt.classList.add('hint-to');
+  G.hintTimer = setTimeout(clearHint, 3200);
+}
+
+function clearHint() {
+  clearTimeout(G.hintTimer);
+  document.querySelectorAll('.hint-from,.hint-to')
+    .forEach(el => el.classList.remove('hint-from', 'hint-to'));
+}
+
+function onUndo() {
+  if (!G.undoStack.length || G.isAnimating) return;
+  hideNoMoves();
+  G.tubes     = G.undoStack.pop();
+  G.moveCount = Math.max(0, G.moveCount - 1);
+  G.selectedTube = null;
+  SFX.select();
+  clearHint();
+  render();
+}
+
+function onReset() {
+  hideNoMoves();
+  G.tubes        = cloneTubes(G.initialTubes);
+  G.moveCount    = 0;
+  G.undoStack    = [];
+  G.selectedTube = null;
+  G.hintsUsed    = 0;
+  G.isAnimating  = false;
+  clearHint();
+  render();
+}
+
+function onNextLevel() {
+  hideNoMoves();
+  document.getElementById('win-overlay').classList.remove('show');
+  document.getElementById('win-overlay').setAttribute('aria-hidden', 'true');
+  G.level++;
+  startLevel(G.level);
+}
+
+// ── No Moves Screen ────────────────────────────────────────────────────────────
+function showNoMoves() {
+  const overlay = document.getElementById('no-moves-overlay');
+  if (!overlay) return;
+  SFX.stuck();
+  overlay.classList.add('show');
+  overlay.setAttribute('aria-hidden', 'false');
+}
+
+function hideNoMoves() {
+  const overlay = document.getElementById('no-moves-overlay');
+  if (overlay) {
+    overlay.classList.remove('show');
+    overlay.setAttribute('aria-hidden', 'true');
+  }
+}
+
+// ── Win Screen ─────────────────────────────────────────────────────────────────
+function showWin() {
+  document.getElementById('win-moves').textContent = `Hoàn thành trong ${G.moveCount} bước!`;
+
+  const starsEl = document.getElementById('win-stars');
+  starsEl.innerHTML = '';
+  const stars = calcStars();
+  for (let i = 1; i <= 3; i++) {
+    const s = document.createElement('span');
+    s.className   = 'win-star' + (i <= stars ? ' active' : '');
+    s.textContent = i <= stars ? '⭐' : '☆';
+    starsEl.appendChild(s);
+  }
+
+  const overlay = document.getElementById('win-overlay');
+  overlay.classList.add('show');
+  overlay.setAttribute('aria-hidden', 'false');
+
+  SFX.win();
+  launchConfetti();
+}
+
+function launchConfetti() {
+  const palette = ['#ff6b6b','#ffeaa7','#55efc4','#a29bfe','#74b9ff','#fd79a8','#81ecec','#b8e994'];
+  for (let i = 0; i < 90; i++) {
+    setTimeout(() => {
+      const p = document.createElement('div');
+      const s = 5 + Math.random() * 9;
+      p.style.cssText = `
+        position:fixed; border-radius:${Math.random() > .5 ? '50%' : '3px'};
+        pointer-events:none; z-index:9997;
+        width:${s}px; height:${s}px;
+        background:${palette[Math.floor(Math.random() * palette.length)]};
+        left:${Math.random() * 100}vw; top:-12px;
+        animation:confetti-fall ${1.1 + Math.random() * 1.8}s ease-out ${Math.random() * 0.6}s forwards;
+      `;
+      document.body.appendChild(p);
+      setTimeout(() => p.remove(), 3800);
+    }, i * 22);
+  }
+}
+
+// ── Toast ─────────────────────────────────────────────────────────────────────
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2600);
+}
+
+// ── Level Init ─────────────────────────────────────────────────────────────────
+function startLevel(level) {
+  hideNoMoves();
+  G.level        = level;
+  const cfg      = getLevelConfig(level);
+  G.config       = cfg;
+  G.tubes        = generateLevel(cfg);
+  G.initialTubes = cloneTubes(G.tubes);
+  G.selectedTube = null;
+  G.moveCount    = 0;
+  G.undoStack    = [];
+  G.hintsUsed    = 0;
+  G.isAnimating  = false;
+  clearHint();
+  render();
+  saveGame();
+}
+
+// ── Persistence ────────────────────────────────────────────────────────────────
+
+/**
+ * Đọc dữ liệu tiến trình từ localStorage.
+ * Trả về { maxLevel, currentLevel }
+ */
+function loadGameData() {
+  try {
+    const raw = localStorage.getItem(SAVE_KEY);
+    if (!raw) return { maxLevel: 1, currentLevel: 1 };
+    const d = JSON.parse(raw);
+    const maxLevel = Math.max(1, typeof d.maxLevel === 'number' ? d.maxLevel : (typeof d.level === 'number' ? d.level : 1));
+    const currentLevel = Math.max(1, typeof d.currentLevel === 'number' ? d.currentLevel : (typeof d.level === 'number' ? d.level : 1));
+    return { maxLevel, currentLevel };
+  } catch (_) {
+    return { maxLevel: 1, currentLevel: 1 };
+  }
+}
+
+/**
+ * Lưu tiến trình:
+ * - currentLevel: màn vừa chơi / vừa chọn
+ * - maxLevel: màn cao nhất đạt được (không bao giờ bị giảm khi chơi lại màn cũ)
+ */
+function saveGame() {
+  try {
+    const current = loadGameData();
+    const newMaxLevel = Math.max(current.maxLevel, G.level || 1);
+    localStorage.setItem(SAVE_KEY, JSON.stringify({
+      maxLevel:     newMaxLevel,
+      currentLevel: G.level || 1
+    }));
+  } catch (_) {}
+}
+
+// ── Menu Screen ────────────────────────────────────────────────────────────────
+function showMenu() {
+  const overlay = document.getElementById('menu-overlay');
+  const { maxLevel, currentLevel } = loadGameData();
+
+  const descEl = document.getElementById('menu-continue-desc');
+  const selectDescEl = document.getElementById('menu-select-desc');
+  const statsEl = document.getElementById('menu-stats');
+
+  if (descEl) descEl.textContent = `Level ${currentLevel}`;
+  if (selectDescEl) selectDescEl.textContent = `Đã mở: ${maxLevel} màn`;
+  if (statsEl) statsEl.textContent = `Màn cao nhất: Level ${maxLevel}`;
+
+  overlay.classList.add('show');
+  overlay.setAttribute('aria-hidden', 'false');
+}
+
+function hideMenu() {
+  const overlay = document.getElementById('menu-overlay');
+  overlay.classList.remove('show');
+  overlay.setAttribute('aria-hidden', 'true');
+}
+
+// ── Level Select Screen ────────────────────────────────────────────────────────
+function showLevelsOverlay() {
+  const overlay = document.getElementById('levels-overlay');
+  const grid = document.getElementById('levels-grid');
+  const { maxLevel, currentLevel } = loadGameData();
+
+  // Hiển thị danh sách màn chơi: các màn đã mở + thêm 2 màn kế tiếp (hiển thị khóa)
+  const totalToShow = Math.max(12, Math.ceil((maxLevel + 3) / 4) * 4);
+  grid.innerHTML = '';
+
+  for (let i = 1; i <= totalToShow; i++) {
+    const item = document.createElement('div');
+    const isUnlocked = i <= maxLevel;
+    const isCurrent = i === currentLevel;
+
+    item.className = 'level-item' + (!isUnlocked ? ' locked' : '') + (isCurrent ? ' current' : '');
+
+    const cfg = getLevelConfig(i);
+    const diffName = DIFFICULTY_NAME[cfg.difficulty] || 'EASY';
+    const diffTag = diffName.slice(0, 3);
+
+    item.innerHTML = `
+      <div class="level-num">${isUnlocked ? i : '🔒'}</div>
+      <div class="level-badge-tag">${isUnlocked ? diffTag : 'Khóa'}</div>
+    `;
+
+    if (isUnlocked) {
+      item.addEventListener('click', () => {
+        SFX.select();
+        hideLevelsOverlay();
+        hideMenu();
+        startLevel(i);
+        setTimeout(() => showToast(`▶ Bắt đầu Level ${i}`), 300);
+      });
+    }
+
+    grid.appendChild(item);
+  }
+
+  overlay.classList.add('show');
+  overlay.setAttribute('aria-hidden', 'false');
+}
+
+function hideLevelsOverlay() {
+  const overlay = document.getElementById('levels-overlay');
+  overlay.classList.remove('show');
+  overlay.setAttribute('aria-hidden', 'true');
+}
+
+// ── Bootstrap ─────────────────────────────────────────────────────────────────
+function init() {
+  document.getElementById('btn-hint').addEventListener('click',  onHint);
+  document.getElementById('btn-undo').addEventListener('click',  onUndo);
+  document.getElementById('btn-reset').addEventListener('click', onReset);
+  document.getElementById('btn-next').addEventListener('click',  onNextLevel);
+
+  // Home button
+  const btnHome = document.getElementById('btn-home');
+  if (btnHome) {
+    btnHome.addEventListener('click', () => {
+      SFX.select();
+      showMenu();
+    });
+  }
+
+  // Menu: Tiếp tục
+  const btnContinue = document.getElementById('btn-menu-continue');
+  if (btnContinue) {
+    btnContinue.addEventListener('click', () => {
+      SFX.select();
+      hideMenu();
+      const { currentLevel } = loadGameData();
+      startLevel(currentLevel);
+      setTimeout(() => showToast(`▶ Tiếp tục Level ${currentLevel}`), 300);
+    });
+  }
+
+  // Menu: Chọn màn chơi
+  const btnSelect = document.getElementById('btn-menu-select');
+  if (btnSelect) {
+    btnSelect.addEventListener('click', () => {
+      SFX.select();
+      showLevelsOverlay();
+    });
+  }
+
+  // Level select: Nút quay lại Menu
+  const btnLevelsBack = document.getElementById('btn-levels-back');
+  if (btnLevelsBack) {
+    btnLevelsBack.addEventListener('click', () => {
+      SFX.select();
+      hideLevelsOverlay();
+    });
+  }
+
+  // No-moves (Hết nước đi) modal buttons
+  const btnNoMoveUndo = document.getElementById('btn-nomove-undo');
+  if (btnNoMoveUndo) {
+    btnNoMoveUndo.addEventListener('click', () => {
+      if (G.undoStack.length) {
+        onUndo();
+      } else {
+        onReset();
+      }
+    });
+  }
+
+  const btnNoMoveReset = document.getElementById('btn-nomove-reset');
+  if (btnNoMoveReset) {
+    btnNoMoveReset.addEventListener('click', onReset);
+  }
+
+  // Hiển thị màn hình chính lúc ban đầu
+  showMenu();
+}
+
+document.addEventListener('DOMContentLoaded', init);

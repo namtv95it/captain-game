@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Xếp bóng - Captain Áo Xanh</title>
+  <meta name="description" content="Trò chơi xếp bóng màu – Sắp xếp các bóng vào đúng ống của chúng!" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800;900&display=swap&subset=vietnamese"
+    rel="stylesheet" />
+  <link rel="icon" type="image/png" href="xep-hinh.png" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+
+  <!-- Animated background -->
+  <div class="bg-scene" aria-hidden="true">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+    <div class="grid-overlay"></div>
+  </div>
+
+  <!-- Main Game Container -->
+  <div class="game-container">
+
+    <!-- ── Header ── -->
+    <header class="header">
+      <div class="header-left">
+        <button class="btn-home" id="btn-home" aria-label="Màn hình chính" title="Màn hình chính">
+          <span>🏠</span>
+        </button>
+        <div class="level-info">
+          <div class="level-badge" id="level-badge">Level 1</div>
+          <div class="meta-row">
+            <span class="difficulty-label" id="difficulty-name">EASY</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="header-center">
+        <div class="game-logo">
+          <img src="../captain.png" alt="Logo" class="logo-img" />
+          <span class="logo-text">Captain Áo Xanh</span>
+        </div>
+      </div>
+
+      <div class="header-right">
+        <div class="moves-box">
+          <span class="moves-num" id="move-count">0</span>
+          <span class="moves-lbl">bước</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- ── Tubes Area ── -->
+    <main class="tubes-area">
+      <div class="tubes-container" id="tubes-container"></div>
+    </main>
+
+    <!-- ── Controls ── -->
+    <footer class="controls">
+      <button class="btn btn-hint" id="btn-hint" aria-label="Gợi ý">
+        <span class="btn-icon">💡</span>
+        <span class="btn-label">Gợi ý</span>
+      </button>
+      <button class="btn btn-undo" id="btn-undo" aria-label="Hoàn tác">
+        <span class="btn-icon">↩️</span>
+        <span class="btn-label">Hoàn tác</span>
+      </button>
+      <button class="btn btn-reset" id="btn-reset" aria-label="Bắt đầu lại">
+        <span class="btn-icon">🔄</span>
+        <span class="btn-label">Reset</span>
+      </button>
+    </footer>
+
+  </div><!-- /.game-container -->
+
+  <!-- ── Main Menu Overlay ── -->
+  <div class="menu-overlay" id="menu-overlay" role="dialog" aria-modal="true">
+    <div class="menu-card">
+      <div class="menu-decor">
+        <span class="decor-ball decor-ball-1"></span>
+        <span class="decor-ball decor-ball-2"></span>
+        <span class="decor-ball decor-ball-3"></span>
+      </div>
+      <div class="menu-logo-box">
+        <img src="../captain.png" alt="Logo" class="menu-logo-img" />
+        <h1 class="menu-title">Captain Áo Xanh</h1>
+        <p class="menu-subtitle">Xếp Bóng</p>
+      </div>
+
+      <div class="menu-actions">
+        <button class="menu-btn menu-btn-continue" id="btn-menu-continue">
+          <span class="menu-btn-icon">▶</span>
+          <span class="menu-btn-text">
+            <strong>Tiếp tục</strong>
+            <small id="menu-continue-desc">Level 1</small>
+          </span>
+        </button>
+
+        <button class="menu-btn menu-btn-select" id="btn-menu-select">
+          <span class="menu-btn-icon">🗺️</span>
+          <span class="menu-btn-text">
+            <strong>Chọn màn chơi</strong>
+            <small id="menu-select-desc">Đã mở: 1 màn</small>
+          </span>
+        </button>
+
+        <a href="../index.html" class="menu-btn menu-btn-hub" style="text-decoration: none;">
+          <span class="menu-btn-icon">🏠</span>
+          <span class="menu-btn-text">
+            <strong>Về Captain Game Hub</strong>
+            <small>Chọn trò chơi khác</small>
+          </span>
+        </a>
+      </div>
+
+      <div class="menu-footer">
+        <span id="menu-stats">Màn cao nhất: Level 1</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Level Select Overlay ── -->
+  <div class="levels-overlay" id="levels-overlay" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="levels-card">
+      <div class="levels-header">
+        <button class="btn-back" id="btn-levels-back" aria-label="Quay lại">←</button>
+        <h2 class="levels-title">Chọn Màn Chơi</h2>
+        <div class="levels-placeholder"></div>
+      </div>
+      <p class="levels-subtitle" id="levels-subtitle">Chọn màn bạn muốn thử sức lại</p>
+      <div class="levels-grid" id="levels-grid"></div>
+    </div>
+  </div>
+
+  <!-- ── Win Overlay ── -->
+  <div class="win-overlay" id="win-overlay" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="win-card">
+      <img src="../captain.png" alt="Logo" class="win-logo-img" />
+      <h2 class="win-title">Xuất Sắc!</h2>
+      <p class="win-subtitle" id="win-moves">Hoàn thành trong 0 bước!</p>
+      <div class="win-stars" id="win-stars" aria-label="Điểm sao"></div>
+      <button class="btn-next" id="btn-next">Level tiếp theo →</button>
+    </div>
+  </div>
+
+  <!-- ── No Moves Left (Hết nước đi) Overlay ── -->
+  <div class="no-moves-overlay" id="no-moves-overlay" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="no-moves-card">
+      <div class="no-moves-emoji">🔒</div>
+      <h2 class="no-moves-title">Hết Nước Đi!</h2>
+      <p class="no-moves-subtitle">Không còn nước đi hợp lệ nào nữa. Bạn muốn làm gì tiếp theo?</p>
+
+      <div class="no-moves-actions">
+        <button class="no-moves-btn btn-no-moves-undo" id="btn-nomove-undo">
+          <span class="btn-icon">↩️</span>
+          <span>Hoàn tác bước trước</span>
+        </button>
+        <button class="no-moves-btn btn-no-moves-reset" id="btn-nomove-reset">
+          <span class="btn-icon">🔄</span>
+          <span>Chơi lại màn này</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Toast ── -->
+  <div class="toast" id="toast" role="alert" aria-live="polite"></div>
+
+  <script src="game.js"></script>
+</body>
+
+</html>

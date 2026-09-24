@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Captain Game Hub - Cổng Game Trực Tuyến Hấp Dẫn</title>
+  <meta name="description" content="Captain Game - Cổng game mini trực tuyến giải trí cực vui nhộn và thử thách trí tuệ. Trải nghiệm ngay các tựa game hấp dẫn!">
+  
+  <!-- Google Fonts & Lucide Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap&subset=vietnamese" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
+  <link rel="icon" type="image/png" href="captain.png">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Background Glow & Particles -->
+  <div class="bg-glow bg-glow-1"></div>
+  <div class="bg-glow bg-glow-2"></div>
+  <div class="bg-grid"></div>
+
+  <!-- Header / Navbar -->
+  <header class="navbar">
+    <div class="nav-container">
+      <a href="#" class="brand-logo">
+        <img src="captain.png" alt="Captain Game Logo" class="nav-logo-img">
+        <div class="brand-text">
+          <span class="brand-title">CAPTAIN</span>
+          <span class="brand-sub">GAMES HUB</span>
+        </div>
+      </a>
+
+      <!-- Search & Filters -->
+      <div class="nav-actions">
+        <div class="search-box">
+          <i class="fa-solid fa-magnifying-glass search-icon"></i>
+          <input type="text" id="searchInput" placeholder="Tìm kiếm tựa game..." autocomplete="off">
+          <button id="clearSearch" class="clear-search-btn" title="Xóa tìm kiếm" style="display: none;">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+        <div class="quick-stats">
+          <span class="badge-total"><i class="fa-solid fa-gamepad"></i> <span id="gameCount">1</span> Game</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero-section">
+    <div class="hero-content">
+      <div class="hero-badge">
+        <span class="sparkle-dot"></span> Khám phá thế giới game miễn phí
+      </div>
+      <h1 class="hero-title">Thỏa Sức Giải Trí Cùng <br><span class="gradient-text">Captain Games</span></h1>
+      <p class="hero-desc">Tổng hợp các tựa game mini trí tuệ, arcade và phiêu lưu vui nhộn ngay trên trình duyệt web của bạn mà không cần cài đặt!</p>
+      
+      <!-- Category Filter Tabs -->
+      <div class="categories-tab" id="categoryTabs">
+        <button class="tab-btn active" data-category="all">
+          <i class="fa-solid fa-border-all"></i> Tất Cả
+        </button>
+        <button class="tab-btn" data-category="puzzle">
+          <i class="fa-solid fa-brain"></i> Trí Tuệ
+        </button>
+        <button class="tab-btn" data-category="arcade">
+          <i class="fa-solid fa-ghost"></i> Arcade
+        </button>
+        <button class="tab-btn" data-category="action">
+          <i class="fa-solid fa-bolt"></i> Hành Động
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Game Showcase -->
+  <main class="games-container">
+    <div class="section-header">
+      <div class="header-left">
+        <h2 class="section-title">Danh Sách Trò Chơi</h2>
+        <p class="section-sub">Chọn một trò chơi để bắt đầu ngay bây giờ</p>
+      </div>
+    </div>
+
+    <!-- Games Grid -->
+    <div class="games-grid" id="gamesGrid">
+      <!-- Game cards rendered by JS -->
+    </div>
+
+    <!-- Empty State -->
+    <div class="empty-state" id="emptyState" style="display: none;">
+      <i class="fa-solid fa-face-frown empty-icon"></i>
+      <h3>Không tìm thấy trò chơi nào</h3>
+      <p>Thử tìm kiếm với từ khóa khác xem nhé!</p>
+      <button class="reset-filter-btn" id="resetFilterBtn">Xem tất cả</button>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-container">
+      <div class="footer-brand">
+        <img src="captain.png" alt="Captain Game" class="footer-logo">
+        <p>Captain Game Hub &copy; 2026. Giải trí đỉnh cao mỗi ngày.</p>
+      </div>
+      <div class="footer-links">
+        <a href="#top"><i class="fa-solid fa-arrow-up"></i> Về đầu trang</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="main.js"></script>
+</body>
+</html>
