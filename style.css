@@ -622,6 +622,25 @@ body {
   color: var(--primary-light);
 }
 
+/* User Top Rank Badge on Game Card */
+.user-top-rank-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(236, 72, 153, 0.2));
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  color: #fbbf24;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 6px 12px;
+  border-radius: var(--radius-full);
+  margin-bottom: 12px;
+  box-shadow: 0 2px 10px rgba(245, 158, 11, 0.15);
+}
+.user-top-rank-badge i {
+  color: #f59e0b;
+}
+
 /* Animations */
 @keyframes pulseDot {
   0%, 100% { opacity: 1; transform: scale(1); }

@@ -706,10 +706,34 @@ html, body {
 }
 
 .menu-footer {
-  font-size: 12px;
-  color: var(--text-dim);
-  border-top: 1px solid rgba(255,255,255,0.08);
-  padding-top: 16px;
+  margin-top: 20px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  justify-content: center;
+}
+
+#menu-stats {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02));
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  padding: 10px 20px;
+  border-radius: 50px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #e2e8f0;
+  letter-spacing: 0.3px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  transition: all 0.3s var(--ease-smooth);
+}
+
+#menu-stats:hover {
+  border-color: rgba(124, 111, 238, 0.5);
+  box-shadow: 0 6px 25px rgba(124, 111, 238, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  transform: translateY(-2px);
 }
 
 /* ── Level Select Overlay ─────────────────────────────────────── */

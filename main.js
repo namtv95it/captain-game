@@ -81,6 +81,8 @@ function renderGames() {
       ? `<a href="${game.path}" class="play-btn"><i class="fa-solid fa-play"></i> Chơi Ngay</a>`
       : `<span class="play-btn disabled"><i class="fa-solid fa-lock"></i> Sớm thôi</span>`;
 
+    const myRankInfo = game.userRank ? `<div class="user-top-rank-badge"><i class="fa-solid fa-trophy"></i> Hạng của bạn: Top ${game.userRank.rank} (Lvl ${game.userRank.level})</div>` : '';
+
     return `
       <article class="game-card">
         <div class="game-thumb-wrapper">
@@ -91,6 +93,7 @@ function renderGames() {
         <div class="game-details">
           <h3 class="game-title">${game.title}</h3>
           <p class="game-desc">${game.description}</p>
+          ${myRankInfo}
           <div class="game-meta">
             <div class="game-tags">
               ${game.tags.map(tag => `<span class="tag-pill">#${tag}</span>`).join('')}
@@ -101,6 +104,21 @@ function renderGames() {
       </article>
     `;
   }).join('');
+}
+
+// Kiểm tra thứ hạng người chơi từ Firebase cho từng game
+async function checkUserRanks() {
+  if (window.getMyLeaderboardRank) {
+    for (const game of GAMES_DATA) {
+      if (game.isReady) {
+        const rankInfo = await window.getMyLeaderboardRank(game.id);
+        if (rankInfo) {
+          game.userRank = rankInfo;
+        }
+      }
+    }
+    renderGames();
+  }
 }
 
 // Event Listeners
@@ -140,4 +158,5 @@ resetFilterBtn.addEventListener('click', () => {
 // Initial Render
 document.addEventListener('DOMContentLoaded', () => {
   renderGames();
+  setTimeout(checkUserRanks, 500);
 });

@@ -874,12 +874,22 @@ function showMenu() {
   const { maxLevel, currentLevel } = loadGameData();
 
   const descEl = document.getElementById('menu-continue-desc');
-  const selectDescEl = document.getElementById('menu-select-desc');
   const statsEl = document.getElementById('menu-stats');
 
   if (descEl) descEl.textContent = `Level ${currentLevel}`;
-  if (selectDescEl) selectDescEl.textContent = `Đã mở: ${maxLevel} màn`;
-  if (statsEl) statsEl.textContent = `Màn cao nhất: Level ${maxLevel}`;
+
+  // Kiểm tra thứ hạng trên Firebase (chỉ hiển thị riêng thứ hạng nếu thuộc Top 1000)
+  if (statsEl) {
+    statsEl.style.display = 'none'; // Tạm ẩn mặc định
+    if (window.getMyRank) {
+      window.getMyRank('xep-hinh').then(rank => {
+        if (rank && rank <= 1000) {
+          statsEl.innerHTML = `<span style="color:#fbbf24; font-weight:800;">🏆 Thứ Hạng Của Bạn: Top ${rank}</span>`;
+          statsEl.style.display = 'inline-flex';
+        }
+      });
+    }
+  }
 
   overlay.classList.add('show');
   overlay.setAttribute('aria-hidden', 'false');

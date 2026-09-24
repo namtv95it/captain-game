@@ -81,21 +81,66 @@ export async function getTopScoresFromFirebase(gameId = "xep-hinh") {
     const q = query(
       collection(db, `leaderboard_${gameId}`),
       orderBy("level", "desc"),
-      orderBy("moves", "asc"),
-      limit(10)
+      limit(50)
     );
     const querySnapshot = await getDocs(q);
     const scores = [];
     querySnapshot.forEach((doc) => {
       scores.push(doc.data());
     });
-    return scores;
+
+    // Sắp xếp phụ theo số bước (moves) tăng dần ở Client-side để không yêu cầu Index
+    scores.sort((a, b) => {
+      if (b.level !== a.level) {
+        return b.level - a.level;
+      }
+      return a.moves - b.moves;
+    });
+
+    return scores.slice(0, 10);
   } catch (error) {
     console.error("Lỗi khi lấy bảng xếp hạng:", error);
     return [];
   }
 }
 
+/**
+ * Kiểm tra xem người dùng hiện tại có thuộc Top 1000 không
+ * @param {string} gameId 
+ */
+export async function getMyRank(gameId = "xep-hinh") {
+  try {
+    const devId = localStorage.getItem('captain_device_id');
+    if (!devId) return null;
+
+    const q = query(
+      collection(db, `leaderboard_${gameId}`),
+      orderBy("level", "desc"),
+      limit(1000)
+    );
+    const querySnapshot = await getDocs(q);
+    const scores = [];
+    querySnapshot.forEach((doc) => {
+      scores.push(doc.data());
+    });
+
+    scores.sort((a, b) => {
+      if (b.level !== a.level) return b.level - a.level;
+      return a.moves - b.moves;
+    });
+
+    const index = scores.findIndex(s => s.deviceId === devId);
+    if (index !== -1) {
+      return index + 1; // Trả về thứ hạng (1 -> 1000)
+    }
+    return null;
+  } catch (error) {
+    console.error("Lỗi khi lấy thứ hạng cá nhân:", error);
+    return null;
+  }
+}
+
 // Gắn hàm vào window để game.js dễ dàng gọi
 window.saveScoreToFirebase = saveScoreToFirebase;
 window.getTopScoresFromFirebase = getTopScoresFromFirebase;
+window.getMyRank = getMyRank;
