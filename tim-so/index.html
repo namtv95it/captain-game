@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Tìm Số - Captain Áo Xanh</title>
+  <meta name="description" content="Trò chơi Tìm Số – Tìm các con số theo thứ tự từ 1 đến đích trên bản đồ cực hấp dẫn!" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800;900&display=swap&subset=vietnamese" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <link rel="icon" type="image/png" href="../captain.png" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+
+  <!-- Animated Background -->
+  <div class="bg-scene" aria-hidden="true">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+    <div class="grid-overlay"></div>
+  </div>
+
+  <!-- Main Game Layout -->
+  <div class="game-container">
+
+    <!-- Header -->
+    <header class="header">
+      <div class="header-left">
+        <button class="btn-icon-head" id="btn-home" title="Về Màn Hình Chính" aria-label="Màn hình chính">
+          <i class="fa-solid fa-house"></i>
+        </button>
+        <div class="level-info">
+          <span class="level-badge" id="level-badge">Màn 1</span>
+          <span class="range-info" id="range-info">1 - 30</span>
+        </div>
+      </div>
+
+      <!-- CENTER: Target Number to find -->
+      <div class="header-center">
+        <div class="target-card">
+          <span class="target-label">CẦN TÌM</span>
+          <span class="target-num" id="target-number">1</span>
+        </div>
+      </div>
+
+      <div class="header-right">
+        <!-- Pause Button -->
+        <button class="btn-icon-head" id="btn-pause" title="Tạm dừng game" aria-label="Tạm dừng">
+          <i class="fa-solid fa-pause"></i>
+        </button>
+
+        <!-- Hint Button -->
+        <button class="btn-hint" id="btn-hint" title="Gợi ý vị trí số cần tìm">
+          <i class="fa-solid fa-lightbulb"></i>
+          <span class="hint-text">Gợi ý</span>
+          <span class="hint-count-badge" id="hint-count">3</span>
+        </button>
+
+        <!-- Sound Control -->
+        <div class="sound-control-wrapper">
+          <button class="btn-icon-head" id="btn-sound" title="Cài đặt âm thanh">
+            <i class="fa-solid fa-volume-high" id="sound-icon"></i>
+          </button>
+          <div class="sound-popover" id="sound-popover">
+            <div class="sound-popover-header">
+              <span>Âm lượng</span>
+              <span id="sound-volume-val">80%</span>
+            </div>
+            <div class="sound-slider-row">
+              <button class="btn-mute-toggle" id="btn-mute-toggle" title="Tắt/Mở âm">
+                <i class="fa-solid fa-volume-xmark"></i>
+              </button>
+              <input type="range" id="sound-slider" min="0" max="100" value="80" step="5" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Timer & Found Stats -->
+        <div class="stats-box">
+          <div class="stat-item">
+            <span class="stat-num" id="timer-display">00:00</span>
+            <span class="stat-lbl">thời gian</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Zoom & Pan Controls floating toolbar -->
+    <div class="zoom-toolbar">
+      <button class="btn-zoom" id="btn-zoom-in" title="Phóng to (+)"><i class="fa-solid fa-plus"></i></button>
+      <button class="btn-zoom" id="btn-zoom-reset" title="Đặt lại thu phóng"><span id="zoom-level-text">100%</span></button>
+      <button class="btn-zoom" id="btn-zoom-out" title="Thu nhỏ (-)"><i class="fa-solid fa-minus"></i></button>
+    </div>
+
+    <!-- Game Viewport & Canvas Area -->
+    <main class="board-viewport" id="board-viewport">
+      <div class="board-content" id="board-content">
+        <!-- Number elements created dynamically -->
+      </div>
+    </main>
+
+  </div><!-- /.game-container -->
+
+  <!-- Main Menu Overlay -->
+  <div class="menu-overlay" id="menu-overlay" role="dialog" aria-modal="true">
+    <!-- Floating Background Decor Numbers -->
+    <div class="menu-floating-decor" aria-hidden="true">
+      <span class="f-num f-num-1">1</span>
+      <span class="f-num f-num-2">7</span>
+      <span class="f-num f-num-3">42</span>
+      <span class="f-num f-num-4">99</span>
+      <span class="f-num f-num-5">150</span>
+    </div>
+
+    <div class="menu-card">
+      <div class="menu-badge">
+        <i class="fa-solid fa-eye"></i> <span>THỬ THÁCH TINH MẮT</span>
+      </div>
+
+      <div class="menu-logo-box">
+        <div class="logo-glow-wrapper">
+          <img src="../captain.png" alt="Captain Logo" class="menu-logo-img" />
+        </div>
+        <h1 class="menu-title">Captain Áo Xanh</h1>
+        <p class="menu-subtitle">TÌM SỐ</p>
+      </div>
+
+      <!-- Feature Pills Highlights -->
+      <div class="menu-features">
+        <span class="feat-pill"><i class="fa-solid fa-magnifying-glass-plus"></i> Phóng to</span>
+        <span class="feat-pill"><i class="fa-solid fa-hand-pointer"></i> Kéo thả</span>
+        <span class="feat-pill"><i class="fa-solid fa-lightbulb"></i> Gợi ý</span>
+      </div>
+
+      <div class="menu-actions">
+        <button class="menu-btn menu-btn-start" id="btn-menu-start">
+          <span class="menu-btn-icon icon-play"><i class="fa-solid fa-play"></i></span>
+          <span class="menu-btn-text">
+            <strong>Bắt Đầu Chơi</strong>
+            <small id="menu-continue-desc">Màn 1 (1 đến 30)</small>
+          </span>
+          <i class="fa-solid fa-chevron-right btn-arrow"></i>
+        </button>
+
+        <button class="menu-btn menu-btn-leaderboard" id="btn-menu-leaderboard">
+          <span class="menu-btn-icon icon-trophy"><i class="fa-solid fa-trophy"></i></span>
+          <span class="menu-btn-text">
+            <strong>Bảng Xếp Hạng</strong>
+            <small>Top cao thủ tìm số</small>
+          </span>
+          <i class="fa-solid fa-chevron-right btn-arrow"></i>
+        </button>
+
+        <button class="menu-btn menu-btn-auth" id="btn-menu-auth">
+          <span class="menu-btn-icon icon-user" id="auth-btn-icon"><i class="fa-brands fa-google"></i></span>
+          <span class="menu-btn-text">
+            <strong id="auth-btn-title">Đăng nhập Google</strong>
+            <small id="auth-btn-sub">Đồng bộ tên & avatar</small>
+          </span>
+          <i class="fa-solid fa-chevron-right btn-arrow"></i>
+        </button>
+
+        <a href="../index.html" class="menu-btn menu-btn-hub" style="text-decoration: none;">
+          <span class="menu-btn-icon icon-home"><i class="fa-solid fa-house"></i></span>
+          <span class="menu-btn-text">
+            <strong>Về Captain Game Hub</strong>
+            <small>Chọn trò chơi khác</small>
+          </span>
+          <i class="fa-solid fa-chevron-right btn-arrow"></i>
+        </a>
+      </div>
+
+      <div class="menu-footer">
+        <span id="menu-stats" style="display: none;"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Win Overlay -->
+  <div class="win-overlay" id="win-overlay" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="win-card">
+      <img src="../captain.png" alt="Logo" class="win-logo-img" />
+      <h2 class="win-title">Xuất Sắc!</h2>
+      <p class="win-subtitle" id="win-time">Bạn đã hoàn thành trong 00:00!</p>
+      <div class="win-stars" id="win-stars">
+        <i class="fa-solid fa-star star-active"></i>
+        <i class="fa-solid fa-star star-active"></i>
+        <i class="fa-solid fa-star star-active"></i>
+      </div>
+      <div class="win-actions">
+        <button class="btn-next" id="btn-next">
+          Màn Tiếp Theo <i class="fa-solid fa-arrow-right" style="margin-left: 6px;"></i>
+        </button>
+        <a href="../index.html" class="btn-win-home" id="btn-win-home">
+          <i class="fa-solid fa-house"></i> Trang chủ
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Leaderboard Overlay -->
+  <div class="leaderboard-overlay" id="leaderboard-overlay" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="leaderboard-card">
+      <div class="leaderboard-header">
+        <button class="btn-back" id="btn-leaderboard-back" aria-label="Quay lại">
+          <i class="fa-solid fa-arrow-left"></i>
+        </button>
+        <h2 class="leaderboard-title">
+          <i class="fa-solid fa-trophy" style="color: #f1c40f; margin-right: 8px;"></i>Bảng Xếp Hạng
+        </h2>
+      </div>
+      <p class="leaderboard-subtitle">Top 10 người chơi vượt qua level cao nhất</p>
+      <div class="leaderboard-list-container">
+        <ul class="leaderboard-list" id="leaderboard-list">
+          <li class="lb-loading">Đang tải bảng xếp hạng...</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pause Overlay -->
+  <div class="pause-overlay" id="pause-overlay" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="pause-card">
+      <div class="pause-icon"><i class="fa-solid fa-pause"></i></div>
+      <h2 class="pause-title">Tạm Dừng</h2>
+      <p class="pause-msg">Trò chơi đang được tạm dừng</p>
+      <div class="pause-actions">
+        <button class="pause-btn btn-resume" id="btn-resume">
+          <i class="fa-solid fa-play"></i> Tiếp tục
+        </button>
+        <button class="pause-btn btn-restart" id="btn-pause-restart">
+          <i class="fa-solid fa-rotate-right"></i> Chơi lại
+        </button>
+        <button class="pause-btn btn-pause-home" id="btn-pause-home">
+          <i class="fa-solid fa-house"></i> Trang chủ
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast" role="alert" aria-live="polite"></div>
+
+  <!-- Firebase Modular SDK & Game JS -->
+  <script type="module" src="firebase-config.js"></script>
+  <script src="game.js"></script>
+</body>
+
+</html>

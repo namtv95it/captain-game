@@ -24,6 +24,18 @@ const GAMES_DATA = [
     tags: ['Xếp số', 'Sliding Puzzle', 'Logic', 'Trí Tuệ'],
     status: 'Sẵn sàng',
     isReady: true
+  },
+  {
+    id: 'tim-so',
+    title: 'Tìm Số',
+    category: 'puzzle',
+    categoryName: 'Trí Tuệ',
+    description: 'Thử thách tinh mắt! Tìm các con số từ 1 đến đích trên bản đồ. Hỗ trợ phóng to/thu nhỏ, kéo bản đồ và gợi ý.',
+    path: './tim-so/index.html',
+    thumbnail: './tim-so/tim-so.jpg',
+    tags: ['Tìm số', 'Tinh mắt', 'Thử thách', 'Trí Tuệ'],
+    status: 'Sẵn sàng',
+    isReady: true
   }
 ];
 
