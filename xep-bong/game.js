@@ -588,8 +588,21 @@ function renderTubes() {
       tubeEl.appendChild(makeBallEl(ball, isTopBall, isStackBall));
     });
 
+    // Tube number label (top)
+    const labelTop = document.createElement('div');
+    labelTop.className = 'tube-label tube-label-top';
+    labelTop.textContent = idx + 1;
+    wrapper.appendChild(labelTop);
+
     wrapper.appendChild(cap);
     wrapper.appendChild(tubeEl);
+
+    // Tube number label (bottom)
+    const label = document.createElement('div');
+    label.className = 'tube-label';
+    label.textContent = idx + 1;
+    wrapper.appendChild(label);
+
     // Fast tap: bypass iOS 300ms click delay using touchend
     let _touched = false;
     wrapper.addEventListener('touchend', (e) => {

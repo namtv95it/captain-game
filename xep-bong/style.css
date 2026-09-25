@@ -435,6 +435,24 @@ html, body {
 
 .tube-wrapper:active { transform: scale(0.97); }
 
+/* ── Tube Number Label ────────────────────────────────────────── */
+.tube-label {
+  margin-top: 6px;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #ff4d4d;
+  font-family: var(--font-primary, 'Outfit', sans-serif);
+  letter-spacing: 0.02em;
+  line-height: 1;
+  pointer-events: none;
+  user-select: none;
+}
+
+.tube-label-top {
+  margin-top: 0;
+  margin-bottom: 6px;
+}
+
 /* ── Tube Cap (opening) ───────────────────────────────────────── */
 .tube-cap {
   width: var(--tube-w);
