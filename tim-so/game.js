@@ -144,12 +144,23 @@ const NEON_COLORS = [
 // DOM Elements
 const boardViewport = document.getElementById('board-viewport');
 const boardContent = document.getElementById('board-content');
-const targetNumberEl = document.getElementById('target-number');
+const sideDigitsLeftEl = document.getElementById('side-digits-left');
+const sideDigitsRightEl = document.getElementById('side-digits-right');
 const levelBadgeEl = document.getElementById('level-badge');
 const rangeInfoEl = document.getElementById('range-info');
 const timerDisplayEl = document.getElementById('timer-display');
 const hintBtn = document.getElementById('btn-hint');
 const hintCountEl = document.getElementById('hint-count');
+
+function updateTargetNumberDisplay() {
+  const digitHTML = `<span class="side-digit pop-anim">${currentTargetNum}</span>`;
+  
+  [sideDigitsLeftEl, sideDigitsRightEl].forEach(container => {
+    if (container) {
+      container.innerHTML = digitHTML;
+    }
+  });
+}
 
 // Overlays
 const menuOverlay = document.getElementById('menu-overlay');
@@ -193,7 +204,7 @@ function init() {
 function updateMenuState() {
   const desc = document.getElementById('menu-continue-desc');
   if (desc) {
-    const maxForLvl = 30 + (currentLevel - 1) * 10;
+    const maxForLvl = Math.min(100, 30 + (currentLevel - 1) * 10);
     desc.textContent = `Màn ${currentLevel} (1 đến ${maxForLvl})`;
   }
 }
@@ -203,14 +214,13 @@ function startLevel(lvl = currentLevel) {
   currentLevel = lvl;
   localStorage.setItem('tim_so_level', currentLevel);
   currentTargetNum = 1;
-  maxNumber = 30 + (currentLevel - 1) * 10;
-  hintCount = 3;
+  maxNumber = Math.min(100, 30 + (currentLevel - 1) * 10);
 
   // Adjust board canvas size based on number density
-  const areaPerNum = 24000;
+  const areaPerNum = 28000;
   const totalArea = maxNumber * areaPerNum;
-  boardWidth = Math.max(1100, Math.round(Math.sqrt(totalArea * 1.4)));
-  boardHeight = Math.max(750, Math.round(boardWidth / 1.4));
+  boardWidth = Math.max(1200, Math.round(Math.sqrt(totalArea * 1.4)));
+  boardHeight = Math.max(800, Math.round(boardWidth / 1.4));
 
   boardContent.style.width = `${boardWidth}px`;
   boardContent.style.height = `${boardHeight}px`;
@@ -218,8 +228,7 @@ function startLevel(lvl = currentLevel) {
   // UI updates
   levelBadgeEl.textContent = `Màn ${currentLevel}`;
   rangeInfoEl.textContent = `1 - ${maxNumber}`;
-  targetNumberEl.textContent = currentTargetNum;
-  hintCountEl.textContent = hintCount;
+  updateTargetNumberDisplay();
 
   // Reset viewport zoom/pan to fit screen centered
   resetViewportTransform();
@@ -269,9 +278,29 @@ function generateNumberBoard() {
 
   const cols = 8;
   const rows = 6;
-  const colNames = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P'];
+  const rowNames = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L'];
   const cellWidth = boardWidth / cols;
   const cellHeight = boardHeight / rows;
+
+  // Top Column Headers (1, 2, 3, 4, 5, 6, 7, 8)
+  for (let c = 0; c < cols; c++) {
+    const colHeader = document.createElement('div');
+    colHeader.className = 'grid-col-header';
+    colHeader.style.left = `${c * cellWidth + cellWidth / 2}px`;
+    colHeader.style.top = `-32px`;
+    colHeader.textContent = c + 1;
+    gridOverlay.appendChild(colHeader);
+  }
+
+  // Left Row Headers (A, B, C, D, E, F)
+  for (let r = 0; r < rows; r++) {
+    const rowHeader = document.createElement('div');
+    rowHeader.className = 'grid-row-header';
+    rowHeader.style.left = `-32px`;
+    rowHeader.style.top = `${r * cellHeight + cellHeight / 2}px`;
+    rowHeader.textContent = rowNames[r] || (r + 1);
+    gridOverlay.appendChild(rowHeader);
+  }
 
   for (let r = 0; r < rows; r++) {
     for (let c = 0; c < cols; c++) {
@@ -284,7 +313,7 @@ function generateNumberBoard() {
 
       const label = document.createElement('span');
       label.className = 'grid-cell-label';
-      label.textContent = `${colNames[c] || (c + 1)}${r + 1}`;
+      label.textContent = `${rowNames[r] || (r + 1)}${c + 1}`;
       cell.appendChild(label);
 
       gridOverlay.appendChild(cell);
@@ -296,8 +325,8 @@ function generateNumberBoard() {
   const padding = 15;
 
   for (let num = 1; num <= maxNumber; num++) {
-    // Determine random size for each number bubble
-    const size = Math.floor(Math.random() * 22) + 48; // 48px to 70px
+    // Determine larger random size for each number bubble (60px to 86px)
+    const size = Math.floor(Math.random() * 26) + 60;
     let x = 0, y = 0, attempts = 0;
     let overlaps = true;
 
@@ -329,7 +358,7 @@ function generateNumberBoard() {
     card.style.top = `${y}px`;
     card.style.width = `${size}px`;
     card.style.height = `${size}px`;
-    card.style.fontSize = `${Math.floor(size * 0.44)}px`;
+    card.style.fontSize = `${Math.floor(size * 0.46)}px`;
     card.style.background = colorStyle.bg;
     card.style.color = colorStyle.text;
     card.style.transform = `rotate(${rotation}deg)`;
@@ -361,10 +390,7 @@ function handleNumberTap(num, cardEl) {
       onLevelCompleted();
     } else {
       currentTargetNum++;
-      targetNumberEl.textContent = currentTargetNum;
-      targetNumberEl.classList.remove('pop-anim');
-      void targetNumberEl.offsetWidth; // trigger reflow
-      targetNumberEl.classList.add('pop-anim');
+      updateTargetNumberDisplay();
     }
   } else {
     // WRONG NUMBER!
@@ -376,18 +402,11 @@ function handleNumberTap(num, cardEl) {
   }
 }
 
-// ── Hint Feature ──
+// ── Hint Feature (Unlimited) ──
 function triggerHint() {
-  if (hintCount <= 0) {
-    showToast('Hết lượt gợi ý màn này!');
-    return;
-  }
-
   const targetEl = document.getElementById(`num-card-${currentTargetNum}`);
   if (!targetEl) return;
 
-  hintCount--;
-  hintCountEl.textContent = hintCount;
   sound.playHint();
 
   // Scroll / Pan viewport to center target number
@@ -404,20 +423,22 @@ function triggerHint() {
   // Show Toast with grid coordinate (e.g., [C3])
   const cols = 8;
   const rows = 6;
-  const colNames = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P'];
+  const rowNames = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L'];
   const cellWidth = boardWidth / cols;
   const cellHeight = boardHeight / rows;
   const cIdx = Math.min(cols - 1, Math.max(0, Math.floor(parseFloat(targetEl.style.left) / cellWidth)));
   const rIdx = Math.min(rows - 1, Math.max(0, Math.floor(parseFloat(targetEl.style.top) / cellHeight)));
-  const coord = `${colNames[cIdx] || (cIdx + 1)}${rIdx + 1}`;
+  const coord = `${rowNames[rIdx] || (rIdx + 1)}${cIdx + 1}`;
 
   showToast(`Gợi ý: Số ${currentTargetNum} ở ô [${coord}]!`);
 
-  // Add neon pulse glow
+  // Add rapid blinking neon glow & scaling effect
+  targetEl.classList.remove('hint-glow');
+  void targetEl.offsetWidth; // trigger reflow
   targetEl.classList.add('hint-glow');
   setTimeout(() => {
     targetEl.classList.remove('hint-glow');
-  }, 3000);
+  }, 3500);
 }
 
 // ── Level Completion ──
@@ -653,15 +674,58 @@ function setupEventListeners() {
 
   // Google Auth
   btnMenuAuth.addEventListener('click', async () => {
-    if (window.loginWithGoogle) {
-      const res = await window.loginWithGoogle();
-      if (res.success) {
-        showToast(`Xin chào ${res.user.displayName}!`);
-        updateAuthBtnState(res.user);
-        syncCloudProgress(res.user);
+    if (currentAuthUser) {
+      // Đã đăng nhập -> Hiển thị hộp thoại xác nhận đăng xuất
+      const confirmOverlay = document.getElementById('confirm-overlay');
+      if (confirmOverlay) {
+        confirmOverlay.classList.add('show');
+        confirmOverlay.removeAttribute('aria-hidden');
+      }
+    } else {
+      // Chưa đăng nhập -> Thực hiện đăng nhập Google
+      if (window.loginWithGoogle) {
+        showToast('Đang mở trang đăng nhập Google...');
+        const res = await window.loginWithGoogle();
+        if (res.success) {
+          showToast(`Xin chào ${res.user.displayName}!`);
+          updateAuthBtnState(res.user);
+          syncCloudProgress(res.user);
+        }
       }
     }
   });
+
+  // Confirm dialog: Hủy đăng xuất
+  const confirmOverlay = document.getElementById('confirm-overlay');
+  const btnConfirmCancel = document.getElementById('btn-confirm-cancel');
+  const btnConfirmOk = document.getElementById('btn-confirm-ok');
+
+  if (btnConfirmCancel) {
+    btnConfirmCancel.addEventListener('click', () => {
+      if (confirmOverlay) {
+        confirmOverlay.classList.remove('show');
+        confirmOverlay.setAttribute('aria-hidden', 'true');
+      }
+    });
+  }
+
+  // Confirm dialog: Đồng ý đăng xuất
+  if (btnConfirmOk) {
+    btnConfirmOk.addEventListener('click', async () => {
+      if (confirmOverlay) {
+        confirmOverlay.classList.remove('show');
+        confirmOverlay.setAttribute('aria-hidden', 'true');
+      }
+      if (window.logoutGoogle) {
+        await window.logoutGoogle();
+        updateAuthBtnState(null);
+        currentLevel = 1;
+        localStorage.setItem('tim_so_level', '1');
+        updateMenuState();
+        showToast('Đã đăng xuất tài khoản!');
+      }
+    });
+  }
 
   window.onUserAuthChanged = (user) => {
     updateAuthBtnState(user);
@@ -670,6 +734,8 @@ function setupEventListeners() {
     }
   };
 }
+
+let currentAuthUser = null;
 
 async function syncCloudProgress(user) {
   if (!user || !window.getUserScoreFromFirebase) return;
@@ -697,14 +763,25 @@ async function syncCloudProgress(user) {
 }
 
 function updateAuthBtnState(user) {
+  currentAuthUser = user;
   const title = document.getElementById('auth-btn-title');
   const sub = document.getElementById('auth-btn-sub');
   const icon = document.getElementById('auth-btn-icon');
 
   if (user) {
     if (title) title.textContent = user.displayName || 'Gamer';
-    if (sub) sub.textContent = 'Đã đăng nhập Google';
-    if (icon) icon.innerHTML = `<img src="${user.photoURL}" style="width:34px;height:34px;border-radius:50%;object-fit:cover;">`;
+    if (sub) sub.textContent = 'Đã đăng nhập Google (Bấm để đăng xuất)';
+    if (icon) {
+      if (user.photoURL) {
+        icon.innerHTML = `<img src="${user.photoURL}" style="width:34px;height:34px;border-radius:50%;object-fit:cover;">`;
+      } else {
+        icon.innerHTML = `<i class="fa-solid fa-user-check"></i>`;
+      }
+    }
+  } else {
+    if (title) title.textContent = 'Đăng nhập Google';
+    if (sub) sub.textContent = 'Đồng bộ tên & avatar';
+    if (icon) icon.innerHTML = `<i class="fa-brands fa-google"></i>`;
   }
 }
 
