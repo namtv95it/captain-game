@@ -506,32 +506,37 @@ function applyLevelSizing() {
   const totalTubes = G.tubes.length || (G.config ? G.config.colors + G.config.emptyTubes : 7);
   const root = document.documentElement;
 
+  // Lấy chiều cao hiển thị thực tế (tránh bị Safari iOS tính sai do thanh URL)
+  const visibleH = Math.min(window.innerHeight, document.documentElement.clientHeight || window.innerHeight);
+
   // Lấy kích thước thực của tubes-area
   const tubesArea = document.querySelector('.tubes-area');
   const areaW = tubesArea && tubesArea.clientWidth > 0 ? tubesArea.clientWidth : Math.min(window.innerWidth, 960);
-  const areaH = tubesArea && tubesArea.clientHeight > 0 ? tubesArea.clientHeight : (window.innerHeight - 100);
+  const rawAreaH = tubesArea && tubesArea.clientHeight > 0 ? tubesArea.clientHeight : (visibleH - 100);
+  const areaH = Math.min(rawAreaH, visibleH - 110);
 
   // Tính theo chiều ngang (1 hàng)
-  const gapBetween = Math.max(6, Math.min(12, Math.floor(areaW / (totalTubes * 8))));
+  const gapBetween = Math.max(4, Math.min(12, Math.floor(areaW / (totalTubes * 8))));
   const totalHorizontalGap = (totalTubes - 1) * gapBetween + 16;
   const perTubeW = Math.floor((areaW - totalHorizontalGap) / totalTubes);
-  const maxBallW = Math.max(12, perTubeW - 12);
+  const maxBallW = Math.max(10, perTubeW - 10);
 
-  // Tính theo chiều cao khả dụng
-  // Chiều cao tổng của ống = tubeH + tubeCap (10px) + khoảng đệm an toàn trên dưới (30px)
-  // tubeH = cap * ballSize + (cap - 1) * ballGap + 12
-  // Với ballGap ~ 3px, tubeH ~ cap * ballSize + 3 * cap + 9
-  // Tổng không gian cần: cap * ballSize + 3 * cap + 49 <= areaH
-  const availableH = Math.max(80, areaH - 45); // Dành 45px cho tube-cap, padding và khoảng cách an toàn
-  const maxBallH = Math.floor((availableH - (cap * 3)) / cap);
+  // Ống có nhiều bóng (cap >= 12, cap = 16 ở mức khó) cần trừ bù khoảng cách an toàn lớn hơn
+  const safeMargin = cap >= 12 ? 65 : (cap >= 8 ? 50 : 35);
+  const availableH = Math.max(60, areaH - safeMargin);
+  
+  // ballGap nhỏ hơn ở các ống dài để tiết kiệm chiều cao
+  const ballGap = cap >= 12 ? 1 : (cap >= 8 ? 2 : Math.max(2, Math.min(4, Math.floor(maxBallW / 12))));
 
-  // Chọn kích thước bóng tối ưu vừa cả 2 chiều (chiều cao và chiều rộng)
+  // Tính kích thước bóng tối đa phù hợp chiều cao
+  const maxBallH = Math.floor((availableH - ((cap - 1) * ballGap) - 10) / cap);
+
+  // Chọn kích thước bóng vừa cả 2 chiều
   let ballSize = Math.min(maxBallH, maxBallW);
-  ballSize = Math.max(12, Math.min(56, ballSize)); // Giới hạn tối thiểu 12px, tối đa 56px
+  ballSize = Math.max(10, Math.min(56, ballSize));
 
-  const ballGap = Math.max(2, Math.min(4, Math.floor(ballSize / 12)));
-  const tubeW = ballSize + 12;
-  const tubeH = cap * ballSize + (cap - 1) * ballGap + 12;
+  const tubeW = ballSize + (ballSize < 24 ? 6 : 10);
+  const tubeH = cap * ballSize + (cap - 1) * ballGap + 10;
   const radius = Math.round(tubeW / 2);
 
   root.style.setProperty('--ball-size', `${ballSize}px`);
