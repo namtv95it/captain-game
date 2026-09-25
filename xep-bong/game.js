@@ -418,23 +418,26 @@ function applyLevelSizing() {
 
   // Lấy kích thước thực của tubes-area
   const tubesArea = document.querySelector('.tubes-area');
-  const areaW = tubesArea ? tubesArea.clientWidth : Math.min(window.innerWidth, 960);
-  const areaH = tubesArea ? tubesArea.clientHeight : window.innerHeight - 80;
+  const areaW = tubesArea && tubesArea.clientWidth > 0 ? tubesArea.clientWidth : Math.min(window.innerWidth, 960);
+  const areaH = tubesArea && tubesArea.clientHeight > 0 ? tubesArea.clientHeight : (window.innerHeight - 100);
 
-  // Luôn 1 hàng – tính ball size sao cho tất cả ống vừa ngang màn hình
-  const gapBetween = 10; // px giữa các ống
-  const totalGap = (totalTubes - 1) * gapBetween + 16; // + padding
-  const perTubeW = Math.floor((areaW - totalGap) / totalTubes);
+  // Tính theo chiều ngang (1 hàng)
+  const gapBetween = Math.max(6, Math.min(12, Math.floor(areaW / (totalTubes * 8))));
+  const totalHorizontalGap = (totalTubes - 1) * gapBetween + 16;
+  const perTubeW = Math.floor((areaW - totalHorizontalGap) / totalTubes);
+  const maxBallW = Math.max(12, perTubeW - 12);
 
-  // Chiều cao: ball size theo height
-  const maxBallH = Math.floor((areaH - 20) / (cap + 0.5));
+  // Tính theo chiều cao khả dụng
+  // Chiều cao tổng của ống = tubeH + tubeCap (10px) + khoảng đệm an toàn trên dưới (30px)
+  // tubeH = cap * ballSize + (cap - 1) * ballGap + 12
+  // Với ballGap ~ 3px, tubeH ~ cap * ballSize + 3 * cap + 9
+  // Tổng không gian cần: cap * ballSize + 3 * cap + 49 <= areaH
+  const availableH = Math.max(80, areaH - 45); // Dành 45px cho tube-cap, padding và khoảng cách an toàn
+  const maxBallH = Math.floor((availableH - (cap * 3)) / cap);
 
-  // Tính ball size từ chiều rộng mỗi ống (tube width = ballSize + 12)
-  const maxBallW = perTubeW - 12;
-
-  // Pick optimal ball size fitting both dimensions
+  // Chọn kích thước bóng tối ưu vừa cả 2 chiều (chiều cao và chiều rộng)
   let ballSize = Math.min(maxBallH, maxBallW);
-  ballSize = Math.max(18, ballSize); // tối thiểu 18px
+  ballSize = Math.max(12, Math.min(56, ballSize)); // Giới hạn tối thiểu 12px, tối đa 56px
 
   const ballGap = Math.max(2, Math.min(4, Math.floor(ballSize / 12)));
   const tubeW = ballSize + 12;
@@ -445,6 +448,7 @@ function applyLevelSizing() {
   root.style.setProperty('--ball-gap', `${ballGap}px`);
   root.style.setProperty('--tube-w', `${tubeW}px`);
   root.style.setProperty('--tube-h', `${tubeH}px`);
+  root.style.setProperty('--tube-gap', `${gapBetween}px`);
   root.style.setProperty('--radius-tube', `${radius}px`);
 }
 
@@ -1113,8 +1117,73 @@ function init() {
     btnNoMoveReset.addEventListener('click', onReset);
   }
 
+  // Khởi tạo hiệu ứng con trỏ chuột tùy chỉnh và vệt lấp lánh
+  setupCustomCursor();
+
   // Hiển thị màn hình chính lúc ban đầu
   showMenu();
+}
+
+/** ── Mouse Bubbles & Sparkle Particles (Around default cursor) ─── */
+function setupCustomCursor() {
+  if (window.matchMedia('(hover: none)').matches) return; // Bỏ qua trên màn cảm ứng điện thoại
+
+  let lastParticleTime = 0;
+  // Bảng màu viền và ánh sáng cho bong bóng trong suốt
+  const colors = [
+    { border: 'rgba(124, 111, 238, 0.75)', glow: 'rgba(124, 111, 238, 0.45)', bg: 'rgba(124, 111, 238, 0.08)' },
+    { border: 'rgba(116, 185, 255, 0.75)', glow: 'rgba(116, 185, 255, 0.45)', bg: 'rgba(116, 185, 255, 0.08)' },
+    { border: 'rgba(85, 239, 196, 0.75)',  glow: 'rgba(85, 239, 196, 0.45)',  bg: 'rgba(85, 239, 196, 0.08)' },
+    { border: 'rgba(255, 234, 167, 0.75)', glow: 'rgba(255, 234, 167, 0.45)', bg: 'rgba(255, 234, 167, 0.08)' },
+    { border: 'rgba(253, 121, 168, 0.75)', glow: 'rgba(253, 121, 168, 0.45)', bg: 'rgba(253, 121, 168, 0.08)' },
+    { border: 'rgba(255, 159, 243, 0.75)', glow: 'rgba(255, 159, 243, 0.45)', bg: 'rgba(255, 159, 243, 0.08)' },
+    { border: 'rgba(129, 236, 236, 0.75)', glow: 'rgba(129, 236, 236, 0.45)', bg: 'rgba(129, 236, 236, 0.08)' },
+  ];
+
+  function createBubble(x, y) {
+    const p = document.createElement('div');
+    p.className = 'cursor-particle';
+
+    const isBubble = Math.random() > 0.35; // Ưu tiên phần lớn là bong bóng trong suốt
+    const size = isBubble ? (Math.floor(Math.random() * 9) + 7) : (Math.floor(Math.random() * 3) + 2);
+    const colorObj = colors[Math.floor(Math.random() * colors.length)];
+    
+    // Tỏa nhẹ quanh vị trí chuột
+    const angle = Math.random() * Math.PI * 2;
+    const distance = Math.random() * 18 + 4;
+    const offsetX = Math.cos(angle) * distance;
+    const offsetY = Math.sin(angle) * distance;
+
+    p.style.width = `${size}px`;
+    p.style.height = `${size}px`;
+    p.style.left = `${x + offsetX}px`;
+    p.style.top = `${y + offsetY}px`;
+
+    if (isBubble) {
+      // Bong bóng thủy tinh siêu trong suốt: chỉ rõ đường viền mỏng và đốm sáng phản quang nhỏ
+      p.style.background = `radial-gradient(circle at 35% 30%, rgba(255,255,255,0.45) 0%, ${colorObj.bg} 40%, rgba(255,255,255,0.02) 80%)`;
+      p.style.border = `1px solid ${colorObj.border}`;
+      p.style.boxShadow = `0 0 6px ${colorObj.glow}, inset 0 0 4px rgba(255,255,255,0.35)`;
+      p.style.backdropFilter = 'blur(0.5px)';
+    } else {
+      // Hạt bụi sáng nhỏ li ti
+      p.style.backgroundColor = colorObj.border;
+      p.style.boxShadow = `0 0 6px ${colorObj.glow}`;
+      p.style.opacity = '0.7';
+    }
+
+    document.body.appendChild(p);
+    setTimeout(() => p.remove(), 750);
+  }
+
+  window.addEventListener('mousemove', (e) => {
+    const now = performance.now();
+    // Tạo bong bóng và hạt bụi bay nhẹ quanh chuột khi di chuyển
+    if (now - lastParticleTime > 26) {
+      createBubble(e.clientX, e.clientY);
+      lastParticleTime = now;
+    }
+  }, { passive: true });
 }
 
 /** Hiển thị Leaderboard Overlay */
@@ -1176,3 +1245,4 @@ window.addEventListener('resize', () => {
 });
 
 document.addEventListener('DOMContentLoaded', init);
+

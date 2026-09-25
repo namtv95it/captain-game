@@ -18,6 +18,7 @@
   --accent-glow:   rgba(124,111,238,0.45);
   --tube-w:        64px;
   --tube-h:        232px;   /* 4*52 + 3*4 + 4+8 = 232px */
+  --tube-gap:      10px;
   --ball-size:     52px;
   --ball-gap:      4px;
   --radius-tube:   32px;
@@ -34,6 +35,31 @@ html, body {
   background: var(--bg);
   color: var(--text);
   -webkit-font-smoothing: antialiased;
+}
+
+/* ── Mouse Sparkle & Bubble Particles ─────────────────────────── */
+.cursor-particle {
+  position: fixed;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 99999;
+  transform: translate(-50%, -50%);
+  animation: bubble-float 0.75s cubic-bezier(0.1, 0.8, 0.25, 1) forwards;
+}
+
+@keyframes bubble-float {
+  0% {
+    transform: translate(-50%, -50%) scale(0.4);
+    opacity: 0.95;
+  }
+  30% {
+    transform: translate(-50%, -50%) scale(1.1);
+    opacity: 0.9;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(0.1) translateY(-24px);
+    opacity: 0;
+  }
 }
 
 /* ── Background Scene ─────────────────────────────────────────── */
@@ -243,9 +269,10 @@ html, body {
   display: flex;
   flex-wrap: nowrap;
   justify-content: center;
-  align-items: flex-end;
-  gap: 10px;
+  align-items: center;
+  gap: var(--tube-gap, 10px);
   max-width: 100%;
+  max-height: 100%;
   padding: 8px 4px;
   width: 100%;
 }

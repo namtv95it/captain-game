@@ -2,13 +2,13 @@
 // Khi có thêm game mới ở thư mục con, chỉ cần khai báo thêm vào mảng này
 const GAMES_DATA = [
   {
-    id: 'xep-hinh',
+    id: 'xep-bong',
     title: 'Xếp bóng',
     category: 'puzzle',
     categoryName: 'Trí Tuệ',
     description: 'Thử thách sắp xếp các quả bóng cùng màu vào từng ống nghiệm. Game giải đố rèn luyện trí não cực lôi cuốn!',
-    path: './xep-hinh/index.html',
-    thumbnail: './xep-hinh/xep-hinh.png',
+    path: './xep-bong/index.html',
+    thumbnail: './xep-bong/xep-bong.png',
     tags: ['Xếp bóng', 'Logic', 'Thư giãn'],
     status: 'Sẵn sàng',
     isReady: true

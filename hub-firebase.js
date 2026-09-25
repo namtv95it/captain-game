@@ -16,7 +16,7 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 /** Lấy thông tin Hạng của thiết bị hiện tại trong Top Bảng xếp hạng game */
-export async function getMyLeaderboardRank(gameId = "xep-hinh") {
+export async function getMyLeaderboardRank(gameId = "xep-bong") {
   try {
     const devId = localStorage.getItem('captain_device_id');
     if (!devId) return null;
