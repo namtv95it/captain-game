@@ -24,30 +24,6 @@ const GAMES_DATA = [
     tags: ['Xếp số', 'Sliding Puzzle', 'Logic', 'Trí Tuệ'],
     status: 'Sẵn sàng',
     isReady: true
-  },
-  {
-    id: 'snake-retro',
-    title: 'Retro Snake Master',
-    category: 'arcade',
-    categoryName: 'Arcade',
-    description: 'Trò chơi rắn săn mồi cổ điển với đồ họa neon hiện đại và nhiều loại chướng ngại vật hấp dẫn.',
-    path: '#',
-    thumbnail: 'captain.png',
-    tags: ['Rắn săn mồi', 'Retro', 'Neon'],
-    status: 'Sắp ra mắt',
-    isReady: false
-  },
-  {
-    id: 'space-invader',
-    title: 'Galaxy Defender',
-    category: 'action',
-    categoryName: 'Hành Động',
-    description: 'Bắn tàu vũ trụ vượt qua các làn đạn không gian và bảo vệ trạm chỉ huy của bạn khỏi người ngoài hành tinh.',
-    path: '#',
-    thumbnail: 'captain.png',
-    tags: ['Bắn phi thuyền', 'Bắn súng'],
-    status: 'Sắp ra mắt',
-    isReady: false
   }
 ];
 
@@ -95,15 +71,26 @@ function renderGames() {
 
     const myRankInfo = game.userRank ? `<div class="user-top-rank-badge"><i class="fa-solid fa-trophy"></i> Hạng của bạn: Top ${game.userRank.rank} (Lvl ${game.userRank.level})</div>` : '';
 
+    const thumbElement = game.isReady
+      ? `<a href="${game.path}" class="game-thumb-link" aria-label="Chơi ngay ${game.title}">
+          <img src="${game.thumbnail}" alt="${game.title}" class="game-thumb" onerror="this.src='captain.png'">
+          <div class="game-thumb-overlay">
+            <span class="play-circle-icon"><i class="fa-solid fa-play"></i></span>
+          </div>
+        </a>`
+      : `<div class="game-thumb-link disabled">
+          <img src="${game.thumbnail}" alt="${game.title}" class="game-thumb" onerror="this.src='captain.png'">
+        </div>`;
+
     return `
       <article class="game-card">
         <div class="game-thumb-wrapper">
-          <img src="${game.thumbnail}" alt="${game.title}" class="game-thumb" onerror="this.src='captain.png'">
+          ${thumbElement}
           <span class="game-badge-category">${game.categoryName}</span>
           ${statusBadge}
         </div>
         <div class="game-details">
-          <h3 class="game-title">${game.title}</h3>
+          <h3 class="game-title"><a href="${game.isReady ? game.path : '#'}" class="game-title-link">${game.title}</a></h3>
           <p class="game-desc">${game.description}</p>
           ${myRankInfo}
           <div class="game-meta">
