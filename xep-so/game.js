@@ -572,6 +572,24 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  function togglePause() {
+    const menuOverlay = document.getElementById('menu-overlay');
+    const winOverlay = document.getElementById('win-overlay');
+    const pauseOverlay = document.getElementById('pause-overlay');
+
+    if (menuOverlay?.classList.contains('show') || winOverlay?.classList.contains('show')) {
+      return;
+    }
+
+    if (pauseOverlay?.classList.contains('show')) {
+      SFX.select();
+      hidePauseOverlay();
+    } else if (G.running) {
+      SFX.select();
+      showPauseOverlay();
+    }
+  }
+
   document.getElementById('btn-pause')?.addEventListener('click', () => {
     SFX.select();
     showPauseOverlay();
@@ -586,6 +604,16 @@ document.addEventListener('DOMContentLoaded', () => {
     SFX.select();
     hidePauseOverlay();
     startNewGame(G.size);
+  });
+
+  window.addEventListener('keydown', (e) => {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable) {
+      return;
+    }
+    if (e.code === 'Space' || e.key === ' ') {
+      e.preventDefault();
+      togglePause();
+    }
   });
 
   // ── Difficulty Selection Overlay logic ──
