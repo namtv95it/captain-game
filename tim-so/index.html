@@ -39,11 +39,11 @@
         </div>
       </div>
 
-      <!-- CENTER: Target Number to find -->
+      <!-- CENTER: Game Logo -->
       <div class="header-center">
-        <div class="target-card">
-          <span class="target-label">CẦN TÌM</span>
-          <span class="target-num" id="target-number">1</span>
+        <div class="game-logo">
+          <img src="../captain.png" alt="Logo" class="logo-img" />
+          <span class="logo-text">Captain Áo Xanh</span>
         </div>
       </div>
 
@@ -89,10 +89,21 @@
       </div>
     </header>
 
+    <!-- Target Number Floating Bar (Fixed at bottom center) -->
+    <div class="target-floating-container">
+      <div class="target-card">
+        <div class="target-icon-badge"><i class="fa-solid fa-bullseye"></i></div>
+        <div class="target-text-group">
+          <span class="target-label">CẦN TÌM SỐ</span>
+          <span class="target-num" id="target-number">1</span>
+        </div>
+      </div>
+    </div>
+
     <!-- Zoom & Pan Controls floating toolbar -->
     <div class="zoom-toolbar">
       <button class="btn-zoom" id="btn-zoom-in" title="Phóng to (+)"><i class="fa-solid fa-plus"></i></button>
-      <button class="btn-zoom" id="btn-zoom-reset" title="Đặt lại thu phóng"><span id="zoom-level-text">100%</span></button>
+      <button class="btn-zoom" id="btn-zoom-reset" title="Đặt lại căn giữa (100%)"><span id="zoom-level-text">100%</span></button>
       <button class="btn-zoom" id="btn-zoom-out" title="Thu nhỏ (-)"><i class="fa-solid fa-minus"></i></button>
     </div>
 
@@ -183,21 +194,49 @@
   <!-- Win Overlay -->
   <div class="win-overlay" id="win-overlay" role="dialog" aria-modal="true" aria-hidden="true">
     <div class="win-card">
-      <img src="../captain.png" alt="Logo" class="win-logo-img" />
+      <div class="win-header-badge">
+        <i class="fa-solid fa-crown"></i> CHIẾN THẮNG
+      </div>
+
+      <div class="win-avatar-wrapper">
+        <div class="win-avatar-glow"></div>
+        <img src="../captain.png" alt="Logo" class="win-avatar-img" />
+        <span class="win-trophy-tag"><i class="fa-solid fa-trophy"></i></span>
+      </div>
+
       <h2 class="win-title">Xuất Sắc!</h2>
-      <p class="win-subtitle" id="win-time">Bạn đã hoàn thành trong 00:00!</p>
+      <p class="win-subtitle" id="win-time">Hoàn thành Màn 1 trong 00:00!</p>
+
       <div class="win-stars" id="win-stars">
         <i class="fa-solid fa-star star-active"></i>
         <i class="fa-solid fa-star star-active"></i>
         <i class="fa-solid fa-star star-active"></i>
       </div>
+
+      <!-- Stats Summary Card -->
+      <div class="win-stats-grid">
+        <div class="win-stat-box">
+          <span class="w-stat-val" id="win-stat-time">00:00</span>
+          <span class="w-stat-lbl"><i class="fa-solid fa-stopwatch"></i> Thời Gian</span>
+        </div>
+        <div class="win-stat-box">
+          <span class="w-stat-val" id="win-stat-level">Màn 1</span>
+          <span class="w-stat-lbl"><i class="fa-solid fa-flag"></i> Màn Chơi</span>
+        </div>
+      </div>
+
       <div class="win-actions">
         <button class="btn-next" id="btn-next">
-          Màn Tiếp Theo <i class="fa-solid fa-arrow-right" style="margin-left: 6px;"></i>
+          <span>Màn Tiếp Theo</span> <i class="fa-solid fa-arrow-right"></i>
         </button>
-        <a href="../index.html" class="btn-win-home" id="btn-win-home">
-          <i class="fa-solid fa-house"></i> Trang chủ
-        </a>
+        <div class="win-secondary-btns">
+          <button class="btn-win-replay" id="btn-win-replay">
+            <i class="fa-solid fa-rotate-right"></i> <span>Chơi Lại</span>
+          </button>
+          <a href="../index.html" class="btn-win-home" id="btn-win-home">
+            <i class="fa-solid fa-house"></i> <span>Trang chủ</span>
+          </a>
+        </div>
       </div>
     </div>
   </div>

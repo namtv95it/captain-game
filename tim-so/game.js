@@ -119,6 +119,7 @@ let isGameActive = false;
 
 // Zoom & Pan State
 let scale = 1.0;
+let initialFitScale = 1.0;
 let panX = 0;
 let panY = 0;
 let isDragging = false;
@@ -220,7 +221,7 @@ function startLevel(lvl = currentLevel) {
   targetNumberEl.textContent = currentTargetNum;
   hintCountEl.textContent = hintCount;
 
-  // Reset viewport zoom/pan
+  // Reset viewport zoom/pan to fit screen centered
   resetViewportTransform();
 
   // Generate numbers
@@ -237,12 +238,16 @@ function startLevel(lvl = currentLevel) {
   isGameActive = true;
 }
 
-// Reset view transform to center of viewport
+// Reset view transform to fit screen centered
 function resetViewportTransform() {
   const vpWidth = boardViewport.clientWidth || window.innerWidth;
   const vpHeight = boardViewport.clientHeight || (window.innerHeight - 70);
 
-  scale = 1.0;
+  const scaleX = (vpWidth - 40) / boardWidth;
+  const scaleY = (vpHeight - 40) / boardHeight;
+
+  scale = Math.min(3.0, Math.max(0.3, Math.min(scaleX, scaleY)));
+  initialFitScale = scale;
   panX = (vpWidth - boardWidth * scale) / 2;
   panY = (vpHeight - boardHeight * scale) / 2;
   applyTransform();
@@ -250,12 +255,43 @@ function resetViewportTransform() {
 
 function applyTransform() {
   boardContent.style.transform = `translate(${panX}px, ${panY}px) scale(${scale})`;
-  zoomLevelText.textContent = `${Math.round(scale * 100)}%`;
+  const percent = Math.round((scale / (initialFitScale || scale)) * 100);
+  zoomLevelText.textContent = `${percent}%`;
 }
 
 // ── Scatter Numbers Algorithm ──
 function generateNumberBoard() {
   boardContent.innerHTML = '';
+
+  // Render Chessboard Grid Overlay
+  const gridOverlay = document.createElement('div');
+  gridOverlay.className = 'board-grid-overlay';
+
+  const cols = 8;
+  const rows = 6;
+  const colNames = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P'];
+  const cellWidth = boardWidth / cols;
+  const cellHeight = boardHeight / rows;
+
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const cell = document.createElement('div');
+      cell.className = `grid-cell ${(r + c) % 2 === 0 ? 'cell-even' : 'cell-odd'}`;
+      cell.style.left = `${c * cellWidth}px`;
+      cell.style.top = `${r * cellHeight}px`;
+      cell.style.width = `${cellWidth}px`;
+      cell.style.height = `${cellHeight}px`;
+
+      const label = document.createElement('span');
+      label.className = 'grid-cell-label';
+      label.textContent = `${colNames[c] || (c + 1)}${r + 1}`;
+      cell.appendChild(label);
+
+      gridOverlay.appendChild(cell);
+    }
+  }
+  boardContent.appendChild(gridOverlay);
+
   const placedRects = [];
   const padding = 15;
 
@@ -326,9 +362,9 @@ function handleNumberTap(num, cardEl) {
     } else {
       currentTargetNum++;
       targetNumberEl.textContent = currentTargetNum;
-      targetNumberEl.parentElement.classList.remove('pulseTargetBorder');
-      void targetNumberEl.parentElement.offsetWidth; // trigger reflow
-      targetNumberEl.parentElement.classList.add('pulseTargetBorder');
+      targetNumberEl.classList.remove('pop-anim');
+      void targetNumberEl.offsetWidth; // trigger reflow
+      targetNumberEl.classList.add('pop-anim');
     }
   } else {
     // WRONG NUMBER!
@@ -365,6 +401,18 @@ function triggerHint() {
   panY = vpHeight / 2 - numY * scale;
   applyTransform();
 
+  // Show Toast with grid coordinate (e.g., [C3])
+  const cols = 8;
+  const rows = 6;
+  const colNames = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P'];
+  const cellWidth = boardWidth / cols;
+  const cellHeight = boardHeight / rows;
+  const cIdx = Math.min(cols - 1, Math.max(0, Math.floor(parseFloat(targetEl.style.left) / cellWidth)));
+  const rIdx = Math.min(rows - 1, Math.max(0, Math.floor(parseFloat(targetEl.style.top) / cellHeight)));
+  const coord = `${colNames[cIdx] || (cIdx + 1)}${rIdx + 1}`;
+
+  showToast(`Gợi ý: Số ${currentTargetNum} ở ô [${coord}]!`);
+
   // Add neon pulse glow
   targetEl.classList.add('hint-glow');
   setTimeout(() => {
@@ -378,15 +426,23 @@ async function onLevelCompleted() {
   stopTimer();
 
   const timeStr = timerDisplayEl.textContent;
-  document.getElementById('win-time').textContent = `Bạn đã vượt Màn ${currentLevel} trong ${timeStr}!`;
+  const winTimeEl = document.getElementById('win-time');
+  if (winTimeEl) winTimeEl.textContent = `Hoàn thành Màn ${currentLevel} trong ${timeStr}!`;
+
+  const statTime = document.getElementById('win-stat-time');
+  const statLevel = document.getElementById('win-stat-level');
+  if (statTime) statTime.textContent = timeStr;
+  if (statLevel) statLevel.textContent = `Màn ${currentLevel}`;
 
   // Render stars
   const winStarsEl = document.getElementById('win-stars');
-  winStarsEl.innerHTML = `
-    <i class="fa-solid fa-star star-active"></i>
-    <i class="fa-solid fa-star star-active"></i>
-    <i class="fa-solid fa-star star-active"></i>
-  `;
+  if (winStarsEl) {
+    winStarsEl.innerHTML = `
+      <i class="fa-solid fa-star star-active"></i>
+      <i class="fa-solid fa-star star-active"></i>
+      <i class="fa-solid fa-star star-active"></i>
+    `;
+  }
 
   winOverlay.setAttribute('aria-hidden', 'false');
 
@@ -579,6 +635,14 @@ function setupEventListeners() {
     startLevel(currentLevel + 1);
   });
 
+  const btnWinReplay = document.getElementById('btn-win-replay');
+  if (btnWinReplay) {
+    btnWinReplay.addEventListener('click', () => {
+      winOverlay.setAttribute('aria-hidden', 'true');
+      startLevel(currentLevel);
+    });
+  }
+
   hintBtn.addEventListener('click', triggerHint);
 
   // Leaderboard
@@ -594,13 +658,42 @@ function setupEventListeners() {
       if (res.success) {
         showToast(`Xin chào ${res.user.displayName}!`);
         updateAuthBtnState(res.user);
+        syncCloudProgress(res.user);
       }
     }
   });
 
   window.onUserAuthChanged = (user) => {
     updateAuthBtnState(user);
+    if (user) {
+      syncCloudProgress(user);
+    }
   };
+}
+
+async function syncCloudProgress(user) {
+  if (!user || !window.getUserScoreFromFirebase) return;
+
+  try {
+    const cloudData = await window.getUserScoreFromFirebase('tim-so');
+    const cloudPassedLevel = cloudData ? (Number(cloudData.level) || 0) : 0;
+    const cloudNextLevel = cloudPassedLevel > 0 ? cloudPassedLevel + 1 : 1;
+    const localLevel = parseInt(localStorage.getItem('tim_so_level') || '1');
+
+    if (cloudNextLevel > localLevel) {
+      currentLevel = cloudNextLevel;
+      localStorage.setItem('tim_so_level', currentLevel);
+      updateMenuState();
+      showToast(`Đã tải tiến trình Màn ${currentLevel} từ tài khoản Google!`);
+    } else if (localLevel > 1) {
+      const levelToSave = Math.max(1, localLevel - 1);
+      if (window.saveScoreToFirebase) {
+        await window.saveScoreToFirebase(user.displayName || 'Gamer', levelToSave, 0, 'tim-so');
+      }
+    }
+  } catch (err) {
+    console.error('Lỗi đồng bộ tiến trình đám mây:', err);
+  }
 }
 
 function updateAuthBtnState(user) {
