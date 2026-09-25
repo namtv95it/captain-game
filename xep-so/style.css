@@ -187,16 +187,7 @@ button { cursor: pointer; border: none; outline: none; background: none; font-fa
 }
 .tile:active { transform: scale(0.94); }
 
-/* Tile in correct position */
-.tile.correct {
-  filter: brightness(1.15);
-  animation: correctPulse 0.5s ease forwards;
-}
-@keyframes correctPulse {
-  0%   { box-shadow: 0 0 0 0 rgba(255,255,255,0.6); }
-  50%  { box-shadow: 0 0 0 8px rgba(255,255,255,0); }
-  100% { box-shadow: inherit; }
-}
+
 
 /* Tile sliding animation */
 .tile.sliding { transition: transform 0.18s cubic-bezier(0.25,0.46,0.45,0.94) !important; }

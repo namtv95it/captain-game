@@ -239,10 +239,6 @@ function renderBoard() {
       tile.setAttribute('role', 'gridcell');
       tile.setAttribute('aria-label', `Ô số ${val}`);
 
-      // Highlight if in correct position
-      const goalPos = val - 1;
-      if (idx === goalPos) tile.classList.add('correct');
-
       tile.addEventListener('click', () => onTileClick(idx));
       board.appendChild(tile);
     }
