@@ -13,18 +13,18 @@ const MAX_UNDO         = 40;
 const SAVE_KEY         = 'bsp_v1';   // bump version if save format changes
 
 const COLORS = [
-  { bg: 'linear-gradient(155deg,#ff6b6b,#c0392b)', shadow: 'rgba(255,107,107,.70)' }, // 0 crimson
-  { bg: 'linear-gradient(155deg,#74b9ff,#2980b9)', shadow: 'rgba(116,185,255,.70)' }, // 1 azure
-  { bg: 'linear-gradient(155deg,#55efc4,#00b894)', shadow: 'rgba( 85,239,196,.70)' }, // 2 emerald
-  { bg: 'linear-gradient(155deg,#ffeaa7,#f39c12)', shadow: 'rgba(255,234,167,.70)' }, // 3 amber
-  { bg: 'linear-gradient(155deg,#be2edd,#8e44ad)', shadow: 'rgba(190,46,221,.70)' }, // 4 royal purple
-  { bg: 'linear-gradient(155deg,#fd79a8,#e17055)', shadow: 'rgba(253,121,168,.70)' }, // 5 coral
-  { bg: 'linear-gradient(155deg,#ff9ff3,#f368e0)', shadow: 'rgba(255,159,243,.70)' }, // 6 orchid
-  { bg: 'linear-gradient(155deg,#81ecec,#00cec9)', shadow: 'rgba(129,236,236,.70)' }, // 7 cyan
-  { bg: 'linear-gradient(155deg,#b8e994,#6ab04c)', shadow: 'rgba(184,233,148,.70)' }, // 8 lime
-  { bg: 'linear-gradient(155deg,#a0c3ff,#4a69bd)', shadow: 'rgba(160,195,255,.70)' }, // 9 sky
-  { bg: 'linear-gradient(155deg,#ffccbc,#ff7043)', shadow: 'rgba(255,204,188,.70)' }, // 10 peach
-  { bg: 'linear-gradient(155deg,#d4fc79,#96e6a1)', shadow: 'rgba(212,252,121,.70)' }, // 11 mint
+  { bg: 'linear-gradient(145deg, #ff6b6b, #ee5253)', shadow: 'rgba(238, 82, 83, 0.45)' }, // 0 Đỏ san hô
+  { bg: 'linear-gradient(145deg, #48dbfb, #0abde3)', shadow: 'rgba(10, 189, 227, 0.45)' }, // 1 Xanh da trời
+  { bg: 'linear-gradient(145deg, #1dd1a1, #10ac84)', shadow: 'rgba(16, 172, 132, 0.45)' }, // 2 Xanh ngọc
+  { bg: 'linear-gradient(145deg, #feca57, #ff9f43)', shadow: 'rgba(255, 159, 67, 0.45)' }, // 3 Vàng cam
+  { bg: 'linear-gradient(145deg, #a29bfe, #6c5ce7)', shadow: 'rgba(108, 92, 231, 0.45)' }, // 4 Tím pastel
+  { bg: 'linear-gradient(145deg, #ff9ff3, #f368e0)', shadow: 'rgba(243, 104, 224, 0.45)' }, // 5 Hồng phấn
+  { bg: 'linear-gradient(145deg, #ff7675, #d63031)', shadow: 'rgba(214, 48, 49, 0.45)' },  // 6 Đỏ ruby
+  { bg: 'linear-gradient(145deg, #54a0ff, #2e86de)', shadow: 'rgba(46, 134, 222, 0.45)' }, // 7 Xanh coban
+  { bg: 'linear-gradient(145deg, #55efc4, #00b894)', shadow: 'rgba(0, 184, 148, 0.45)' },  // 8 Xanh mint
+  { bg: 'linear-gradient(145deg, #ffeaa7, #fdcb6e)', shadow: 'rgba(253, 203, 110, 0.45)' }, // 9 Vàng tươi
+  { bg: 'linear-gradient(145deg, #fd79a8, #e84393)', shadow: 'rgba(232, 67, 147, 0.45)' }, // 10 Hồng đậm
+  { bg: 'linear-gradient(145deg, #81ecec, #00cec9)', shadow: 'rgba(0, 206, 201, 0.45)' },  // 11 Xanh cyan
 ];
 
 const DIFFICULTY_NAME = { 1:'DỄ', 2:'DỄ', 3:'VỪA', 4:'KHÓ', 5:'CHUYÊN GIA', 6:'CAO THỦ' };
@@ -514,7 +514,7 @@ function makeBallEl(ball, isTopBall = false, isStackBall = false) {
   const c = COLORS[ball.colorIndex];
   if (c) {
     el.style.background = c.bg;
-    el.style.boxShadow  = `0 5px 14px ${c.shadow}, inset 0 1px 0 rgba(255,255,255,.32)`;
+    el.style.boxShadow  = `0 4px 10px ${c.shadow}, inset 0 1px 1px rgba(255, 255, 255, 0.4)`;
   }
   return el;
 }
@@ -597,7 +597,7 @@ function animateAndMove(fromIdx, toIdx, afterCb) {
       left:${ballRect.left}px; top:${ballRect.top}px;
       width:${ballRect.width}px; height:${ballRect.height}px;
       background:${c.bg};
-      box-shadow:0 6px 18px ${c.shadow},inset 0 1px 0 rgba(255,255,255,.35);
+      box-shadow:0 3px 8px ${c.shadow}, inset 0 2px 3px rgba(255,255,255,.45), inset 0 -3px 6px rgba(0,0,0,.35);
     `;
     document.body.appendChild(fly);
     flyEls.push(fly);
