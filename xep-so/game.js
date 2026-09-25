@@ -25,11 +25,13 @@ const SHUFFLE_MOVES = {
 // ── Sound System ────────────────────────────────────────────────
 let _ctx = null;
 function getCtx() {
-  if (!_ctx) _ctx = new (window.AudioContext || window.webkitAudioContext)();
-  if (_ctx.state === 'suspended') _ctx.resume();
-  return _ctx;
+  try {
+    if (!_ctx) _ctx = new (window.AudioContext || window.webkitAudioContext)();
+    if (_ctx.state === 'suspended') _ctx.resume();
+    return _ctx;
+  } catch (_) { return null; }
 }
-function snd(fn) { try { fn(getCtx()); } catch (_) {} }
+function snd(fn) { try { const ctx = getCtx(); if (ctx) fn(ctx); } catch (_) {} }
 
 const SFX = {
   slide() {
@@ -238,8 +240,20 @@ function renderBoard() {
       tile.textContent = val;
       tile.setAttribute('role', 'gridcell');
       tile.setAttribute('aria-label', `Ô số ${val}`);
+      // touch-action: manipulation eliminates iOS 300ms tap delay
+      tile.style.touchAction = 'manipulation';
 
-      tile.addEventListener('click', () => onTileClick(idx));
+      // Fast tap handler: use touchend on touch devices to skip 300ms delay
+      let _touched = false;
+      tile.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        _touched = true;
+        onTileClick(idx);
+      }, { passive: false });
+      tile.addEventListener('click', () => {
+        if (_touched) { _touched = false; return; } // already handled by touchend
+        onTileClick(idx);
+      });
       board.appendChild(tile);
     }
   });

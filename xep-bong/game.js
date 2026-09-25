@@ -61,9 +61,11 @@ let _ctx = null;
 
 /** Lazily create / resume the AudioContext (required by browser autoplay policy). */
 function getCtx() {
-  if (!_ctx) _ctx = new (window.AudioContext || window.webkitAudioContext)();
-  if (_ctx.state === 'suspended') _ctx.resume();
-  return _ctx;
+  try {
+    if (!_ctx) _ctx = new (window.AudioContext || window.webkitAudioContext)();
+    if (_ctx.state === 'suspended') _ctx.resume();
+    return _ctx;
+  } catch (_) { return null; }
 }
 
 /** Safe wrapper – nhân với âm lượng hiện tại, nếu tắt âm (muted) thì bỏ qua */
@@ -71,7 +73,7 @@ function snd(fn) {
   if (isSoundMuted || soundVolume <= 0) return;
   try {
     const ctx = getCtx();
-    fn(ctx, soundVolume);
+    if (ctx) fn(ctx, soundVolume);
   } catch (_) {}
 }
 
@@ -588,7 +590,17 @@ function renderTubes() {
 
     wrapper.appendChild(cap);
     wrapper.appendChild(tubeEl);
-    wrapper.addEventListener('click', () => onTubeClick(idx));
+    // Fast tap: bypass iOS 300ms click delay using touchend
+    let _touched = false;
+    wrapper.addEventListener('touchend', (e) => {
+      e.preventDefault();
+      _touched = true;
+      onTubeClick(idx);
+    }, { passive: false });
+    wrapper.addEventListener('click', () => {
+      if (_touched) { _touched = false; return; }
+      onTubeClick(idx);
+    });
     container.appendChild(wrapper);
   });
 }
@@ -662,10 +674,10 @@ function animateAndMove(fromIdx, toIdx, afterCb) {
   const destX  = toRect.left + (toRect.width - ballH) / 2;
 
   // ── Timing ───────────────────────────────────────────────────────────────
-  const T_RISE  = 80;    // ms – rise phase
-  const T_SLIDE = 110;   // ms – horizontal slide
-  const T_DROP  = 105;   // ms – drop into tube
-  const STAGGER = 110;   // ms between starting each ball (wider gap = more visible separation)
+  const T_RISE  = 55;    // ms – rise phase
+  const T_SLIDE = 75;    // ms – horizontal slide
+  const T_DROP  = 70;    // ms – drop into tube
+  const STAGGER = 65;    // ms between starting each ball
 
   const flyEls  = [];
   let doneCount = 0;     // incremented each time a ball lands; triggers cleanup at stackSize
