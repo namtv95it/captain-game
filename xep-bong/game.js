@@ -249,56 +249,117 @@ function getLevelConfig(level) {
 }
 
 // ── Level Generation ───────────────────────────────────────────────────────────
+/**
+ * Tạo bố cục màn chơi hợp lệ.
+ *
+ * Thuật toán mới (3 giai đoạn):
+ *  1. Phân phối ngẫu nhiên hoàn toàn: tạo pool tất cả bóng rồi xáo và chia đều vào ống.
+ *     Điều này đảm bảo KHÔNG có chuỗi dài cùng màu do bắt đầu từ trạng thái đã giải.
+ *  2. Phá vỡ chuỗi dài: nếu còn ống có > MAX_RUN bóng liên tiếp cùng màu, hoán đổi
+ *     với bóng từ ống khác để phá vỡ.
+ *  3. Kiểm tra hợp lệ: phải có ít nhất 1 nước đi và chưa thắng sẵn.
+ */
 function generateLevel(cfg) {
-  const cap = cfg.capacity || DEFAULT_CAPACITY;
+  const cap    = cfg.capacity || DEFAULT_CAPACITY;
+  const colors = cfg.colors;
+  const MAX_RUN = Math.max(2, Math.floor(cap / 3)); // chuỗi tối đa cho phép trong ống
 
-  // Lặp lại việc xáo bài nếu ván tạo ra bị kẹt (không có nước đi nào) hoặc đã tự giải
-  for (let attempt = 0; attempt < 50; attempt++) {
-    // Khởi tạo từ trạng thái đã giải: mỗi màu nằm gọn trong 1 ống
-    const tubes = Array.from({ length: cfg.colors }, (_, i) =>
-      Array.from({ length: cap }, () => ({ colorIndex: i, revealed: true }))
-    );
-    for (let i = 0; i < cfg.emptyTubes; i++) tubes.push([]);
+  for (let attempt = 0; attempt < 80; attempt++) {
 
-    for (let s = 0; s < cfg.shuffles; s++) {
-      const nonEmpty = tubes.map((_, i) => i).filter(i => tubes[i].length > 0);
-      const notFull  = tubes.map((_, i) => i).filter(i => tubes[i].length < cap);
-      if (!nonEmpty.length) break;
-      const from = nonEmpty[Math.floor(Math.random() * nonEmpty.length)];
-      const valid = notFull.filter(i => i !== from);
-      if (!valid.length) continue;
-      const to = valid[Math.floor(Math.random() * valid.length)];
-      tubes[to].push({ ...tubes[from].pop(), revealed: true });
+    // ── Giai đoạn 1: Phân phối ngẫu nhiên vào TẤT CẢ ống ───────────────────
+    // Tạo pool: mỗi màu có đúng `cap` bóng
+    const pool = [];
+    for (let c = 0; c < colors; c++) {
+      for (let b = 0; b < cap; b++) pool.push(c);
+    }
+    // Fisher-Yates shuffle pool
+    for (let i = pool.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [pool[i], pool[j]] = [pool[j], pool[i]];
     }
 
-    // Luôn đảm bảo có ít nhất 1 ống hoàn toàn trống lúc bắt đầu
+    // Khởi tạo TẤT CẢ ống (kể cả ống "rỗng") dưới dạng mảng trống
+    const totalTubes = colors + cfg.emptyTubes;
+    const tubes = Array.from({ length: totalTubes }, () => []);
+
+    // Phân phối từng bóng một vào ống ngẫu nhiên còn chỗ
+    // → bóng sẽ trải đều ra tất cả 7 ống thay vì chỉ 5 ống
+    for (const ballColor of pool) {
+      const withSpace = [];
+      for (let t = 0; t < totalTubes; t++) {
+        if (tubes[t].length < cap) withSpace.push(t);
+      }
+      const target = withSpace[Math.floor(Math.random() * withSpace.length)];
+      tubes[target].push({ colorIndex: ballColor, revealed: true });
+    }
+
+    // ── Giai đoạn 2: Phá vỡ chuỗi dài ──────────────────────────────────────
+    // Lặp tối đa 5*cap lần hoán đổi có chủ đích
+    for (let pass = 0; pass < 5 * cap; pass++) {
+      let fixed = true;
+      for (let ti = 0; ti < totalTubes; ti++) {
+        const tube = tubes[ti];
+        if (tube.length < 2) continue;
+        // Tìm chuỗi dài nhất trong ống này
+        let maxRun = 1, run = 1;
+        let runStart = 0;
+        for (let bi = 1; bi < tube.length; bi++) {
+          if (tube[bi].colorIndex === tube[bi - 1].colorIndex) {
+            run++;
+            if (run > maxRun) { maxRun = run; runStart = bi - run + 1; }
+          } else {
+            run = 1;
+          }
+        }
+        if (maxRun <= MAX_RUN) continue;
+
+        // Chọn ngẫu nhiên 1 bóng trong chuỗi vi phạm để hoán đổi
+        const swapPos = runStart + Math.floor(Math.random() * maxRun);
+        const swapColor = tube[swapPos].colorIndex;
+
+        // Tìm ống khác có bóng khác màu để hoán đổi
+        const candidates = [];
+        for (let tj = 0; tj < totalTubes; tj++) {
+          if (tj === ti) continue;
+          for (let bj = 0; bj < tubes[tj].length; bj++) {
+            if (tubes[tj][bj].colorIndex !== swapColor) {
+              candidates.push({ tj, bj });
+            }
+          }
+        }
+        if (!candidates.length) continue;
+        const { tj, bj } = candidates[Math.floor(Math.random() * candidates.length)];
+
+        // Hoán đổi
+        const tmp = tubes[ti][swapPos];
+        tubes[ti][swapPos] = tubes[tj][bj];
+        tubes[tj][bj] = tmp;
+        fixed = false;
+      }
+      if (fixed) break;
+    }
+
+    // ── Giai đoạn 3: Đảm bảo có ống trống ───────────────────────────────────
     const emptyCount = tubes.filter(t => t.length === 0).length;
     if (emptyCount === 0) {
-      // Tìm ống có ít bóng nhất để dồn sang các ống khác còn chỗ
       const sortedIdx = tubes.map((t, idx) => ({ idx, len: t.length }))
                              .sort((a, b) => a.len - b.len);
       const emptiest = sortedIdx[0].idx;
       while (tubes[emptiest].length > 0) {
         const ball = tubes[emptiest].pop();
         const receiver = tubes.find((t, i) => i !== emptiest && t.length < cap);
-        if (receiver) {
-          receiver.push(ball);
-        } else {
-          tubes[emptiest].push(ball);
-          break;
-        }
+        if (receiver) receiver.push(ball);
+        else { tubes[emptiest].push(ball); break; }
       }
     }
 
-    // Kiểm tra xem ván chơi này có ít nhất 1 nước đi hợp lệ không
+    // ── Giai đoạn 4: Kiểm tra hợp lệ ────────────────────────────────────────
     let hasMove = false;
     for (let from = 0; from < tubes.length; from++) {
       const f = tubes[from];
       if (!f.length) continue;
-      // Nếu ống này đã giải xong (đầy và cùng màu), không cần xét chuyển đi
       if (f.length === cap && f.every(b => b.colorIndex === f[0].colorIndex)) continue;
 
-      // Tính stack size ở đỉnh ống from
       const topColor = f[f.length - 1].colorIndex;
       let stackSize = 0;
       for (let i = f.length - 1; i >= 0 && f[i].colorIndex === topColor; i--) stackSize++;
@@ -308,22 +369,18 @@ function generateLevel(cfg) {
         const t = tubes[to];
         if (t.length >= cap || t.length + stackSize > cap) continue;
         if (!t.length || t[t.length - 1].colorIndex === topColor) {
-          hasMove = true;
-          break;
+          hasMove = true; break;
         }
       }
       if (hasMove) break;
     }
 
-    // Kiểm tra xem màn có bị rơi vào trạng thái đã thắng luôn không
     const alreadyWon = tubes.every(t => !t.length || (t.length === cap && t.every(b => b.colorIndex === t[0].colorIndex)));
 
-    if (hasMove && !alreadyWon) {
-      return tubes;
-    }
+    if (hasMove && !alreadyWon) return tubes;
   }
 
-  // Fallback an toàn nếu sau nhiều lần shuffle vẫn không đạt:
+  // Fallback an toàn nếu sau nhiều lần vẫn không đạt:
   const tubes = Array.from({ length: cfg.colors }, (_, i) =>
     Array.from({ length: cap }, () => ({ colorIndex: i, revealed: true }))
   );
