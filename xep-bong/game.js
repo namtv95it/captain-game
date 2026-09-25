@@ -12,6 +12,8 @@ const TUBE_PAD_TOP     = 4;    // px – padding-top inside .tube
 const MAX_UNDO         = 40;
 const SAVE_KEY         = 'bsp_v1';   // bump version if save format changes
 
+const DIFFICULTY_NAME  = ['', 'DỄ', 'DỄ', 'TB', 'TB', 'KHÓ', 'KHÓ', 'SIÊU KHÓ'];
+
 const COLORS = [
   { bg: 'linear-gradient(145deg, #ff6b6b, #ee5253)', shadow: 'rgba(238, 82, 83, 0.45)' }, // 0 Đỏ san hô
   { bg: 'linear-gradient(145deg, #48dbfb, #0abde3)', shadow: 'rgba(10, 189, 227, 0.45)' }, // 1 Xanh da trời
@@ -27,7 +29,32 @@ const COLORS = [
   { bg: 'linear-gradient(145deg, #81ecec, #00cec9)', shadow: 'rgba(0, 206, 201, 0.45)' },  // 11 Xanh cyan
 ];
 
-const DIFFICULTY_NAME = { 1:'DỄ', 2:'DỄ', 3:'VỪA', 4:'KHÓ', 5:'CHUYÊN GIA', 6:'CAO THỦ' };
+// ── Sound Settings & Volume State ─────────────────────────────
+const SOUND_SETTING_KEY = 'captain_sound_settings_v1';
+let soundVolume = 0.8; // 0.0 -> 1.0 (mặc định 80%)
+let isSoundMuted = false;
+
+function loadSoundSettings() {
+  try {
+    const raw = localStorage.getItem(SOUND_SETTING_KEY);
+    if (raw) {
+      const data = JSON.parse(raw);
+      if (typeof data.volume === 'number') soundVolume = Math.max(0, Math.min(1, data.volume));
+      if (typeof data.muted === 'boolean') isSoundMuted = data.muted;
+    }
+  } catch (_) {}
+}
+
+function saveSoundSettings() {
+  try {
+    localStorage.setItem(SOUND_SETTING_KEY, JSON.stringify({
+      volume: soundVolume,
+      muted: isSoundMuted
+    }));
+  } catch (_) {}
+}
+
+loadSoundSettings();
 
 // ── Sound System (Web Audio API – no external files) ──────────────────────────
 let _ctx = null;
@@ -39,19 +66,25 @@ function getCtx() {
   return _ctx;
 }
 
-/** Safe wrapper – swallows any errors so sounds never break gameplay. */
-function snd(fn) { try { fn(getCtx()); } catch (_) {} }
+/** Safe wrapper – nhân với âm lượng hiện tại, nếu tắt âm (muted) thì bỏ qua */
+function snd(fn) {
+  if (isSoundMuted || soundVolume <= 0) return;
+  try {
+    const ctx = getCtx();
+    fn(ctx, soundVolume);
+  } catch (_) {}
+}
 
 const SFX = {
   /** Short bright tick – tube selected */
   select() {
-    snd(ctx => {
+    snd((ctx, vol) => {
       const t = ctx.currentTime;
       const osc = ctx.createOscillator(), g = ctx.createGain();
       osc.type = 'sine';
       osc.frequency.setValueAtTime(850, t);
       osc.frequency.exponentialRampToValueAtTime(1050, t + 0.06);
-      g.gain.setValueAtTime(0.10, t);
+      g.gain.setValueAtTime(0.24 * vol, t);
       g.gain.exponentialRampToValueAtTime(0.001, t + 0.09);
       osc.connect(g); g.connect(ctx.destination);
       osc.start(t); osc.stop(t + 0.10);
@@ -60,13 +93,13 @@ const SFX = {
 
   /** Soft downward tick – tube deselected */
   deselect() {
-    snd(ctx => {
+    snd((ctx, vol) => {
       const t = ctx.currentTime;
       const osc = ctx.createOscillator(), g = ctx.createGain();
       osc.type = 'sine';
       osc.frequency.setValueAtTime(1050, t);
       osc.frequency.exponentialRampToValueAtTime(750, t + 0.07);
-      g.gain.setValueAtTime(0.08, t);
+      g.gain.setValueAtTime(0.20 * vol, t);
       g.gain.exponentialRampToValueAtTime(0.001, t + 0.09);
       osc.connect(g); g.connect(ctx.destination);
       osc.start(t); osc.stop(t + 0.10);
@@ -75,7 +108,7 @@ const SFX = {
 
   /** Airy whoosh – ball(s) in flight */
   move() {
-    snd(ctx => {
+    snd((ctx, vol) => {
       const t = ctx.currentTime;
       const size = Math.floor(ctx.sampleRate * 0.18);
       const buf  = ctx.createBuffer(1, size, ctx.sampleRate);
@@ -88,7 +121,7 @@ const SFX = {
       bpf.frequency.setValueAtTime(2800, t);
       bpf.frequency.exponentialRampToValueAtTime(500, t + 0.18);
       const g = ctx.createGain();
-      g.gain.setValueAtTime(0.30, t);
+      g.gain.setValueAtTime(0.55 * vol, t);
       g.gain.exponentialRampToValueAtTime(0.001, t + 0.18);
       src.connect(bpf); bpf.connect(g); g.connect(ctx.destination);
       src.start(t);
@@ -97,13 +130,13 @@ const SFX = {
 
   /** Soft thud – ball(s) land in tube */
   land() {
-    snd(ctx => {
+    snd((ctx, vol) => {
       const t = ctx.currentTime;
       const osc = ctx.createOscillator(), g = ctx.createGain();
       osc.type = 'sine';
       osc.frequency.setValueAtTime(340, t);
       osc.frequency.exponentialRampToValueAtTime(140, t + 0.10);
-      g.gain.setValueAtTime(0.22, t);
+      g.gain.setValueAtTime(0.45 * vol, t);
       g.gain.exponentialRampToValueAtTime(0.001, t + 0.13);
       osc.connect(g); g.connect(ctx.destination);
       osc.start(t); osc.stop(t + 0.14);
@@ -112,12 +145,12 @@ const SFX = {
 
   /** Low buzz – invalid move attempt */
   invalid() {
-    snd(ctx => {
+    snd((ctx, vol) => {
       const t = ctx.currentTime;
       const osc = ctx.createOscillator(), g = ctx.createGain();
       osc.type = 'square';
       osc.frequency.setValueAtTime(160, t);
-      g.gain.setValueAtTime(0.07, t);
+      g.gain.setValueAtTime(0.18 * vol, t);
       g.gain.exponentialRampToValueAtTime(0.001, t + 0.18);
       osc.connect(g); g.connect(ctx.destination);
       osc.start(t); osc.stop(t + 0.18);
@@ -126,14 +159,14 @@ const SFX = {
 
   /** Rising 3-note chime – tube solved */
   complete() {
-    snd(ctx => {
+    snd((ctx, vol) => {
       const t = ctx.currentTime;
       [523, 659, 784].forEach((freq, i) => {
         const osc = ctx.createOscillator(), g = ctx.createGain();
         osc.type = 'sine';
         osc.frequency.setValueAtTime(freq, t + i * 0.10);
         g.gain.setValueAtTime(0, t + i * 0.10);
-        g.gain.linearRampToValueAtTime(0.18, t + i * 0.10 + 0.02);
+        g.gain.linearRampToValueAtTime(0.38 * vol, t + i * 0.10 + 0.02);
         g.gain.exponentialRampToValueAtTime(0.001, t + i * 0.10 + 0.36);
         osc.connect(g); g.connect(ctx.destination);
         osc.start(t + i * 0.10); osc.stop(t + i * 0.10 + 0.37);
@@ -143,14 +176,14 @@ const SFX = {
 
   /** Celebratory 5-note ascending arpeggio – level cleared */
   win() {
-    snd(ctx => {
+    snd((ctx, vol) => {
       const t = ctx.currentTime;
       [523, 659, 784, 1047, 1319].forEach((freq, i) => {
         const osc = ctx.createOscillator(), g = ctx.createGain();
         osc.type = 'sine';
         osc.frequency.setValueAtTime(freq, t + i * 0.13);
         g.gain.setValueAtTime(0, t + i * 0.13);
-        g.gain.linearRampToValueAtTime(0.20, t + i * 0.13 + 0.02);
+        g.gain.linearRampToValueAtTime(0.42 * vol, t + i * 0.13 + 0.02);
         g.gain.exponentialRampToValueAtTime(0.001, t + i * 0.13 + 0.55);
         osc.connect(g); g.connect(ctx.destination);
         osc.start(t + i * 0.13); osc.stop(t + i * 0.13 + 0.56);
@@ -160,14 +193,14 @@ const SFX = {
 
   /** Descending tone – no moves left (stuck) */
   stuck() {
-    snd(ctx => {
+    snd((ctx, vol) => {
       const t = ctx.currentTime;
       [360, 280, 220].forEach((freq, i) => {
         const osc = ctx.createOscillator(), g = ctx.createGain();
         osc.type = 'sine';
         osc.frequency.setValueAtTime(freq, t + i * 0.12);
         g.gain.setValueAtTime(0, t + i * 0.12);
-        g.gain.linearRampToValueAtTime(0.14, t + i * 0.12 + 0.02);
+        g.gain.linearRampToValueAtTime(0.30 * vol, t + i * 0.12 + 0.02);
         g.gain.exponentialRampToValueAtTime(0.001, t + i * 0.12 + 0.28);
         osc.connect(g); g.connect(ctx.destination);
         osc.start(t + i * 0.12); osc.stop(t + i * 0.12 + 0.29);
@@ -459,7 +492,7 @@ function renderHeader() {
   const moveEl = document.getElementById('move-count');
   if (moveEl) moveEl.textContent = G.moveCount;
   const diffEl = document.getElementById('difficulty-name');
-  if (diffEl) diffEl.textContent = DIFFICULTY_NAME[G.config.difficulty] || 'DỄ';
+  if (diffEl) diffEl.textContent = G.config ? (DIFFICULTY_NAME[G.config.difficulty] || 'DỄ') : 'DỄ';
   const fogEl = document.getElementById('fog-badge');
   if (fogEl) fogEl.style.display = 'none';
 }
@@ -1117,6 +1150,79 @@ function init() {
     btnNoMoveReset.addEventListener('click', onReset);
   }
 
+  // Sound control UI & popover
+  const btnSound = document.getElementById('btn-sound');
+  const soundPopover = document.getElementById('sound-popover');
+  const soundSlider = document.getElementById('sound-slider');
+  const soundVolumeVal = document.getElementById('sound-volume-val');
+  const soundIcon = document.getElementById('sound-icon');
+  const btnMuteToggle = document.getElementById('btn-mute-toggle');
+
+  function updateSoundUI() {
+    const volPercent = Math.round(soundVolume * 100);
+    if (soundSlider) soundSlider.value = volPercent;
+    if (soundVolumeVal) soundVolumeVal.textContent = isSoundMuted ? 'Tắt' : `${volPercent}%`;
+
+    if (btnSound) {
+      if (isSoundMuted || soundVolume === 0) {
+        btnSound.classList.add('muted');
+        if (soundIcon) soundIcon.className = 'fa-solid fa-volume-xmark';
+      } else if (soundVolume < 0.5) {
+        btnSound.classList.remove('muted');
+        if (soundIcon) soundIcon.className = 'fa-solid fa-volume-low';
+      } else {
+        btnSound.classList.remove('muted');
+        if (soundIcon) soundIcon.className = 'fa-solid fa-volume-high';
+      }
+    }
+
+    if (btnMuteToggle) {
+      btnMuteToggle.innerHTML = isSoundMuted 
+        ? '<i class="fa-solid fa-volume-xmark" style="color:#ff7675;"></i>'
+        : '<i class="fa-solid fa-volume-high"></i>';
+    }
+  }
+
+  updateSoundUI();
+
+  if (btnSound && soundPopover) {
+    btnSound.addEventListener('click', (e) => {
+      e.stopPropagation();
+      soundPopover.classList.toggle('show');
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!soundPopover.contains(e.target) && e.target !== btnSound && !btnSound.contains(e.target)) {
+        soundPopover.classList.remove('show');
+      }
+    });
+  }
+
+  if (soundSlider) {
+    soundSlider.addEventListener('input', (e) => {
+      const val = Number(e.target.value);
+      soundVolume = val / 100;
+      if (soundVolume > 0 && isSoundMuted) {
+        isSoundMuted = false;
+      }
+      saveSoundSettings();
+      updateSoundUI();
+    });
+
+    soundSlider.addEventListener('change', () => {
+      SFX.select();
+    });
+  }
+
+  if (btnMuteToggle) {
+    btnMuteToggle.addEventListener('click', () => {
+      isSoundMuted = !isSoundMuted;
+      saveSoundSettings();
+      updateSoundUI();
+      if (!isSoundMuted) SFX.select();
+    });
+  }
+
   // Khởi tạo hiệu ứng con trỏ chuột tùy chỉnh và vệt lấp lánh
   setupCustomCursor();
 
@@ -1207,13 +1313,23 @@ async function showLeaderboardOverlay() {
       const rank = idx + 1;
       const rankClass = rank <= 3 ? `lb-rank-${rank}` : '';
       const avatarHtml = item.avatar ? `<img src="${item.avatar}" class="lb-avatar" alt="${escapeHtml(item.name)}" />` : '';
+      // Hiển thị ngày đạt được level (từ timestamp Firestore)
+      let dateStr = '';
+      if (item.timestamp) {
+        const ms = item.timestamp.toMillis ? item.timestamp.toMillis() : Number(item.timestamp);
+        if (!isNaN(ms)) {
+          const d = new Date(ms);
+          dateStr = `${d.getDate()}/${d.getMonth()+1}/${d.getFullYear()}`;
+        }
+      }
+      const metaHtml = dateStr ? `<span class="lb-meta">Đạt được: ${dateStr}</span>` : '';
       return `
         <li class="lb-item">
           <div class="lb-rank ${rankClass}">${rank}</div>
           ${avatarHtml}
           <div class="lb-info">
             <span class="lb-name">${escapeHtml(item.name || 'Chưa cập nhật')}</span>
-            <span class="lb-meta">${item.moves} bước đi</span>
+            ${metaHtml}
           </div>
           <div class="lb-badge">Màn ${item.level}</div>
         </li>

@@ -51,6 +51,24 @@
       </div>
 
       <div class="header-right">
+        <div class="sound-control-wrapper">
+          <button class="btn-sound" id="btn-sound" aria-label="Âm thanh" title="Âm thanh">
+            <i class="fa-solid fa-volume-high" id="sound-icon"></i>
+          </button>
+          <div class="sound-popover" id="sound-popover">
+            <div class="sound-popover-header">
+              <span>Âm lượng</span>
+              <span id="sound-volume-val">80%</span>
+            </div>
+            <div class="sound-slider-row">
+              <button class="btn-mute-toggle" id="btn-mute-toggle" title="Bật/Tắt âm">
+                <i class="fa-solid fa-volume-xmark"></i>
+              </button>
+              <input type="range" id="sound-slider" min="0" max="100" value="80" step="5" aria-label="Âm lượng hiệu ứng" />
+            </div>
+          </div>
+        </div>
+
         <div class="moves-box">
           <span class="moves-num" id="move-count">0</span>
           <span class="moves-lbl">bước</span>
@@ -127,7 +145,12 @@
       <p class="win-subtitle" id="win-moves">Hoàn thành trong 0 bước!</p>
       <div class="win-stars" id="win-stars" aria-label="Điểm sao"></div>
       
-      <button class="btn-next" id="btn-next">Màn tiếp theo <i class="fa-solid fa-arrow-right" style="margin-left: 6px;"></i></button>
+      <div class="win-actions">
+        <button class="btn-next" id="btn-next">Màn tiếp theo <i class="fa-solid fa-arrow-right" style="margin-left: 6px;"></i></button>
+        <a href="../index.html" class="btn-win-home" id="btn-win-home">
+          <i class="fa-solid fa-house"></i> Trang chủ
+        </a>
+      </div>
     </div>
   </div>
 

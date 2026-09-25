@@ -138,10 +138,151 @@ html, body {
   align-items: center;
   gap: 12px;
 }
-.header-right { display: flex; justify-content: flex-end; }
-.header-center { flex: 0 0 auto; }
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  justify-content: flex-end;
+}
 
-/* Home button */
+/* ── Sound Control ────────────────────────────────────────────── */
+.sound-control-wrapper {
+  position: relative;
+}
+
+.btn-sound {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.2s var(--ease-smooth);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+.btn-sound:hover {
+  background: rgba(255,255,255,0.12);
+  border-color: var(--border-bright);
+  transform: translateY(-2px);
+}
+.btn-sound:active {
+  transform: translateY(0) scale(0.95);
+}
+.btn-sound.muted {
+  color: #ff7675;
+  border-color: rgba(255, 118, 117, 0.4);
+}
+
+.sound-popover {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  background: rgba(20, 20, 38, 0.95);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 12px 16px;
+  min-width: 190px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5), 0 0 20px rgba(124, 111, 238, 0.2);
+  display: none;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 100;
+  animation: popoverFadeIn 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.sound-popover.show {
+  display: flex;
+}
+
+@keyframes popoverFadeIn {
+  from { opacity: 0; transform: translateY(-8px) scale(0.95); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.sound-popover-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+#sound-volume-val {
+  color: #74b9ff;
+  font-weight: 800;
+}
+
+.sound-slider-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.btn-mute-toggle {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--border);
+  color: var(--text);
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+.btn-mute-toggle:hover {
+  background: rgba(255, 255, 255, 0.18);
+  border-color: #fff;
+}
+
+#sound-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 3px;
+  outline: none;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+#sound-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  background: linear-gradient(135deg, #a29bfe, #74b9ff);
+  border: 2px solid #ffffff;
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 0 8px rgba(116, 185, 255, 0.6);
+  transition: transform 0.15s ease;
+}
+#sound-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+}
+#sound-slider::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  background: linear-gradient(135deg, #a29bfe, #74b9ff);
+  border: 2px solid #ffffff;
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 0 8px rgba(116, 185, 255, 0.6);
+}
+
+/* Logo */
 .btn-home {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -390,9 +531,12 @@ html, body {
   border-radius: 50%;
   position: relative;
   flex-shrink: 0;
-  transition: transform 0.18s var(--ease-smooth);
+  transition: transform 0.18s var(--ease-smooth), box-shadow 0.18s var(--ease-smooth);
   will-change: transform;
   box-sizing: border-box;
+  /* Render crisp trên mọi màn hình, tránh blur trên mobile */
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
 }
 
 /* Ánh sáng mềm trên bề mặt quả bóng (Clean Soft Specular) */
@@ -411,15 +555,14 @@ html, body {
 
 /* Lifted (selected top ball) */
 .ball.ball-lifted {
-  transform: translateY(-16px);
-  filter: brightness(1.15);
+  transform: translateZ(0) translateY(-16px);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.5) !important;
   z-index: 5;
 }
 
 /* Stack balls */
 .ball.ball-stack {
-  transform: translateY(-16px);
-  filter: brightness(1.08);
+  transform: translateZ(0) translateY(-16px);
 }
 
 /* Hidden (fog of war) */
@@ -1135,6 +1278,40 @@ html, body {
   box-shadow: 0 14px 36px rgba(108,92,231,0.6);
 }
 .btn-next:active { transform: translateY(0); }
+
+/* Win action buttons container */
+.win-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Nút về trang chủ trong win screen */
+.btn-win-home {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.18);
+  color: rgba(255,255,255,0.75);
+  padding: 12px 32px;
+  border-radius: 50px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  letter-spacing: 0.3px;
+  text-decoration: none;
+  transition: all 0.2s var(--ease-smooth);
+}
+.btn-win-home:hover {
+  background: rgba(255,255,255,0.14);
+  border-color: rgba(255,255,255,0.38);
+  color: #fff;
+  transform: translateY(-2px);
+}
+.btn-win-home:active { transform: translateY(0); }
 
 /* ── No Moves Overlay ─────────────────────────────────────────── */
 .no-moves-overlay {

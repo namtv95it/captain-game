@@ -73,45 +73,51 @@ function getUserId() {
 
 /**
  * Lưu/Cập nhật điểm kỷ lục người chơi lên Firestore
- * @param {string} name 
- * @param {number} level 
- * @param {number} moves 
- * @param {string} gameId 
+ * Chỉ lưu level + timestamp (không lưu số bước).
+ * Timestamp được giữ nguyên nếu level không đổi (người lên trước giữ thứ hạng cao hơn).
+ * @param {string} name
+ * @param {number} level
+ * @param {number} _moves  – giữ tham số để không phá vỡ chữ ký hàm, không lưu
+ * @param {string} gameId
  */
-export async function saveScoreToFirebase(name, level, moves, gameId = "xep-bong") {
+export async function saveScoreToFirebase(name, level, _moves, gameId = "xep-bong") {
   try {
     const userId = getUserId();
     const docRef = doc(db, `leaderboard_${gameId}`, userId);
 
     const displayName = currentUser ? (currentUser.displayName || "Gamer") : "Chưa cập nhật";
     const avatarUrl = currentUser ? currentUser.photoURL : null;
+    const newLevel = Number(level) || 1;
 
-    // Kiểm tra kỷ lục cũ của người chơi/thiết bị này trên Firebase
+    // Kiểm tra kỷ lục cũ
     const existingDoc = await getDoc(docRef);
     if (existingDoc.exists()) {
       const oldData = existingDoc.data();
       const oldLevel = Number(oldData.level) || 0;
-      const oldMoves = Number(oldData.moves) || Infinity;
 
-      const newLevel = Number(level) || 1;
-      const newMoves = Number(moves) || 0;
-
-      // Nếu điểm mới không vượt qua kỷ lục cũ -> chỉ cập nhật lại Tên/Avatar nếu đã đăng nhập
-      if (newLevel < oldLevel || (newLevel === oldLevel && newMoves >= oldMoves)) {
+      if (newLevel < oldLevel) {
+        // Level mới thấp hơn → chỉ cập nhật tên/avatar nếu cần
         if (currentUser && displayName !== oldData.name) {
           await setDoc(docRef, { name: displayName, avatar: avatarUrl }, { merge: true });
         }
         return { success: true, updated: false, msg: "Kỷ lục cũ tốt hơn!" };
       }
+
+      if (newLevel === oldLevel) {
+        // Cùng level → timestamp cũ được giữ nguyên (người lên trước giữ thứ hạng)
+        if (currentUser && displayName !== oldData.name) {
+          await setDoc(docRef, { name: displayName, avatar: avatarUrl }, { merge: true });
+        }
+        return { success: true, updated: false, msg: "Cùng level, giữ timestamp gốc." };
+      }
     }
 
-    // Cập nhật kỷ lục mới
+    // Level cao hơn → ghi đè với timestamp mới
     await setDoc(docRef, {
-      userId: userId,
-      name: displayName,
-      avatar: avatarUrl,
-      level: Number(level) || 1,
-      moves: Number(moves) || 0,
+      userId:    userId,
+      name:      displayName,
+      avatar:    avatarUrl,
+      level:     newLevel,
       timestamp: serverTimestamp()
     });
 
@@ -123,7 +129,9 @@ export async function saveScoreToFirebase(name, level, moves, gameId = "xep-bong
 }
 
 /**
- * Lấy danh sách Top 10 cao thủ từ Firestore theo từng Game
+ * Lấy danh sách Top 10 cao thủ từ Firestore theo từng Game.
+ * Tiêu chí xếp hạng: Level cao hơn → xếp trước.
+ * Nếu cùng Level: timestamp nhỏ hơn (lên trước) → xếp trước.
  * @param {string} gameId
  */
 export async function getTopScoresFromFirebase(gameId = "xep-bong") {
@@ -139,12 +147,13 @@ export async function getTopScoresFromFirebase(gameId = "xep-bong") {
       scores.push(doc.data());
     });
 
-    // Sắp xếp phụ theo số bước (moves) tăng dần ở Client-side để không yêu cầu Index
+    // Cùng level → ai lên trước (timestamp nhỏ hơn) xếp cao hơn
     scores.sort((a, b) => {
-      if (b.level !== a.level) {
-        return b.level - a.level;
-      }
-      return a.moves - b.moves;
+      if (b.level !== a.level) return b.level - a.level;
+      // timestamp có thể là Firestore Timestamp hoặc null
+      const tA = a.timestamp ? (a.timestamp.toMillis ? a.timestamp.toMillis() : Number(a.timestamp)) : Infinity;
+      const tB = b.timestamp ? (b.timestamp.toMillis ? b.timestamp.toMillis() : Number(b.timestamp)) : Infinity;
+      return tA - tB; // nhỏ hơn = lên trước = xếp cao hơn
     });
 
     return scores.slice(0, 10);
@@ -176,7 +185,9 @@ export async function getMyRank(gameId = "xep-bong") {
 
     scores.sort((a, b) => {
       if (b.level !== a.level) return b.level - a.level;
-      return a.moves - b.moves;
+      const tA = a.timestamp ? (a.timestamp.toMillis ? a.timestamp.toMillis() : Number(a.timestamp)) : Infinity;
+      const tB = b.timestamp ? (b.timestamp.toMillis ? b.timestamp.toMillis() : Number(b.timestamp)) : Infinity;
+      return tA - tB;
     });
 
     const index = scores.findIndex(s => (s.userId && s.deviceId) ? (s.userId === userId || s.deviceId === userId) : (s.userId === userId || s.deviceId === userId));
