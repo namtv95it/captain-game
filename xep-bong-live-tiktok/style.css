@@ -2021,7 +2021,7 @@ body {
 /* ── Toast Stack Container (Nhiều thông báo nẩy đè lên nhau) ──────── */
 .toast-container {
   position: fixed;
-  top: 105px;
+  top: 80px;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
