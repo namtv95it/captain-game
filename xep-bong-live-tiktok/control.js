@@ -152,17 +152,7 @@ function startSSEListener() {
     handleUserShare(data.uniqueId);
   });
 
-  // ── Comment ──────────────────────────────────────────────────────────────
-  sseSource.addEventListener('comment', (e) => {
-    const data = JSON.parse(e.data);
-    handleUserComment(data.uniqueId, data.comment);
-  });
-
-  // ── Like ─────────────────────────────────────────────────────────────────
-  sseSource.addEventListener('like', (e) => {
-    const data = JSON.parse(e.data);
-    handleUserLike(data.uniqueId, data.likeCount);
-  });
+  // Comment và Like được bỏ qua để giữ nhật ký sự kiện gọn gàng (chỉ ghi Follow, Share, Gift)
 
   sseSource.onerror = () => {
     // SSE tự reconnect, không cần xử lý thêm
