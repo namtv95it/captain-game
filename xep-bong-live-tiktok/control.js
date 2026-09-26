@@ -188,76 +188,86 @@ function clearFollowersList() {
   }
 }
 
-// 5.5. Xử lý sự kiện Follow (CHỐNG UNFOLLOW SPAM + PHÁT TỪNG THÔNG BÁO RIÊNG BỆNH)
+// 5.5. Xử lý sự kiện Follow (CHỐNG UNFOLLOW SPAM + ĐỒNG BỘ TỨC THÌ LÊN GAME)
 function handleUserFollow(inputString) {
-  if (!inputString || !inputString.trim()) return;
+  if (!inputString || typeof inputString !== 'string' || !inputString.trim()) return;
 
   // Tách danh sách người xem theo dấu phẩy ","
   const userList = inputString.split(',').map(u => u.trim()).filter(Boolean);
   if (userList.length === 0) return;
 
-  let delay = 0;
-
   userList.forEach(user => {
-    const cleanUser = user.toLowerCase();
+    const cleanUser = user.trim().replace(/^@/, '').toLowerCase();
+    if (!cleanUser) return;
 
     if (liveState.isPaused) {
-      addLog(`Bỏ qua Follow từ @${user} (Do đang tạm dừng nhận)`, 'warn');
+      addLog(`Bỏ qua Follow từ @${cleanUser} (Do đang tạm dừng nhận)`, 'warn');
       return;
     }
 
     // KIỂM TRA UNFOLLOW / RE-FOLLOW: Nếu đã follow rồi thì KHÔNG CỘNG MÀN
     if (liveState.followedUsers.includes(cleanUser)) {
-      addLog(`Bỏ qua @${user} (Tài khoản này đã follow trước đó!)`, 'warn');
+      addLog(`Bỏ qua @${cleanUser} (Tài khoản này đã follow trước đó!)`, 'warn');
       return;
     }
 
     // Đánh dấu người dùng đã follow & cộng +1 màn
     liveState.followedUsers.push(cleanUser);
     liveState.totalLevels += 1;
-    addLog(`@${user} đã Follow -> +1 Màn thử thách!`, 'follow');
+    addLog(`@${cleanUser} đã Follow -> +1 Màn thử thách!`, 'follow');
 
     renderAll();
-
-    // Phát lần lượt từng thông báo riêng cho từng người kèm khoảng trễ nhẹ (ví dụ 600ms)
-    setTimeout(() => {
-      broadcastStateToGame({ type: 'FOLLOW', username: user, addedLevels: 1 });
-    }, delay);
-
-    delay += 600;
+    // Đồng bộ tức thì sang màn hình Game + hiện Toast thông báo
+    broadcastStateToGame({ type: 'FOLLOW', username: cleanUser, addedLevels: 1 });
   });
 }
 
 // 5.6. Xử lý sự kiện Tặng Quà (Gift)
 function handleUserGift(inputString, giftName, coinValue) {
-  if (!inputString || !inputString.trim() || !coinValue || coinValue <= 0) return;
+  if (!inputString || !coinValue || coinValue <= 0) return;
 
-  // Tách danh sách người tặng quà theo dấu phẩy ","
-  const userList = inputString.split(',').map(u => u.trim()).filter(Boolean);
+  const rawString = typeof inputString === 'string' ? inputString : String(inputString);
+  const userList = rawString.split(',').map(u => u.trim()).filter(Boolean);
   if (userList.length === 0) return;
 
-  let delay = 0;
-
   userList.forEach(user => {
+    const cleanUser = user.trim().replace(/^@/, '').toLowerCase();
+    if (!cleanUser) return;
+
     if (liveState.isPaused) {
-      addLog(`Bỏ qua Quà (${giftName}) từ @${user} (Do đang tạm dừng)`, 'warn');
+      addLog(`Bỏ qua Quà (${giftName}) từ @${cleanUser} (Do đang tạm dừng)`, 'warn');
       return;
     }
 
-    const addedLevels = coinValue; // 1 xu = 1 màn
+    const addedLevels = parseInt(coinValue, 10) || 1; // 1 xu = 1 màn
     liveState.totalLevels += addedLevels;
-    addLog(`@${user} tặng ${giftName} (${coinValue} xu) -> +${addedLevels} Màn!`, 'gift');
+    addLog(`@${cleanUser} tặng ${giftName || 'Quà'} (${addedLevels} xu) -> +${addedLevels} Màn!`, 'gift');
 
     renderAll();
-
-    // Bắn lần lượt từng thông báo tặng quà riêng biệt cho từng người
-    setTimeout(() => {
-      broadcastStateToGame({ type: 'GIFT', username: user, giftName: giftName, addedLevels: addedLevels });
-    }, delay);
-
-    delay += 600;
+    // Đồng bộ tức thì sang màn hình Game + hiện Toast thông báo
+    broadcastStateToGame({ type: 'GIFT', username: cleanUser, giftName: giftName || 'Quà', addedLevels: addedLevels });
   });
 }
+
+// Global Exports & Listener cho TikTok Connectors (Extension / Bookmarklet / Node Connector)
+window.handleUserFollow = handleUserFollow;
+window.handleUserGift = handleUserGift;
+window.onTikTokFollow = handleUserFollow;
+window.onTikTokGift = handleUserGift;
+
+window.addEventListener('message', (event) => {
+  if (!event || !event.data) return;
+  const d = event.data;
+  if (d.type === 'TIKTOK_FOLLOW' || d.type === 'follow' || d.event === 'follow' || d.type === 'member') {
+    const user = d.username || d.uniqueId || d.nickname || d.userId;
+    if (user) handleUserFollow(user);
+  } else if (d.type === 'TIKTOK_GIFT' || d.type === 'gift' || d.event === 'gift') {
+    const user = d.username || d.uniqueId || d.nickname || d.userId;
+    const giftName = d.giftName || d.name || 'Quà';
+    const coins = d.diamondCount || d.coins || d.coinValue || d.repeatCount || 1;
+    if (user) handleUserGift(user, giftName, coins);
+  }
+});
 
 // 5.7. Thêm Nhật ký Event
 function addLog(message, type = 'info') {
@@ -496,7 +506,10 @@ function initEventListeners() {
 
   // Simulation: Test Follow
   document.getElementById('btn-sim-follow').addEventListener('click', () => {
-    const username = document.getElementById('sim-username').value;
+    let username = (document.getElementById('sim-username').value || '').trim();
+    if (!username) {
+      username = `khangia_${Math.floor(Math.random() * 900 + 100)}`;
+    }
     handleUserFollow(username);
   });
 
