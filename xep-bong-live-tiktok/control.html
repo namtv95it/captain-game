@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bảng Điều Khiển Streamer - Xếp Bóng TikTok Live</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800;900&display=swap&subset=vietnamese"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <link rel="icon" type="image/png" href="xep-bong.png" />
+  <link rel="stylesheet" href="control.css" />
+</head>
+
+<body>
+  <div class="control-container">
+
+    <!-- Header -->
+    <header class="ctrl-header">
+      <div class="brand">
+        <img src="../captain.png" alt="Logo" class="brand-logo" />
+        <div>
+          <h1 class="brand-title">BẢNG ĐIỀU KHIỂN STREAMER</h1>
+          <p class="brand-sub">Game Xếp Bóng TikTok Live Interactive</p>
+        </div>
+      </div>
+      <div class="header-status">
+        <span class="status-indicator" id="sync-status">
+          <i class="fa-solid fa-circle-dot"></i> Đã kết nối Màn hình Game
+        </span>
+      </div>
+    </header>
+
+    <div class="ctrl-grid">
+
+      <!-- Column 1: Connection & Live Status -->
+      <div class="ctrl-col">
+        <!-- Card 1: TikTok Connection -->
+        <div class="ctrl-card">
+          <div class="card-header">
+            <i class="fa-brands fa-tiktok card-icon text-tiktok"></i>
+            <h2>Kết Nối TikTok Live</h2>
+          </div>
+          <div class="card-body">
+            <div class="form-group">
+              <label for="tiktok-id-input">Nhập TikTok Unique ID / Username:</label>
+              <div class="input-with-btn">
+                <span class="input-prefix">@</span>
+                <input type="text" id="tiktok-id-input" placeholder="nhap_id_tiktok_cua_ban" autocomplete="off" />
+                <button class="btn btn-primary" id="btn-connect-tiktok">
+                  <i class="fa-solid fa-plug"></i> Kết nối
+                </button>
+              </div>
+            </div>
+
+            <!-- ID History -->
+            <div class="history-section">
+              <label><i class="fa-solid fa-history"></i> Lịch sử ID đã dùng:</label>
+              <div class="history-tags" id="history-tags">
+                <span class="history-empty">Chưa có lịch sử</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 2: Status & Controls -->
+        <div class="ctrl-card">
+          <div class="card-header">
+            <i class="fa-solid fa-sliders card-icon text-accent"></i>
+            <h2>Điều Khiển Thử Thách</h2>
+          </div>
+          <div class="card-body">
+            <!-- Pause/Resume Toggle Button -->
+            <div class="pause-toggle-box">
+              <div class="pause-info">
+                <strong id="pause-status-text">Đang nhận thử thách từ TikTok</strong>
+                <small id="pause-status-desc">Người xem follow/tặng quà sẽ tự động cộng màn</small>
+              </div>
+              <button class="btn btn-toggle-pause" id="btn-toggle-pause">
+                <i class="fa-solid fa-pause" id="pause-icon"></i>
+                <span id="pause-btn-text">Tạm dừng nhận thử thách</span>
+              </button>
+            </div>
+
+            <!-- Manual Add Levels -->
+            <div class="manual-add-box">
+              <label><i class="fa-solid fa-plus-circle"></i> Cộng thủ công số màn thử thách:</label>
+              <div class="btn-group-row">
+                <button class="btn btn-outline" data-add="1">+1 Màn</button>
+                <button class="btn btn-outline" data-add="5">+5 Màn</button>
+                <button class="btn btn-outline" data-add="10">+10 Màn</button>
+              </div>
+            </div>
+
+            <!-- Reset Challenge -->
+            <div class="reset-box">
+              <button class="btn btn-danger-outline" id="btn-reset-challenge">
+                <i class="fa-solid fa-rotate"></i> Đặt lại thử thách ban đầu (Màn 1 / 50 màn)
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Column 2: Dashboard Stats & Event Simulation -->
+      <div class="ctrl-col">
+        <!-- Card 3: Live Stats HUD -->
+        <div class="ctrl-card">
+          <div class="card-header">
+            <i class="fa-solid fa-chart-line card-icon text-warning"></i>
+            <h2>Thống Kê Thử Thách</h2>
+          </div>
+          <div class="card-body">
+            <div class="stats-grid">
+              <div class="stat-box">
+                <span class="stat-lbl">Màn Hiện Tại</span>
+                <span class="stat-val text-accent" id="stat-current-level">1</span>
+              </div>
+              <div class="stat-box">
+                <span class="stat-lbl">Tổng Màn Thử Thách</span>
+                <span class="stat-val text-warning" id="stat-total-levels">50</span>
+              </div>
+              <div class="stat-box">
+                <span class="stat-lbl">Màn Còn Lai</span>
+                <span class="stat-val text-danger" id="stat-remaining-levels">50</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 4: TikTok Live Simulator & Anti-Spam Check -->
+        <div class="ctrl-card">
+          <div class="card-header">
+            <i class="fa-solid fa-flask card-icon text-info"></i>
+            <h2>Giả Lập Sự Kiện TikTok (Dev / Test)</h2>
+          </div>
+          <div class="card-body">
+            <div class="sim-controls">
+              <div class="sim-row">
+                <input type="text" id="sim-username" placeholder="Tên người xem (VD: user123)" value="viewer_demo" />
+                <button class="btn btn-sim btn-sim-follow" id="btn-sim-follow">
+                  <i class="fa-solid fa-user-plus"></i> Test Follow (+1 Màn)
+                </button>
+              </div>
+              <div class="sim-gift-row">
+                <button class="btn btn-sim btn-sim-gift" data-coins="1" data-gift="Hoa Hồng">
+                  🌹 Rose (1 xu = +1 màn)
+                </button>
+                <button class="btn btn-sim btn-sim-gift" data-coins="5" data-gift="Donut">
+                  🍩 Donut (5 xu = +5 màn)
+                </button>
+                <button class="btn btn-sim btn-sim-gift" data-coins="10" data-gift="Mũ Captain">
+                  🧢 Captain Cap (10 xu = +10 màn)
+                </button>
+              </div>
+            </div>
+
+            <!-- Event Log Table -->
+            <div class="log-section">
+              <div class="log-header">
+                <span><i class="fa-solid fa-list-ul"></i> Nhật Ký Sự Kiện Live</span>
+                <button class="btn-text-only" id="btn-clear-log">Xóa nhật ký</button>
+              </div>
+              <div class="log-list" id="log-list">
+                <div class="log-empty">Chưa có sự kiện nào...</div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="control.js"></script>
+</body>
+
+</html>
