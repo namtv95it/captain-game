@@ -626,6 +626,7 @@ function renderHeader() {
     if (levelInfo) levelInfo.style.display = 'none';
     if (liveHudBox) liveHudBox.style.display = 'flex';
     if (rulesWidget) rulesWidget.style.display = 'flex';
+    document.body.classList.add('live-mode');
 
     const progressText = document.getElementById('live-progress-text');
     if (progressText) {
@@ -650,6 +651,7 @@ function renderHeader() {
     if (levelInfo) levelInfo.style.display = 'flex';
     if (liveHudBox) liveHudBox.style.display = 'none';
     if (rulesWidget) rulesWidget.style.display = 'none';
+    document.body.classList.remove('live-mode');
   }
 }
 

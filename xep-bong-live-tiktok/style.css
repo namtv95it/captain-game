@@ -49,17 +49,16 @@ body {
 /* ── Marquee Ticker Banner (Chữ Chạy Thông Báo) ────────────────── */
 .marquee-ticker-container {
   width: 100%;
-  max-width: 800px;
-  margin: 20px auto 4px auto;
-  background: linear-gradient(90deg, #ff0050, #00f2fe, #7c6fee);
-  background-size: 200% 200%;
-  animation: gradientShift 6s ease infinite;
+  max-width: 100%;
+  margin: 12px 0 4px 0;
+  background: linear-gradient(90deg, rgba(15,23,42,0.95), rgba(20,10,40,0.95), rgba(15,23,42,0.95));
+  border: 1.5px solid rgba(255, 0, 80, 0.5);
   color: #fff;
-  padding: 6px 14px;
+  padding: 10px 20px;
   border-radius: 999px;
   overflow: hidden;
   white-space: nowrap;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 4px 20px rgba(255, 0, 80, 0.25), inset 0 1px 0 rgba(255,255,255,0.1);
   position: relative;
   z-index: 100;
   box-sizing: border-box;
@@ -82,10 +81,11 @@ body {
 .marquee-content {
   display: inline-block;
   padding-left: 100%;
-  font-weight: 700;
-  font-size: 0.95rem;
-  letter-spacing: 0.5px;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+  font-weight: 800;
+  font-size: 1.05rem;
+  letter-spacing: 0.8px;
+  color: #ffffff;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
   animation: marquee-scroll 15s linear infinite;
 }
 
@@ -116,12 +116,49 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  background: rgba(15, 23, 42, 0.85);
-  border: 1px solid rgba(255, 0, 80, 0.35);
-  padding: 3px 12px;
-  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.9);
+  border: 1.5px solid rgba(255, 0, 80, 0.5);
+  padding: 8px 32px;
+  border-radius: 16px;
   backdrop-filter: blur(12px);
-  box-shadow: 0 4px 20px rgba(255, 0, 80, 0.2);
+  box-shadow: 0 4px 24px rgba(255, 0, 80, 0.3), inset 0 1px 0 rgba(255,255,255,0.08);
+  gap: 1px;
+  position: relative;
+  overflow: hidden;
+  animation: hudBorderGlow 3s ease-in-out infinite;
+}
+
+/* Shimmer sweep qua nền */
+.live-hud-box::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 60%;
+  height: 100%;
+  background: linear-gradient(
+    105deg,
+    transparent 40%,
+    rgba(255, 255, 255, 0.07) 50%,
+    transparent 60%
+  );
+  animation: hudShimmer 3.5s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes hudBorderGlow {
+  0%, 100% {
+    box-shadow: 0 4px 24px rgba(255, 0, 80, 0.3), inset 0 1px 0 rgba(255,255,255,0.08);
+  }
+  50% {
+    box-shadow: 0 6px 32px rgba(255, 0, 80, 0.55), 0 0 20px rgba(124, 111, 238, 0.3), inset 0 1px 0 rgba(255,255,255,0.12);
+  }
+}
+
+@keyframes hudShimmer {
+  0% { left: -100%; }
+  50% { left: 150%; }
+  100% { left: 150%; }
 }
 
 .live-header-row {
@@ -132,20 +169,21 @@ body {
 }
 
 .live-tag {
-  font-size: 0.75rem;
-  font-weight: 800;
+  font-size: 0.88rem;
+  font-weight: 900;
   color: #ffffff;
-  letter-spacing: 0.8px;
+  letter-spacing: 1.2px;
   display: flex;
   align-items: center;
-  gap: 5px;
-  text-shadow: 0 0 8px rgba(255, 0, 80, 0.8);
+  gap: 6px;
+  text-shadow: 0 0 10px rgba(255, 0, 80, 0.9);
 }
 
 .live-tag i {
   color: #ff0050;
-  font-size: 0.85rem;
-  filter: drop-shadow(0 0 6px #ff0050);
+  font-size: 1rem;
+  filter: drop-shadow(0 0 8px #ff0050);
+  animation: liveBlink 1.2s infinite;
 }
 
 .live-tag.pulse i {
@@ -153,16 +191,15 @@ body {
 }
 
 @keyframes liveBlink {
-
-  0%,
-  100% {
+  0%, 100% {
     opacity: 1;
     transform: scale(1);
+    filter: drop-shadow(0 0 8px #ff0050);
   }
-
   50% {
-    opacity: 0.4;
-    transform: scale(0.85);
+    opacity: 0.5;
+    transform: scale(0.82);
+    filter: drop-shadow(0 0 3px #ff0050);
   }
 }
 
@@ -177,17 +214,31 @@ body {
 }
 
 .live-counter {
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 5px;
+  color: rgba(255,255,255,0.8);
 }
 
 .live-counter strong {
-  font-size: 1.1rem;
+  font-size: 1.35rem;
   font-weight: 900;
   color: #38bdf8;
-  padding: 0 4px;
+  padding: 0 3px;
+  text-shadow: 0 0 12px rgba(56, 189, 248, 0.8);
+  animation: counterGlow 2s ease-in-out infinite;
+}
+
+@keyframes counterGlow {
+  0%, 100% {
+    text-shadow: 0 0 12px rgba(56, 189, 248, 0.8);
+    color: #38bdf8;
+  }
+  50% {
+    text-shadow: 0 0 22px rgba(56, 189, 248, 1), 0 0 40px rgba(56, 189, 248, 0.5);
+    color: #7dd3fc;
+  }
 }
 
 /* ── Live Complete Card (Chiến Thắng Toàn Bộ Thử Thách Live) ───── */
@@ -348,8 +399,9 @@ body {
   flex-direction: column;
   height: 100%;
   height: 100dvh;
-  max-width: 960px;
-  margin: 0 auto;
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
   padding: 10px 16px calc(10px + env(safe-area-inset-bottom, 0px));
   gap: 8px;
   box-sizing: border-box;
@@ -362,7 +414,7 @@ body {
   justify-content: space-between;
   flex-shrink: 0;
   width: 100%;
-  max-width: 800px;
+  max-width: 100%;
   margin: 10px auto 0 auto;
 }
 
@@ -753,7 +805,11 @@ body {
   border: 2px solid rgba(255, 255, 255, 0.18);
   border-top: none;
   border-radius: 0 0 var(--radius-tube) var(--radius-tube);
-  box-shadow: inset 0 0 12px rgba(255, 255, 255, 0.02);
+  box-shadow:
+    inset 0 0 12px rgba(255, 255, 255, 0.02),
+    0 0 12px rgba(255, 255, 255, 0.08),
+    0 0 28px rgba(124, 111, 238, 0.15),
+    0 4px 16px rgba(0, 0, 0, 0.4);
 
   transition: all 0.25s var(--ease-smooth);
   overflow: hidden;
@@ -2465,19 +2521,58 @@ body {
 /* ═══════════════════════════════════════════════════════════════
    BẢNG QUY TẮC THỬ THÁCH TIKTOK LIVE (WIDGET NỔI CẠNH TRÁI)
    ═══════════════════════════════════════════════════════════════ */
+
+/*
+  Khi ở Live Mode: KHÔNG dịch cả game-container (sẽ làm header & ticker lệch).
+  Thay vào đó, chỉ thêm padding-left cho tubes-area để nhường chỗ cho widget bên trái.
+  Header và marquee-ticker luôn căng full-width 100%.
+*/
+body.live-mode .tubes-area {
+  padding-left: 290px;
+  transition: padding-left 0.3s ease;
+}
+
+/* Dịch toast thông báo sang phải trong live mode để không bị widget che */
+body.live-mode .toast-container {
+  left: calc(50% + 145px);
+}
+
+@media (max-width: 950px) {
+  body.live-mode .tubes-area {
+    padding-left: 220px;
+  }
+
+  body.live-mode .toast-container {
+    left: calc(50% + 110px);
+  }
+}
+
+@media (max-width: 700px) {
+  body.live-mode .tubes-area {
+    padding-left: 0;
+  }
+
+  body.live-mode .toast-container {
+    left: 50%;
+  }
+}
+
 .live-rules-widget {
-  display: none; /* Chỉ hiện khi ở chế độ TikTok Live */
+  display: none;
+  /* Chỉ hiện khi ở chế độ TikTok Live */
   flex-direction: column;
   position: fixed;
   left: 28px;
   top: 50%;
   transform: translateY(-50%);
   z-index: 85;
-  pointer-events: none; /* Chuột click xuyên qua bảng, không vướng khi chơi */
+  pointer-events: none;
+  /* Chuột click xuyên qua bảng, không vướng khi chơi */
   user-select: none;
   width: 250px;
   padding: 18px 18px 16px;
-  background: rgba(18, 22, 36, 0.55); /* Kính mờ dày dặn, nhìn siêu rõ chữ */
+  background: rgba(18, 22, 36, 0.55);
+  /* Kính mờ dày dặn, nhìn siêu rõ chữ */
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
   border: 1.5px solid rgba(255, 255, 255, 0.16);
@@ -2491,6 +2586,7 @@ body {
     opacity: 0;
     transform: translateY(-50%) translateX(-25px);
   }
+
   to {
     opacity: 1;
     transform: translateY(-50%) translateX(0);
@@ -2566,7 +2662,8 @@ body {
   filter: drop-shadow(0 0 6px rgba(56, 189, 248, 0.6));
 }
 
-.icon-rose, .icon-gift {
+.icon-rose,
+.icon-gift {
   background: rgba(255, 255, 255, 0.08);
 }
 
@@ -2588,7 +2685,8 @@ body {
 .rule-reward {
   font-weight: 900;
   font-size: 17px;
-  color: #fbbf24; /* Vàng cam sáng rực rỡ */
+  color: #fbbf24;
+  /* Vàng cam sáng rực rỡ */
   text-shadow: 0 0 14px rgba(251, 191, 36, 0.65), 0 2px 4px rgba(0, 0, 0, 0.8);
   white-space: nowrap;
 }
@@ -2600,19 +2698,23 @@ body {
     width: 200px;
     padding: 12px 10px;
   }
+
   .rules-header {
     font-size: 13px;
     padding: 6px 10px;
   }
+
   .rule-icon-box {
     width: 28px;
     height: 28px;
     font-size: 14px;
   }
+
   .rule-label {
     font-size: 13px;
   }
+
   .rule-reward {
     font-size: 14px;
   }
-}
+}
