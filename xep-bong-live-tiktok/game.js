@@ -594,6 +594,11 @@ liveChannel.onmessage = (e) => {
       showToast(`<i class="fa-solid fa-gift" style="color:#ff0050;margin-right:6px;"></i> Khán giả vừa ủng hộ: +${added} Màn thử thách!`);
     }
 
+    // Nếu Control Panel reset màn hoặc thay đổi currentLevel -> Đồng bộ lại màn chơi
+    if (G.isLiveMode && liveData.currentLevel && liveData.currentLevel !== G.level) {
+      startLevel(liveData.currentLevel);
+    }
+
     renderHeader();
     renderTickerBanner();
     renderPauseBanner();
@@ -1243,11 +1248,25 @@ function init() {
       SFX.select();
       hideMenu();
       G.isLiveMode = true;
-      startLevel(1);
+
+      // Đọc lại tiến trình màn live đã lưu trong LIVE_SESSION_KEY (hoặc liveData)
+      let savedLevel = 1;
+      try {
+        const savedLive = localStorage.getItem(LIVE_SESSION_KEY);
+        if (savedLive) {
+          const parsed = JSON.parse(savedLive);
+          liveData = { ...liveData, ...parsed };
+          if (parsed.currentLevel) savedLevel = parsed.currentLevel;
+        } else if (liveData && liveData.currentLevel) {
+          savedLevel = liveData.currentLevel;
+        }
+      } catch (_) {}
+
+      startLevel(savedLevel);
       renderHeader();
       renderTickerBanner();
       renderPauseBanner();
-      setTimeout(() => showToast(`<i class="fa-brands fa-tiktok" style="color:#ff0050;margin-right:6px;"></i> Bắt đầu Chế Độ TikTok Live!`), 300);
+      setTimeout(() => showToast(`<i class="fa-brands fa-tiktok" style="color:#ff0050;margin-right:6px;"></i> Tiếp tục Chế Độ TikTok Live (Màn ${savedLevel})`), 300);
     });
   }
 

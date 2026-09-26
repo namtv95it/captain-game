@@ -13,6 +13,8 @@ const broadcastChannel = new BroadcastChannel(CHANNEL_NAME);
 
 let liveState = {
   tiktokId: '',
+  connectionState: 'disconnected', // 'disconnected' | 'connecting' | 'connected' | 'failed'
+  connectionError: '',
   currentLevel: 1,
   totalLevels: 100,   // Mặc định 100 màn thử thách
   isPaused: false, // Trạng thái tạm dừng nhận thử thách
@@ -40,9 +42,14 @@ function loadStateFromStorage() {
     try {
       const parsed = JSON.parse(savedState);
       liveState = { ...liveState, ...parsed };
-      // Đảm bảo followedUsers luôn là mảng
       if (!Array.isArray(liveState.followedUsers)) {
         liveState.followedUsers = [];
+      }
+      // Khôi phục trạng thái kết nối dựa trên tiktokId có sẵn
+      if (liveState.tiktokId) {
+        liveState.connectionState = 'connected';
+      } else {
+        liveState.connectionState = 'disconnected';
       }
     } catch (e) {
       console.error("Lỗi parse liveState storage:", e);
@@ -76,23 +83,61 @@ function broadcastStateToGame(eventDetail = null) {
 
 // 5. CÁC THAO TÁC XỬ LÝ LOGIC
 
-// 5.1. Kết nối TikTok ID
+// 5.1. Kết nối TikTok ID với các trạng thái rõ ràng
 function connectTikTokId(rawId) {
-  const cleanId = rawId.trim().replace(/^@/, '');
-  if (!cleanId) return;
-
-  liveState.tiktokId = cleanId;
-
-  // Lưu lịch sử ID
-  if (!idHistory.includes(cleanId)) {
-    idHistory.unshift(cleanId);
-    if (idHistory.length > 5) idHistory.pop();
+  const inputEl = document.getElementById('tiktok-id-input');
+  const targetId = (rawId !== undefined ? rawId : (inputEl ? inputEl.value : '')).trim().replace(/^@/, '');
+  
+  if (!targetId) {
+    liveState.connectionState = 'failed';
+    liveState.connectionError = 'Vui lòng nhập TikTok Unique ID!';
+    addLog('Kết nối thất bại: Chưa nhập TikTok ID', 'error');
+    renderAll();
+    broadcastStateToGame();
+    return;
   }
 
-  addLog(`Kết nối TikTok Live ID: @${cleanId}`, 'info');
+  // Chuyển sang trạng thái "Đang kết nối..."
+  liveState.tiktokId = targetId;
+  liveState.connectionState = 'connecting';
+  liveState.connectionError = '';
+  addLog(`Đang kết nối tới TikTok Live ID: @${targetId}...`, 'info');
+  renderAll();
+
+  // Giả lập/Xác minh tiến trình kết nối phiên Live
+  setTimeout(() => {
+    // Kiểm tra tính hợp lệ cơ bản của TikTok username
+    if (!/^[a-zA-Z0-9._]{2,30}$/.test(targetId)) {
+      liveState.connectionState = 'failed';
+      liveState.connectionError = 'TikTok ID chứa ký tự không hợp lệ hoặc quá ngắn.';
+      addLog(`Kết nối thất bại: ID @${targetId} không đúng định dạng TikTok`, 'error');
+    } else {
+      liveState.connectionState = 'connected';
+      liveState.connectionError = '';
+      if (!idHistory.includes(targetId)) {
+        idHistory.unshift(targetId);
+        if (idHistory.length > 5) idHistory.pop();
+        localStorage.setItem(STORAGE_KEY_ID_HISTORY, JSON.stringify(idHistory));
+      }
+      addLog(`Đã kết nối thành công tới phiên Live của @${targetId}`, 'info');
+    }
+    renderAll();
+    broadcastStateToGame();
+  }, 700);
+}
+
+function disconnectTikTokId() {
+  const oldId = liveState.tiktokId;
+  liveState.tiktokId = '';
+  liveState.connectionState = 'disconnected';
+  liveState.connectionError = '';
+  addLog(`Đã ngắt kết nối TikTok Live ID: @${oldId}`, 'warn');
   renderAll();
   broadcastStateToGame();
 }
+
+window.connectTikTokId = connectTikTokId;
+window.disconnectTikTokId = disconnectTikTokId;
 
 // 5.2. Toggle Tạm dừng / Tiếp tục nhận thử thách
 function togglePauseChallenge() {
@@ -116,9 +161,10 @@ function addLevelsManual(count) {
 
 // 5.4. Đặt lại thử thách phiên live
 function resetChallenge() {
-  if (confirm('Bạn có chắc muốn ĐẶT LẠI TOÀN BỘ PHÊN LIVE này?\n\u2022 Xóa toàn bộ dữ liệu phiên live trong localStorage\n\u2022 Đặt về Màn 1 / Mặc định 100 màn\n\u2022 Xóa danh sách Follower đã lưu')) {
-    // Xóa toàn bộ dữ liệu phiên live trong localStorage
+  if (confirm('Bạn có chắc muốn ĐẶT LẠI TOÀN BỘ PHÊN LIVE này?\n• Xóa toàn bộ dữ liệu phiên live trong localStorage\n• Đặt về Màn 1 / Mặc định 100 màn\n• Xóa danh sách Follower đã lưu')) {
+    // Xóa toàn bộ dữ liệu phiên live trong localStorage (cả state control và state game live)
     localStorage.removeItem(STORAGE_KEY_STATE);
+    localStorage.removeItem('tiktok_xep_bong_live_state');
 
     // Reset lại liveState về mặc định
     liveState.currentLevel = 1;
@@ -126,7 +172,7 @@ function resetChallenge() {
     liveState.isPaused = false;
     liveState.followedUsers = [];
     liveState.logs = [];
-    addLog('\u0110ã ĐẶT LẠI phiên live: Xóa dữ liệu localStorage + về Màn 1 / 100 Màn', 'warn');
+    addLog('Đã ĐẶT LẠI phiên live: Xóa dữ liệu localStorage + về Màn 1 / 100 Màn', 'warn');
     renderAll();
     broadcastStateToGame();
   }
@@ -227,17 +273,8 @@ function renderAll() {
   document.getElementById('tiktok-id-input').value = liveState.tiktokId;
   renderHistoryTags();
 
-  // Render thẻ trạng thái kết nối TikTok ID
-  const connectBadge = document.getElementById('connect-badge');
-  if (connectBadge) {
-    if (liveState.tiktokId) {
-      connectBadge.className = 'status-badge connected';
-      connectBadge.innerHTML = `<i class="fa-solid fa-circle-check"></i> Đã kết nối với TikTok Live ID: <strong>@${liveState.tiktokId}</strong>`;
-    } else {
-      connectBadge.className = 'status-badge disconnected';
-      connectBadge.innerHTML = `<i class="fa-solid fa-circle-xmark"></i> Chưa nhập TikTok Unique ID`;
-    }
-  }
+  // Render thẻ trạng thái kết nối TikTok ID (4 trạng thái: disconnected, connecting, connected, failed)
+  renderConnectStatusBox();
 
   // Stats HUD
   document.getElementById('stat-current-level').textContent = liveState.currentLevel;
@@ -290,6 +327,76 @@ function renderAll() {
   }
 
   renderLogList();
+}
+
+function renderConnectStatusBox() {
+  const box = document.getElementById('connect-status-box');
+  const input = document.getElementById('tiktok-id-input');
+  const btnConnect = document.getElementById('btn-connect-tiktok');
+  if (!box) return;
+
+  const state = liveState.connectionState || (liveState.tiktokId ? 'connected' : 'disconnected');
+
+  if (state === 'connecting') {
+    if (btnConnect) {
+      btnConnect.disabled = true;
+      btnConnect.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> Đang kết nối...`;
+    }
+    box.innerHTML = `
+      <div class="status-badge connecting">
+        <div class="status-badge-text">
+          <i class="fa-solid fa-circle-notch fa-spin"></i>
+          <span>Đang kết nối tới phiên Live của <strong>@${liveState.tiktokId}</strong>...</span>
+        </div>
+      </div>
+    `;
+  } else if (state === 'connected') {
+    if (btnConnect) {
+      btnConnect.disabled = false;
+      btnConnect.innerHTML = `<i class="fa-solid fa-plug"></i> Kết nối lại`;
+    }
+    box.innerHTML = `
+      <div class="status-badge connected">
+        <div class="status-badge-text">
+          <i class="fa-solid fa-circle-check"></i>
+          <span>Đã kết nối: <strong>@${liveState.tiktokId}</strong></span>
+        </div>
+        <button type="button" class="btn-disconnect-id" onclick="disconnectTikTokId()" title="Ngắt kết nối phiên này">
+          <i class="fa-solid fa-power-off"></i> Ngắt kết nối
+        </button>
+      </div>
+    `;
+  } else if (state === 'failed') {
+    if (btnConnect) {
+      btnConnect.disabled = false;
+      btnConnect.innerHTML = `<i class="fa-solid fa-plug"></i> Kết nối`;
+    }
+    box.innerHTML = `
+      <div class="status-badge failed">
+        <div class="status-badge-text">
+          <i class="fa-solid fa-circle-exclamation"></i>
+          <span>Kết nối thất bại: ${liveState.connectionError || 'Không thể kết nối.'}</span>
+        </div>
+        <button type="button" class="btn-retry-id" onclick="connectTikTokId('${liveState.tiktokId || (input ? input.value : '')}')" title="Thử kết nối lại">
+          <i class="fa-solid fa-rotate-right"></i> Thử lại
+        </button>
+      </div>
+    `;
+  } else {
+    // disconnected
+    if (btnConnect) {
+      btnConnect.disabled = false;
+      btnConnect.innerHTML = `<i class="fa-solid fa-plug"></i> Kết nối`;
+    }
+    box.innerHTML = `
+      <div class="status-badge disconnected">
+        <div class="status-badge-text">
+          <i class="fa-solid fa-circle-xmark"></i>
+          <span>Chưa kết nối TikTok ID</span>
+        </div>
+      </div>
+    `;
+  }
 }
 
 function renderHistoryTags() {
