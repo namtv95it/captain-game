@@ -300,13 +300,29 @@ function renderHistoryTags() {
   }
 
   container.innerHTML = idHistory.map(id => `
-    <span class="history-tag" onclick="selectHistoryId('${id}')">@${id}</span>
+    <span class="history-tag" onclick="selectHistoryId('${id}')">
+      <span>@${id}</span>
+      <i class="fa-solid fa-xmark btn-remove-history" onclick="removeHistoryId(event, '${id}')" title="Xóa ID này"></i>
+    </span>
   `).join('');
 }
 
 window.selectHistoryId = function(id) {
   document.getElementById('tiktok-id-input').value = id;
   connectTikTokId(id);
+};
+
+window.removeHistoryId = function(event, idToRemove) {
+  event.stopPropagation(); // Tránh kích hoạt chọn ID khi nhấn nút xóa
+  idHistory = idHistory.filter(id => id !== idToRemove);
+  localStorage.setItem(STORAGE_KEY_ID_HISTORY, JSON.stringify(idHistory));
+  renderHistoryTags();
+};
+
+window.clearAllHistoryId = function() {
+  idHistory = [];
+  localStorage.setItem(STORAGE_KEY_ID_HISTORY, JSON.stringify(idHistory));
+  renderHistoryTags();
 };
 
 function renderLogList() {

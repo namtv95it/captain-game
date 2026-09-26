@@ -65,7 +65,12 @@
 
             <!-- ID History -->
             <div class="history-section">
-              <label><i class="fa-solid fa-history"></i> Lịch sử ID đã dùng:</label>
+              <div class="history-header">
+                <label><i class="fa-solid fa-history"></i> Lịch sử ID đã dùng:</label>
+                <button type="button" class="btn-clear-all-history" onclick="clearAllHistoryId()" title="Xóa tất cả lịch sử ID">
+                  <i class="fa-solid fa-trash-can"></i> Xóa tất cả
+                </button>
+              </div>
               <div class="history-tags" id="history-tags">
                 <span class="history-empty">Chưa có lịch sử</span>
               </div>
