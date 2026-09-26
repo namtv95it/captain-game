@@ -5,17 +5,17 @@
   --card-border: rgba(255, 255, 255, 0.1);
   --text-main: #f8fafc;
   --text-muted: #94a3b8;
-  
+
   --accent: #38bdf8;
   --accent-glow: rgba(56, 189, 248, 0.25);
   --tiktok: #ff0050;
   --tiktok-cyan: #00f2fe;
-  
+
   --success: #22c55e;
   --warning: #f59e0b;
   --danger: #ef4444;
   --info: #8b5cf6;
-  
+
   --font-family: 'Outfit', 'Be Vietnam Pro', sans-serif;
 }
 
@@ -27,7 +27,7 @@
 
 body {
   background-color: var(--bg-dark);
-  background-image: 
+  background-image:
     radial-gradient(at 10% 20%, rgba(56, 189, 248, 0.1) 0px, transparent 50%),
     radial-gradient(at 90% 80%, rgba(255, 0, 80, 0.08) 0px, transparent 50%);
   color: var(--text-main);
@@ -171,8 +171,15 @@ body {
 }
 
 @keyframes blink {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.3; }
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.3;
+  }
 }
 
 /* Grid Layout */
@@ -222,11 +229,25 @@ body {
   font-size: 1.2rem;
 }
 
-.text-tiktok { color: var(--tiktok); }
-.text-accent { color: var(--accent); }
-.text-warning { color: var(--warning); }
-.text-danger { color: var(--danger); }
-.text-info { color: var(--info); }
+.text-tiktok {
+  color: var(--tiktok);
+}
+
+.text-accent {
+  color: var(--accent);
+}
+
+.text-warning {
+  color: var(--warning);
+}
+
+.text-danger {
+  color: var(--danger);
+}
+
+.text-info {
+  color: var(--info);
+}
 
 /* Form Components */
 .form-group {
@@ -349,14 +370,16 @@ body {
   color: var(--accent);
 }
 
-.btn-danger-outline, .btn-outline-danger {
+.btn-danger-outline,
+.btn-outline-danger {
   width: 100%;
   background: rgba(239, 68, 68, 0.1);
   border: 1px solid rgba(239, 68, 68, 0.3);
   color: var(--danger);
 }
 
-.btn-danger-outline:hover, .btn-outline-danger:hover {
+.btn-danger-outline:hover,
+.btn-outline-danger:hover {
   background: rgba(239, 68, 68, 0.25);
 }
 
@@ -634,9 +657,107 @@ body {
   color: var(--accent);
 }
 
-.log-item.follow { border-left: 3px solid var(--tiktok); }
-.log-item.gift { border-left: 3px solid var(--info); }
-.log-item.warn { border-left: 3px solid var(--warning); color: var(--warning); }
+.log-item.follow {
+  border-left: 3px solid var(--tiktok);
+}
+
+.log-item.gift {
+  border-left: 3px solid var(--info);
+}
+
+.log-item.warn {
+  border-left: 3px solid var(--warning);
+  color: var(--warning);
+}
+
+.log-empty {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  text-align: center;
+  padding: 12px;
+}
+
+background: rgba(255, 255, 255, 0.03);
+display: flex;
+justify-content: space-between;
+align-items: center;
+}
+
+.log-item .user {
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.log-item.comment {
+  border-left: 3px solid #38bdf8;
+  background: rgba(56, 189, 248, 0.08);
+}
+
+.log-item.follow {
+  border-left: 3px solid #ff0050;
+  background: rgba(255, 0, 80, 0.08);
+}
+
+.log-item.gift {
+  border-left: 3px solid #a855f7;
+  background: rgba(168, 85, 247, 0.08);
+}
+
+.log-item.share {
+  border-left: 3px solid #22c55e;
+  background: rgba(34, 197, 94, 0.08);
+}
+
+.log-item.like {
+  border-left: 3px solid #f43f5e;
+  background: rgba(244, 63, 94, 0.08);
+}
+
+.log-item.error {
+  border-left: 3px solid #ef4444;
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.08);
+}
+
+.log-item.warn {
+  border-left: 3px solid var(--warning);
+  color: var(--warning);
+  background: rgba(245, 158, 11, 0.08);
+}
+
+.btn-sim-comment {
+  background: rgba(56, 189, 248, 0.2);
+  border: 1px solid #38bdf8;
+  color: #38bdf8;
+}
+
+.btn-sim-comment:hover {
+  background: #38bdf8;
+  color: #0f172a;
+}
+
+.btn-sim-share {
+  background: rgba(34, 197, 94, 0.2);
+  border: 1px solid #22c55e;
+  color: #22c55e;
+}
+
+.btn-sim-share:hover {
+  background: #22c55e;
+  color: #0f172a;
+}
+
+.btn-sim-like {
+  background: rgba(244, 63, 94, 0.2);
+  border: 1px solid #f43f5e;
+  color: #f43f5e;
+}
+
+.btn-sim-like:hover {
+  background: #f43f5e;
+  color: #fff;
+}
+
 .log-empty {
   font-size: 0.8rem;
   color: var(--text-muted);

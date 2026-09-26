@@ -83,55 +83,158 @@ function broadcastStateToGame(eventDetail = null) {
 
 // 5. CÁC THAO TÁC XỬ LÝ LOGIC
 
-// 5.1. Kết nối TikTok ID với các trạng thái rõ ràng
-function connectTikTokId(rawId) {
+// ── Node.js Bridge Server SSE ──────────────────────────────────────────────
+const BRIDGE_SERVER = 'http://localhost:3456';
+let sseSource = null;
+
+/**
+ * Kiểm tra server Node.js có đang chạy không
+ */
+async function checkServerRunning() {
+  try {
+    const res = await fetch(`${BRIDGE_SERVER}/status`, { signal: AbortSignal.timeout(2000) });
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Bắt đầu lắng nghe SSE từ Node.js bridge server
+ */
+function startSSEListener() {
+  if (sseSource) { sseSource.close(); sseSource = null; }
+
+  sseSource = new EventSource(`${BRIDGE_SERVER}/events`);
+
+  // ── Trạng thái kết nối ──────────────────────────────────────────────────
+  sseSource.addEventListener('status', (e) => {
+    const data = JSON.parse(e.data);
+    if (data.state === 'connected') {
+      liveState.connectionState = 'connected';
+      liveState.connectionError = '';
+      const u = data.username || liveState.tiktokId;
+      if (!idHistory.includes(u)) {
+        idHistory.unshift(u); if (idHistory.length > 5) idHistory.pop();
+        localStorage.setItem(STORAGE_KEY_ID_HISTORY, JSON.stringify(idHistory));
+      }
+      addLog(`✅ Đã kết nối thành công tới Live của @${u}${data.roomId ? ' (Room: ' + data.roomId + ')' : ''}`, 'info');
+    } else if (data.state === 'connecting') {
+      liveState.connectionState = 'connecting';
+      addLog(`🔄 Đang kết nối tới @${data.username}...`, 'info');
+    } else if (data.state === 'failed') {
+      liveState.connectionState = 'failed';
+      liveState.connectionError = data.error || 'Kết nối thất bại';
+      addLog(`❌ Kết nối thất bại: ${data.error || 'Không rõ lỗi'}`, 'error');
+    } else if (data.state === 'disconnected') {
+      liveState.connectionState = 'disconnected';
+      addLog(`⚫ Đã ngắt kết nối TikTok Live`, 'warn');
+    }
+    renderAll();
+    broadcastStateToGame();
+  });
+
+  // ── Follow ───────────────────────────────────────────────────────────────
+  sseSource.addEventListener('follow', (e) => {
+    const data = JSON.parse(e.data);
+    handleUserFollow(data.uniqueId);
+  });
+
+  // ── Gift ─────────────────────────────────────────────────────────────────
+  sseSource.addEventListener('gift', (e) => {
+    const data = JSON.parse(e.data);
+    handleUserGift(data.uniqueId, data.giftName, data.totalCoins || data.diamondCount || 1);
+  });
+
+  // ── Share ────────────────────────────────────────────────────────────────
+  sseSource.addEventListener('share', (e) => {
+    const data = JSON.parse(e.data);
+    handleUserShare(data.uniqueId);
+  });
+
+  // ── Comment ──────────────────────────────────────────────────────────────
+  sseSource.addEventListener('comment', (e) => {
+    const data = JSON.parse(e.data);
+    handleUserComment(data.uniqueId, data.comment);
+  });
+
+  // ── Like ─────────────────────────────────────────────────────────────────
+  sseSource.addEventListener('like', (e) => {
+    const data = JSON.parse(e.data);
+    handleUserLike(data.uniqueId, data.likeCount);
+  });
+
+  sseSource.onerror = () => {
+    // SSE tự reconnect, không cần xử lý thêm
+  };
+}
+
+// 5.1. Kết nối TikTok ID - gọi qua Node.js bridge server
+async function connectTikTokId(rawId) {
   const inputEl = document.getElementById('tiktok-id-input');
   const targetId = (rawId !== undefined ? rawId : (inputEl ? inputEl.value : '')).trim().replace(/^@/, '');
-  
+
   if (!targetId) {
     liveState.connectionState = 'failed';
     liveState.connectionError = 'Vui lòng nhập TikTok Unique ID!';
     addLog('Kết nối thất bại: Chưa nhập TikTok ID', 'error');
-    renderAll();
-    broadcastStateToGame();
-    return;
+    renderAll(); broadcastStateToGame(); return;
   }
 
-  // Chuyển sang trạng thái "Đang kết nối..."
+  if (!/^[a-zA-Z0-9._]{2,30}$/.test(targetId)) {
+    liveState.connectionState = 'failed';
+    liveState.connectionError = 'TikTok ID chứa ký tự không hợp lệ.';
+    addLog(`Kết nối thất bại: ID @${targetId} không đúng định dạng TikTok`, 'error');
+    renderAll(); broadcastStateToGame(); return;
+  }
+
+  // Kiểm tra server đang chạy không
+  const serverOk = await checkServerRunning();
+  if (!serverOk) {
+    liveState.connectionState = 'failed';
+    liveState.connectionError = 'Server chưa chạy! Hãy mở terminal và chạy: node server.js';
+    addLog('❌ Server Node.js chưa chạy! Mở terminal trong thư mục game và chạy: node server.js', 'error');
+    renderAll(); broadcastStateToGame(); return;
+  }
+
   liveState.tiktokId = targetId;
   liveState.connectionState = 'connecting';
   liveState.connectionError = '';
-  addLog(`Đang kết nối tới TikTok Live ID: @${targetId}...`, 'info');
+  addLog(`🔄 Đang kết nối tới TikTok Live ID: @${targetId} qua Node.js Bridge...`, 'info');
   renderAll();
 
-  // Giả lập/Xác minh tiến trình kết nối phiên Live
-  setTimeout(() => {
-    // Kiểm tra tính hợp lệ cơ bản của TikTok username
-    if (!/^[a-zA-Z0-9._]{2,30}$/.test(targetId)) {
-      liveState.connectionState = 'failed';
-      liveState.connectionError = 'TikTok ID chứa ký tự không hợp lệ hoặc quá ngắn.';
-      addLog(`Kết nối thất bại: ID @${targetId} không đúng định dạng TikTok`, 'error');
-    } else {
-      liveState.connectionState = 'connected';
-      liveState.connectionError = '';
-      if (!idHistory.includes(targetId)) {
-        idHistory.unshift(targetId);
-        if (idHistory.length > 5) idHistory.pop();
-        localStorage.setItem(STORAGE_KEY_ID_HISTORY, JSON.stringify(idHistory));
-      }
-      addLog(`Đã kết nối thành công tới phiên Live của @${targetId}`, 'info');
-    }
-    renderAll();
-    broadcastStateToGame();
-  }, 700);
+  // Bắt đầu lắng nghe SSE trước
+  startSSEListener();
+
+  // Rồi mới gửi lệnh kết nối
+  try {
+    const res = await fetch(`${BRIDGE_SERVER}/connect`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username: targetId }),
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  } catch (err) {
+    liveState.connectionState = 'failed';
+    liveState.connectionError = 'Không thể gọi server: ' + err.message;
+    addLog('❌ Lỗi gọi server bridge: ' + err.message, 'error');
+    renderAll(); broadcastStateToGame();
+  }
 }
 
 function disconnectTikTokId() {
   const oldId = liveState.tiktokId;
+
+  // Gọi server để ngắt kết nối
+  fetch(`${BRIDGE_SERVER}/disconnect`, { method: 'POST' }).catch(() => {});
+
+  // Đóng SSE
+  if (sseSource) { sseSource.close(); sseSource = null; }
+
   liveState.tiktokId = '';
   liveState.connectionState = 'disconnected';
   liveState.connectionError = '';
-  addLog(`Đã ngắt kết nối TikTok Live ID: @${oldId}`, 'warn');
+  addLog(`⚫ Đã ngắt kết nối TikTok Live ID: @${oldId}`, 'warn');
   renderAll();
   broadcastStateToGame();
 }
@@ -142,10 +245,10 @@ window.disconnectTikTokId = disconnectTikTokId;
 // 5.2. Toggle Tạm dừng / Tiếp tục nhận thử thách
 function togglePauseChallenge() {
   liveState.isPaused = !liveState.isPaused;
-  const statusMsg = liveState.isPaused 
-    ? 'Đã TẠM DỪNG nhận thử thách từ TikTok' 
+  const statusMsg = liveState.isPaused
+    ? 'Đã TẠM DỪNG nhận thử thách từ TikTok'
     : 'Đã TIẾP TỤC nhận thử thách từ TikTok';
-  
+
   addLog(statusMsg, 'warn');
   renderAll();
   broadcastStateToGame();
@@ -255,6 +358,36 @@ window.handleUserGift = handleUserGift;
 window.onTikTokFollow = handleUserFollow;
 window.onTikTokGift = handleUserGift;
 
+// 5.8. Xử lý sự kiện Share
+function handleUserShare(username) {
+  if (!username) return;
+  const cleanUser = String(username).trim().replace(/^@/, '').toLowerCase();
+  if (!cleanUser) return;
+  if (liveState.isPaused) {
+    addLog(`Bỏ qua Share từ @${cleanUser} (Do đang tạm dừng)`, 'warn');
+    return;
+  }
+  liveState.totalLevels += 1;
+  addLog(`@${cleanUser} đã Chia sẻ Live -> +1 Màn thử thách!`, 'share');
+  renderAll();
+  broadcastStateToGame({ type: 'SHARE', username: cleanUser, addedLevels: 1 });
+}
+
+// 5.9. Xử lý sự kiện Comment (hiển thị log, không cộng màn)
+function handleUserComment(username, comment) {
+  if (!username || !comment) return;
+  const cleanUser = String(username).trim().replace(/^@/, '');
+  addLog(`💬 @${cleanUser}: ${comment}`, 'comment');
+}
+
+// 5.10. Xử lý sự kiện Like (chỉ hiển thị log, không cộng màn để tránh spam)
+function handleUserLike(username, count) {
+  if (!username) return;
+  const cleanUser = String(username).trim().replace(/^@/, '');
+  if (!cleanUser) return;
+  addLog(`❤️ @${cleanUser} đã thích x${count || 1}`, 'like');
+}
+
 window.addEventListener('message', (event) => {
   if (!event || !event.data) return;
   const d = event.data;
@@ -266,6 +399,9 @@ window.addEventListener('message', (event) => {
     const giftName = d.giftName || d.name || 'Quà';
     const coins = d.diamondCount || d.coins || d.coinValue || d.repeatCount || 1;
     if (user) handleUserGift(user, giftName, coins);
+  } else if (d.type === 'TIKTOK_SHARE' || d.type === 'share' || d.event === 'share') {
+    const user = d.username || d.uniqueId || d.nickname;
+    if (user) handleUserShare(user);
   }
 });
 
@@ -289,7 +425,7 @@ function renderAll() {
   // Stats HUD
   document.getElementById('stat-current-level').textContent = liveState.currentLevel;
   document.getElementById('stat-total-levels').textContent = liveState.totalLevels;
-  
+
   const remaining = Math.max(0, liveState.totalLevels - liveState.currentLevel + 1);
   document.getElementById('stat-remaining-levels').textContent = remaining;
 
@@ -424,19 +560,19 @@ function renderHistoryTags() {
   `).join('');
 }
 
-window.selectHistoryId = function(id) {
+window.selectHistoryId = function (id) {
   document.getElementById('tiktok-id-input').value = id;
   connectTikTokId(id);
 };
 
-window.removeHistoryId = function(event, idToRemove) {
+window.removeHistoryId = function (event, idToRemove) {
   event.stopPropagation(); // Tránh kích hoạt chọn ID khi nhấn nút xóa
   idHistory = idHistory.filter(id => id !== idToRemove);
   localStorage.setItem(STORAGE_KEY_ID_HISTORY, JSON.stringify(idHistory));
   renderHistoryTags();
 };
 
-window.clearAllHistoryId = function() {
+window.clearAllHistoryId = function () {
   idHistory = [];
   localStorage.setItem(STORAGE_KEY_ID_HISTORY, JSON.stringify(idHistory));
   renderHistoryTags();
@@ -559,3 +695,82 @@ function initEventListeners() {
     }
   };
 }
+
+// Simulation: Test Comment
+const btnSimComment = document.getElementById('btn-sim-comment');
+if (btnSimComment) {
+  btnSimComment.addEventListener('click', () => {
+    let username = (document.getElementById('sim-username').value || '').trim();
+    let commentText = (document.getElementById('sim-comment-text').value || '').trim();
+    if (!username) username = `viewer_${Math.floor(Math.random() * 900 + 100)}`;
+    if (!commentText) commentText = 'Thử thách hay quá!';
+    handleUserComment(username, commentText);
+  });
+}
+
+// Simulation: Test Gift
+document.querySelectorAll('[data-gift]').forEach(btn => {
+  btn.addEventListener('click', (e) => {
+    let username = (document.getElementById('sim-username').value || '').trim();
+    if (!username) username = `viewer_${Math.floor(Math.random() * 900 + 100)}`;
+    const gift = e.currentTarget.dataset.gift;
+    const coins = parseInt(e.currentTarget.dataset.coins, 10);
+    handleUserGift(username, gift, coins);
+  });
+});
+
+// Simulation: Test Share
+const btnSimShare = document.getElementById('btn-sim-share');
+if (btnSimShare) {
+  btnSimShare.addEventListener('click', () => {
+    let username = (document.getElementById('sim-username').value || '').trim();
+    if (!username) username = `viewer_${Math.floor(Math.random() * 900 + 100)}`;
+    handleUserShare(username);
+  });
+}
+
+// Simulation: Test Like
+const btnSimLike = document.getElementById('btn-sim-like');
+if (btnSimLike) {
+  btnSimLike.addEventListener('click', () => {
+    let username = (document.getElementById('sim-username').value || '').trim();
+    if (!username) username = `viewer_${Math.floor(Math.random() * 900 + 100)}`;
+    handleUserLike(username, Math.floor(Math.random() * 20 + 5));
+  });
+}
+
+// Clear Log
+document.getElementById('btn-clear-log').addEventListener('click', () => {
+  liveState.logs = [];
+  renderLogList();
+  saveStateToStorage();
+});
+
+// Lắng nghe xem nếu màn hình Game gửi cập nhật Level hiện tại về Control Panel
+broadcastChannel.onmessage = (event) => {
+  if (!event.data) return;
+
+  if (event.data.type === 'GAME_LEVEL_UPDATE') {
+    liveState.currentLevel = event.data.payload.currentLevel;
+    renderAll();
+    saveStateToStorage();
+  } else if (event.data.type === 'RESET_ALL') {
+    // Xóa dữ liệu phiên live trong localStorage trước
+    localStorage.removeItem(STORAGE_KEY_STATE);
+    liveState = {
+      tiktokId: '',
+      currentLevel: 1,
+      totalLevels: 100,   // Mặc định 100 màn
+      isPaused: false,
+      tickerText: 'Hãy Follow và Tặng quà để cộng thêm màn thử thách cho Streamer nhé!',
+      tickerSpeed: 'normal',
+      tickerVisible: true,
+      followedUsers: [],
+      logs: []
+    };
+    idHistory = [];
+    addLog('Đã làm mới toàn bộ Bảng điều khiển từ Game', 'warn');
+    renderAll();
+    saveStateToStorage();
+  }
+};
