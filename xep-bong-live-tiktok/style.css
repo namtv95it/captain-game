@@ -41,16 +41,20 @@ html, body {
 /* ── Marquee Ticker Banner (Chữ Chạy Thông Báo) ────────────────── */
 .marquee-ticker-container {
   width: 100%;
+  max-width: 960px;
+  margin: 0 auto 4px auto;
   background: linear-gradient(90deg, #ff0050, #00f2fe, #7c6fee);
   background-size: 200% 200%;
   animation: gradientShift 6s ease infinite;
   color: #fff;
-  padding: 6px 0;
+  padding: 6px 14px;
+  border-radius: 999px;
   overflow: hidden;
   white-space: nowrap;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
   position: relative;
   z-index: 100;
+  box-sizing: border-box;
 }
 
 @keyframes gradientShift {
@@ -83,22 +87,48 @@ html, body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  background: rgba(15, 23, 42, 0.7);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  padding: 4px 16px;
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid rgba(255, 0, 80, 0.35);
+  padding: 6px 18px;
   border-radius: 999px;
-  backdrop-filter: blur(8px);
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 4px 20px rgba(255, 0, 80, 0.2);
+}
+
+.live-header-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 2px;
 }
 
 .live-tag {
-  font-size: 0.65rem;
+  font-size: 0.62rem;
   font-weight: 800;
   color: #ff0050;
-  letter-spacing: 1px;
+  letter-spacing: 0.8px;
   display: flex;
   align-items: center;
   gap: 4px;
+}
+
+.live-tag.pulse i {
+  animation: liveBlink 1.2s infinite;
+}
+
+@keyframes liveBlink {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.85); }
+}
+
+.live-user-badge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #38bdf8;
+  background: rgba(56, 189, 248, 0.15);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  padding: 1px 8px;
+  border-radius: 999px;
 }
 
 .live-counter {
@@ -115,6 +145,30 @@ html, body {
   padding: 0 4px;
 }
 
+/* ── Live Complete Card (Chiến Thắng Toàn Bộ Thử Thách Live) ───── */
+.live-complete-card {
+  background: rgba(15, 23, 42, 0.8);
+  border: 2px solid rgba(241, 196, 15, 0.4);
+  border-radius: 12px;
+  padding: 14px;
+  margin: 12px 0;
+  text-align: center;
+  box-shadow: 0 4px 15px rgba(241, 196, 15, 0.2);
+}
+
+.live-complete-card h3 {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #f1c40f;
+  margin: 6px 0 4px 0;
+}
+
+.live-complete-card p {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.8);
+  line-height: 1.4;
+}
+
 /* ── Banner Tạm Dừng Nhận Thử Thách ──────────────────────────── */
 .pause-live-banner {
   background: rgba(245, 158, 11, 0.9);
@@ -122,7 +176,9 @@ html, body {
   font-weight: 800;
   font-size: 0.85rem;
   text-align: center;
-  padding: 6px 12px;
+  padding: 6px 16px;
+  border-radius: 999px;
+  margin: 4px 0;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -801,11 +857,11 @@ html, body {
   position: relative;
   background: linear-gradient(160deg, rgba(30,30,68,0.85), rgba(15,15,35,0.95));
   border: 1px solid rgba(255,255,255,0.12);
-  border-radius: 32px;
-  padding: 44px 36px 36px;
+  border-radius: 28px;
+  padding: 24px 20px 20px;
   text-align: center;
-  max-width: 400px;
-  width: 90%;
+  max-width: 440px;
+  width: 92%;
   box-shadow: 0 32px 70px rgba(0,0,0,0.7),
               0 0 50px rgba(108,92,231,0.22);
   transform: scale(0.85) translateY(20px);
@@ -853,26 +909,26 @@ html, body {
 }
 
 .menu-logo-box {
-  margin-bottom: 24px;
+  margin-bottom: 16px;
   position: relative;
   z-index: 1;
 }
 .menu-logo-img {
-  width: 84px;
-  height: 84px;
-  border-radius: 24px;
+  width: 64px;
+  height: 64px;
+  border-radius: 18px;
   object-fit: cover;
   display: inline-block;
-  margin-bottom: 12px;
+  margin-bottom: 6px;
   border: 2px solid rgba(255,255,255,0.25);
   box-shadow: 0 10px 30px rgba(0,0,0,0.5),
               0 0 24px rgba(124,111,238,0.45);
   animation: menu-icon-bounce 2.6s ease-in-out infinite;
 }
 .menu-icon {
-  font-size: 58px;
+  font-size: 48px;
   display: inline-block;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
   filter: drop-shadow(0 6px 16px rgba(108,92,231,0.5));
   animation: menu-icon-bounce 2.6s ease-in-out infinite;
 }
@@ -882,14 +938,14 @@ html, body {
 }
 
 .menu-title {
-  font-size: 38px;
+  font-size: 28px;
   font-weight: 900;
   letter-spacing: -0.5px;
   background: linear-gradient(135deg, #ffffff 30%, #a29bfe 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  margin-bottom: 4px;
+  margin-bottom: 2px;
 }
 
 .menu-subtitle {
@@ -1046,9 +1102,116 @@ html, body {
   box-shadow: 0 4px 16px rgba(66,153,225,0.6), 0 0 0 1px rgba(99,179,237,0.3) inset;
 }
 
+/* Menu Group Label */
+.menu-group-label {
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: var(--text-dim);
+  letter-spacing: 1px;
+  margin-bottom: 2px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* 2 Column Grid for Mode Selection */
+.menu-grid-2col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.menu-grid-2col .menu-btn {
+  padding: 12px 14px;
+  gap: 10px;
+}
+
+.menu-grid-2col .menu-btn-icon {
+  width: 38px;
+  height: 38px;
+  font-size: 18px;
+  border-radius: 12px;
+}
+
+.menu-grid-2col .menu-btn-text strong {
+  font-size: 14px;
+}
+
+.menu-grid-2col .menu-btn-text small {
+  font-size: 11px;
+}
+
+/* TikTok Live Button Style */
+.menu-btn-tiktok-live {
+  background: linear-gradient(135deg, rgba(255, 0, 80, 0.18), rgba(0, 242, 254, 0.08));
+  border-color: rgba(255, 0, 80, 0.45);
+  box-shadow: 0 8px 24px rgba(255, 0, 80, 0.15);
+}
+
+.menu-btn-tiktok-live:hover {
+  background: linear-gradient(135deg, rgba(255, 0, 80, 0.3), rgba(0, 242, 254, 0.18));
+  border-color: #ff0050;
+  box-shadow: 0 12px 28px rgba(255, 0, 80, 0.35);
+}
+
+.menu-btn-tiktok-live .menu-btn-icon {
+  background: rgba(255, 0, 80, 0.2);
+}
+
+/* Streamer Control Button Style */
+.menu-btn-control {
+  background: linear-gradient(135deg, rgba(56, 189, 248, 0.18), rgba(15, 23, 42, 0.4));
+  border-color: rgba(56, 189, 248, 0.45);
+  position: relative;
+}
+
+.menu-btn-control:hover {
+  background: linear-gradient(135deg, rgba(56, 189, 248, 0.32), rgba(15, 23, 42, 0.6));
+  border-color: var(--accent);
+}
+
+.menu-btn-arrow {
+  margin-left: auto;
+  font-size: 12px;
+  color: var(--accent);
+  opacity: 0.7;
+}
+
+/* Small Buttons Row (BXH, Google, Hub) */
+.menu-row-flex {
+  display: flex;
+  gap: 8px;
+}
+
+.menu-btn-sm {
+  flex: 1;
+  padding: 10px 8px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-family: inherit;
+  font-size: 0.78rem;
+  font-weight: 700;
+  transition: all 0.2s ease;
+}
+
+.menu-btn-sm:hover {
+  background: rgba(255, 255, 255, 0.12);
+  transform: translateY(-2px);
+}
+
+.text-tiktok { color: #ff0050; }
+.text-accent { color: #38bdf8; }
+
 .menu-footer {
-  margin-top: 20px;
-  padding-top: 18px;
+  margin-top: 14px;
+  padding-top: 14px;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
   display: flex;
   justify-content: center;
@@ -1541,25 +1704,25 @@ html, body {
   border-color: rgba(255,255,255,0.3);
 }
 
-/* ── Toast ────────────────────────────────────────────────────── */
+/* ── Toast (Thông báo nổi phía TRÊN màn hình) ──────────────────── */
 .toast {
   position: fixed;
-  bottom: 100px;
+  top: 75px;
   left: 50%;
-  transform: translateX(-50%) translateY(20px);
-  background: rgba(30,30,60,0.95);
-  border: 1px solid rgba(255,255,255,0.12);
+  transform: translateX(-50%) translateY(-20px);
+  background: rgba(15, 23, 42, 0.92);
+  border: 1.5px solid rgba(255, 0, 80, 0.4);
   color: var(--text);
-  padding: 12px 24px;
+  padding: 10px 24px;
   border-radius: 50px;
   font-size: 14px;
   font-weight: 600;
   backdrop-filter: blur(16px);
-  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 20px rgba(255, 0, 80, 0.25);
   pointer-events: none;
   opacity: 0;
   z-index: 300;
-  transition: opacity 0.25s, transform 0.25s;
+  transition: opacity 0.3s var(--ease-spring), transform 0.3s var(--ease-spring);
   white-space: nowrap;
 }
 .toast.show {

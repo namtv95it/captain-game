@@ -65,11 +65,12 @@ function saveStateToStorage() {
 }
 
 // 4. ĐỒNG BỘ BROADCAST CHANNEL SANG MÀN HÌNH GAME
-function broadcastStateToGame() {
+function broadcastStateToGame(eventDetail = null) {
   saveStateToStorage();
   broadcastChannel.postMessage({
     type: 'STATE_UPDATE',
-    payload: liveState
+    payload: liveState,
+    eventDetail: eventDetail
   });
 }
 
@@ -110,7 +111,7 @@ function addLevelsManual(count) {
   liveState.totalLevels += count;
   addLog(`Cộng thủ công +${count} màn thử thách`, 'info');
   renderAll();
-  broadcastStateToGame();
+  broadcastStateToGame({ type: 'MANUAL', username: 'Streamer', addedLevels: count });
 }
 
 // 5.4. Đặt lại thử thách
@@ -128,7 +129,8 @@ function resetChallenge() {
 
 // 5.5. Xử lý sự kiện Follow (CHỐNG UNFOLLOW SPAM)
 function handleUserFollow(username) {
-  const user = username.trim().toLowerCase();
+  const user = username.trim() || 'Khán giả';
+  const cleanUser = user.toLowerCase();
   if (!user) return;
 
   if (liveState.isPaused) {
@@ -137,24 +139,24 @@ function handleUserFollow(username) {
   }
 
   // KIỂM TRA UNFOLLOW / RE-FOLLOW: Nếu đã follow rồi thì KHÔNG CỘNG MÀN
-  if (liveState.followedUsers.includes(user)) {
+  if (liveState.followedUsers.includes(cleanUser)) {
     addLog(`Bỏ qua @${user} (Tài khoản này đã follow trước đó!)`, 'warn');
     renderLogList();
     return;
   }
 
   // Đánh dấu người dùng đã follow & cộng +1 màn
-  liveState.followedUsers.push(user);
+  liveState.followedUsers.push(cleanUser);
   liveState.totalLevels += 1;
   addLog(`@${user} đã Follow -> +1 Màn thử thách!`, 'follow');
 
   renderAll();
-  broadcastStateToGame();
+  broadcastStateToGame({ type: 'FOLLOW', username: user, addedLevels: 1 });
 }
 
 // 5.6. Xử lý sự kiện Tặng Quà (Gift)
 function handleUserGift(username, giftName, coinValue) {
-  const user = username.trim() || 'Người xem';
+  const user = username.trim() || 'Khán giả';
   if (!coinValue || coinValue <= 0) return;
 
   if (liveState.isPaused) {
@@ -167,7 +169,7 @@ function handleUserGift(username, giftName, coinValue) {
   addLog(`@${user} tặng ${giftName} (${coinValue} xu) -> +${addedLevels} Màn!`, 'gift');
 
   renderAll();
-  broadcastStateToGame();
+  broadcastStateToGame({ type: 'GIFT', username: user, giftName: giftName, addedLevels: addedLevels });
 }
 
 // 5.7. Thêm Nhật ký Event
@@ -183,6 +185,18 @@ function renderAll() {
   // TikTok ID & History
   document.getElementById('tiktok-id-input').value = liveState.tiktokId;
   renderHistoryTags();
+
+  // Render thẻ trạng thái kết nối TikTok ID
+  const connectBadge = document.getElementById('connect-badge');
+  if (connectBadge) {
+    if (liveState.tiktokId) {
+      connectBadge.className = 'status-badge connected';
+      connectBadge.innerHTML = `<i class="fa-solid fa-circle-check"></i> Đã kết nối với TikTok Live ID: <strong>@${liveState.tiktokId}</strong>`;
+    } else {
+      connectBadge.className = 'status-badge disconnected';
+      connectBadge.innerHTML = `<i class="fa-solid fa-circle-xmark"></i> Chưa nhập TikTok Unique ID`;
+    }
+  }
 
   // Stats HUD
   document.getElementById('stat-current-level').textContent = liveState.currentLevel;

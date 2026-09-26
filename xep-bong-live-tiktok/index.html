@@ -26,15 +26,15 @@
     <div class="grid-overlay"></div>
   </div>
 
-  <!-- ── Banner Chữ Chạy Thông Báo (Marquee Ticker) ── -->
-  <div class="marquee-ticker-container" id="marquee-ticker" style="display: none;">
-    <div class="marquee-content" id="marquee-content">
-      <i class="fa-solid fa-bullhorn"></i> <span id="marquee-text">Hãy Follow và Tặng quà để cộng thêm màn thử thách cho Streamer nhé!</span>
-    </div>
-  </div>
-
   <!-- Main Game Container -->
   <div class="game-container">
+
+    <!-- ── Banner Chữ Chạy Thông Báo (Marquee Ticker) ── -->
+    <div class="marquee-ticker-container" id="marquee-ticker" style="display: none;">
+      <div class="marquee-content" id="marquee-content">
+        <i class="fa-solid fa-bullhorn"></i> <span id="marquee-text">Hãy Follow và Tặng quà để cộng thêm màn thử thách cho Streamer nhé!</span>
+      </div>
+    </div>
 
     <!-- ── Header ── -->
     <header class="header">
@@ -51,8 +51,14 @@
       </div>
 
       <div class="header-center">
-        <!-- TikTok Live HUD Counter -->
-        <div class="live-hud-box">
+        <!-- Logo Mặc Định khi Chơi Thường -->
+        <div class="game-logo" id="default-game-logo">
+          <img src="../captain.png" alt="Logo" class="logo-img" />
+          <span class="logo-text">Captain Áo Xanh</span>
+        </div>
+
+        <!-- TikTok Live HUD Counter (Chỉ hiện ở Chế độ TikTok Live) -->
+        <div class="live-hud-box" id="live-hud-box" style="display: none;">
           <div class="live-tag"><i class="fa-brands fa-tiktok"></i> TIKTOK LIVE</div>
           <div class="live-counter">
             <span>Thử thách:</span>
@@ -116,37 +122,56 @@
       </div>
 
       <div class="menu-actions">
-        <button class="menu-btn menu-btn-continue" id="btn-menu-continue">
-          <span class="menu-btn-icon"><i class="fa-solid fa-play"></i></span>
-          <span class="menu-btn-text">
-            <strong>Tiếp tục</strong>
-            <small id="menu-continue-desc">Màn 1</small>
-          </span>
-        </button>
+        <!-- NHÓM 1: CHẾ ĐỘ CHƠI GIAO DIỆN CHÍNH -->
+        <div class="menu-group-label"><i class="fa-solid fa-gamepad"></i> CHỌN CHẾ ĐỘ CHƠI</div>
+        
+        <div class="menu-grid-2col">
+          <!-- Nút 1: Chơi Thường (Classic) -->
+          <button class="menu-btn menu-btn-continue" id="btn-menu-classic">
+            <span class="menu-btn-icon"><i class="fa-solid fa-circle-play"></i></span>
+            <span class="menu-btn-text">
+              <strong>Chơi Thường</strong>
+              <small id="menu-continue-desc">Offline Mode</small>
+            </span>
+          </button>
 
-        <button class="menu-btn menu-btn-leaderboard" id="btn-menu-leaderboard">
-          <span class="menu-btn-icon"><i class="fa-solid fa-trophy"></i></span>
-          <span class="menu-btn-text">
-            <strong>Bảng Xếp Hạng</strong>
-            <small>Top cao thủ xếp bóng</small>
-          </span>
-        </button>
+          <!-- Nút 2: Chơi TikTok Live (Interactive) -->
+          <button class="menu-btn menu-btn-tiktok-live" id="btn-menu-tiktok">
+            <span class="menu-btn-icon text-tiktok"><i class="fa-brands fa-tiktok"></i></span>
+            <span class="menu-btn-text">
+              <strong class="text-tiktok">TikTok Live</strong>
+              <small>Tương tác khán giả</small>
+            </span>
+          </button>
+        </div>
 
-        <button class="menu-btn menu-btn-auth" id="btn-menu-auth">
-          <span class="menu-btn-icon" id="auth-btn-icon"><i class="fa-brands fa-google"></i></span>
+        <!-- NHÓM 2: DÀNH CHO STREAMER & BẢNG XẾP HẠNG -->
+        <div class="menu-group-label" style="margin-top: 10px;"><i class="fa-solid fa-sliders"></i> DÀNH CHO STREAMER</div>
+        
+        <!-- Nút 3: Mở Bảng Điều Khiển Streamer -->
+        <a href="control.html" target="_blank" class="menu-btn menu-btn-control" style="text-decoration: none;">
+          <span class="menu-btn-icon text-accent"><i class="fa-solid fa-sliders"></i></span>
           <span class="menu-btn-text">
-            <strong id="auth-btn-title">Đăng nhập Google</strong>
-            <small id="auth-btn-sub">Đồng bộ tên & avatar</small>
+            <strong class="text-accent">Bảng Điều Khiển Streamer</strong>
+            <small>Mở Dashboard quản lý Live (Tab mới)</small>
           </span>
-        </button>
-
-        <a href="../index.html" class="menu-btn menu-btn-hub" style="text-decoration: none;">
-          <span class="menu-btn-icon"><i class="fa-solid fa-house"></i></span>
-          <span class="menu-btn-text">
-            <strong>Về Captain Game Hub</strong>
-            <small>Chọn trò chơi khác</small>
-          </span>
+          <i class="fa-solid fa-arrow-up-right-from-square menu-btn-arrow"></i>
         </a>
+
+        <!-- NHÓM 3: TÀI KHOẢN & TIỆN ÍCH -->
+        <div class="menu-row-flex" style="margin-top: 6px;">
+          <button class="menu-btn-sm menu-btn-leaderboard" id="btn-menu-leaderboard" title="Bảng Xếp Hạng">
+            <i class="fa-solid fa-trophy" style="color:#f1c40f;"></i> <span>BXH Cao Thủ</span>
+          </button>
+
+          <button class="menu-btn-sm menu-btn-auth" id="btn-menu-auth" title="Đăng nhập Google">
+            <span id="auth-btn-icon"><i class="fa-brands fa-google"></i></span> <span id="auth-btn-title">Google</span>
+          </button>
+
+          <a href="../index.html" class="menu-btn-sm menu-btn-hub" style="text-decoration: none;" title="Về Captain Hub">
+            <i class="fa-solid fa-house"></i> <span>Game Hub</span>
+          </a>
+        </div>
       </div>
 
       <div class="menu-footer">
@@ -159,9 +184,16 @@
   <div class="win-overlay" id="win-overlay" role="dialog" aria-modal="true" aria-hidden="true">
     <div class="win-card">
       <img src="../captain.png" alt="Logo" class="win-logo-img" />
-      <h2 class="win-title">Xuất Sắc!</h2>
+      <h2 class="win-title" id="win-title">Xuất Sắc!</h2>
       <p class="win-subtitle" id="win-moves">Hoàn thành trong 0 bước!</p>
       <div class="win-stars" id="win-stars" aria-label="Điểm sao"></div>
+      
+      <!-- Thông báo Hoàn Thành Tất Cả Thử Thách Live -->
+      <div class="live-complete-card" id="live-complete-card" style="display: none;">
+        <i class="fa-solid fa-crown" style="color: #f1c40f; font-size: 1.8rem;"></i>
+        <h3>ĐÃ HOÀN THÀNH TẤT CẢ MÀN THỬ THÁCH!</h3>
+        <p>Streamer đã xuất sắc vượt qua toàn bộ màn chơi. Khán giả hãy tiếp tục <strong>Follow</strong> hoặc <strong>Tặng Quà</strong> để tạo thêm màn thử thách mới nhé!</p>
+      </div>
       
       <div class="win-actions">
         <button class="btn-next" id="btn-next">Màn tiếp theo <i class="fa-solid fa-arrow-right" style="margin-left: 6px;"></i></button>

@@ -216,6 +216,7 @@ const G = {
   level: 1, tubes: [], selectedTube: null, moveCount: 0,
   hintsUsed: 0, undoStack: [], config: null, initialTubes: null,
   isAnimating: false, hintTimer: null,
+  isLiveMode: false, // false = Chơi Thường (Classic), true = Chơi TikTok Live
 };
 
 // ── Tube Capacity Helper ───────────────────────────────────────────────────────
@@ -577,8 +578,17 @@ liveChannel.onmessage = (e) => {
     const prevTotal = liveData.totalLevels;
     liveData = { ...liveData, ...e.data.payload };
     
-    // Nếu có cộng thêm màn mới -> hiện Toast thông báo
-    if (liveData.totalLevels > prevTotal) {
+    // Nếu có sự kiện cộng màn (Follow / Gift) -> Hiện Toast thông báo phía TRÊN kèm tên khán giả
+    const detail = e.data.eventDetail;
+    if (detail) {
+      if (detail.type === 'FOLLOW') {
+        showToast(`<i class="fa-solid fa-user-plus" style="color:#ff0050;margin-right:6px;"></i> Cảm ơn <strong>@${detail.username}</strong> đã Follow! (+1 Màn)`);
+      } else if (detail.type === 'GIFT') {
+        showToast(`<i class="fa-solid fa-gift" style="color:#8b5cf6;margin-right:6px;"></i> Cảm ơn <strong>@${detail.username}</strong> đã tặng ${detail.giftName}! (+${detail.addedLevels} Màn)`);
+      } else if (detail.type === 'MANUAL') {
+        showToast(`<i class="fa-solid fa-plus-circle" style="color:#38bdf8;margin-right:6px;"></i> Streamer đã cộng thủ công: +${detail.addedLevels} Màn!`);
+      }
+    } else if (liveData.totalLevels > prevTotal) {
       const added = liveData.totalLevels - prevTotal;
       showToast(`<i class="fa-solid fa-gift" style="color:#ff0050;margin-right:6px;"></i> Khán giả vừa ủng hộ: +${added} Màn thử thách!`);
     }
@@ -600,17 +610,29 @@ function renderHeader() {
   const fogEl = document.getElementById('fog-badge');
   if (fogEl) fogEl.style.display = 'none';
 
-  // Cập nhật HUD TikTok Live (Màn hiện tại / Tổng số màn)
-  const progressText = document.getElementById('live-progress-text');
-  if (progressText) {
-    progressText.textContent = `${G.level} / ${liveData.totalLevels}`;
-  }
+  const defaultLogo = document.getElementById('default-game-logo');
+  const liveHudBox = document.getElementById('live-hud-box');
 
-  // Bắn ngược Level hiện tại về Control Panel để đồng bộ
-  liveChannel.postMessage({
-    type: 'GAME_LEVEL_UPDATE',
-    payload: { currentLevel: G.level }
-  });
+  if (G.isLiveMode) {
+    // Chế độ TikTok Live: Ẩn logo thường, hiện Live HUD đếm màn
+    if (defaultLogo) defaultLogo.style.display = 'none';
+    if (liveHudBox) liveHudBox.style.display = 'flex';
+
+    const progressText = document.getElementById('live-progress-text');
+    if (progressText) {
+      progressText.textContent = `${G.level} / ${liveData.totalLevels}`;
+    }
+
+    // Bắn ngược Level hiện tại về Control Panel
+    liveChannel.postMessage({
+      type: 'GAME_LEVEL_UPDATE',
+      payload: { currentLevel: G.level }
+    });
+  } else {
+    // Chơi Thường: Hiện logo game truyền thống, ẩn toàn bộ Live HUD
+    if (defaultLogo) defaultLogo.style.display = 'flex';
+    if (liveHudBox) liveHudBox.style.display = 'none';
+  }
 }
 
 function renderTickerBanner() {
@@ -619,7 +641,8 @@ function renderTickerBanner() {
   const textEl = document.getElementById('marquee-text');
   if (!container || !content || !textEl) return;
 
-  if (liveData.tickerVisible && liveData.tickerText) {
+  // Chỉ hiển thị Banner Chữ Chạy khi đang ở Chế độ TikTok Live
+  if (G.isLiveMode && liveData.tickerVisible && liveData.tickerText) {
     container.style.display = 'block';
     textEl.textContent = liveData.tickerText;
     content.className = `marquee-content ${liveData.tickerSpeed || 'normal'}`;
@@ -631,7 +654,9 @@ function renderTickerBanner() {
 function renderPauseBanner() {
   const banner = document.getElementById('pause-live-banner');
   if (!banner) return;
-  if (liveData.isPaused) {
+
+  // Chỉ hiển thị Banner Tạm Dừng khi ở Chế độ TikTok Live
+  if (G.isLiveMode && liveData.isPaused) {
     banner.style.display = 'flex';
   } else {
     banner.style.display = 'none';
@@ -1003,6 +1028,20 @@ function showWin() {
     });
   }
 
+  // Kiểm tra nếu đã chơi hoàn thành màn cuối cùng của Tổng số màn thử thách
+  const liveCompleteCard = document.getElementById('live-complete-card');
+  const btnNext = document.getElementById('btn-next');
+
+  if (liveCompleteCard) {
+    if (G.level >= liveData.totalLevels) {
+      liveCompleteCard.style.display = 'block';
+      if (btnNext) btnNext.style.display = 'none';
+    } else {
+      liveCompleteCard.style.display = 'none';
+      if (btnNext) btnNext.style.display = 'inline-flex';
+    }
+  }
+
   const overlay = document.getElementById('win-overlay');
   overlay.classList.add('show');
   overlay.setAttribute('aria-hidden', 'false');
@@ -1032,12 +1071,14 @@ function launchConfetti() {
 }
 
 // ── Toast ─────────────────────────────────────────────────────────────────────
-function showToast(msg) {
+let _toastTimer = null;
+function showToast(msg, duration = 5000) {
   const t = document.getElementById('toast');
   if (!t) return;
+  if (_toastTimer) clearTimeout(_toastTimer);
   t.innerHTML = msg;
   t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2600);
+  _toastTimer = setTimeout(() => t.classList.remove('show'), duration);
 }
 
 // ── Level Init ─────────────────────────────────────────────────────────────────
@@ -1105,7 +1146,7 @@ function showMenu() {
   const descEl = document.getElementById('menu-continue-desc');
   const statsEl = document.getElementById('menu-stats');
 
-  if (descEl) descEl.textContent = `Màn ${displayLevel}`;
+  if (descEl) descEl.textContent = `Màn ${displayLevel} (Tiếp tục)`;
 
   // Kiểm tra thứ hạng trên Firebase (chỉ hiển thị riêng thứ hạng nếu thuộc Top 1000)
   if (statsEl) {
@@ -1147,16 +1188,35 @@ function init() {
     });
   }
 
-  // Menu: Tiếp tục
-  const btnContinue = document.getElementById('btn-menu-continue');
-  if (btnContinue) {
-    btnContinue.addEventListener('click', () => {
+  // Menu: Chơi Thường (Classic Mode - Ẩn hoàn toàn tính năng TikTok Live)
+  const btnClassic = document.getElementById('btn-menu-classic');
+  if (btnClassic) {
+    btnClassic.addEventListener('click', () => {
       SFX.select();
       hideMenu();
+      G.isLiveMode = false;
       const { maxLevel, currentLevel } = loadGameData();
       const playLevel = Math.max(maxLevel, currentLevel);
       startLevel(playLevel);
-      setTimeout(() => showToast(`<i class="fa-solid fa-play" style="margin-right:6px;"></i> Tiếp tục Màn ${playLevel}`), 300);
+      renderHeader();
+      renderTickerBanner();
+      renderPauseBanner();
+      setTimeout(() => showToast(`<i class="fa-solid fa-gamepad" style="margin-right:6px;"></i> Bắt đầu Chơi Thường - Màn ${playLevel}`), 300);
+    });
+  }
+
+  // Menu: Chơi TikTok Live (Interactive Mode)
+  const btnTikTok = document.getElementById('btn-menu-tiktok');
+  if (btnTikTok) {
+    btnTikTok.addEventListener('click', () => {
+      SFX.select();
+      hideMenu();
+      G.isLiveMode = true;
+      startLevel(1);
+      renderHeader();
+      renderTickerBanner();
+      renderPauseBanner();
+      setTimeout(() => showToast(`<i class="fa-brands fa-tiktok" style="color:#ff0050;margin-right:6px;"></i> Bắt đầu Chế Độ TikTok Live!`), 300);
     });
   }
 
