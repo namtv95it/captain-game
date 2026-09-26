@@ -586,6 +586,8 @@ liveChannel.onmessage = (e) => {
         showToast(`<i class="fa-solid fa-user-plus" style="color:#ff0050;margin-right:6px;"></i> Cảm ơn <strong>@${detail.username}</strong> đã Follow! (+1 Màn)`);
       } else if (detail.type === 'GIFT') {
         showToast(`<i class="fa-solid fa-gift" style="color:#8b5cf6;margin-right:6px;"></i> Cảm ơn <strong>@${detail.username}</strong> đã tặng ${detail.giftName}! (+${detail.addedLevels} Màn)`);
+      } else if (detail.type === 'SHARE') {
+        showToast(`<i class="fa-solid fa-share-nodes" style="color:#00f2fe;margin-right:6px;"></i> Cảm ơn <strong>@${detail.username}</strong> đã Chia sẻ Live! (+1 Màn)`);
       } else if (detail.type === 'MANUAL') {
         showToast(`<i class="fa-solid fa-plus-circle" style="color:#38bdf8;margin-right:6px;"></i> Streamer đã cộng thủ công: +${detail.addedLevels} Màn!`);
       }

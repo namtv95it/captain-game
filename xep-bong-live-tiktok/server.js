@@ -258,7 +258,11 @@ var webServer = http.createServer(function(req, res) {
   if (urlPath === '/' || urlPath === '') urlPath = '/control.html';
 
   var filePath = path.join(__dirname, urlPath);
-  if (!filePath.startsWith(__dirname)) { res.writeHead(403); res.end('Forbidden'); return; }
+  if (urlPath === '/captain.png' || urlPath === '/../captain.png') {
+    filePath = path.join(__dirname, 'captain.png');
+  } else if (!filePath.startsWith(__dirname)) {
+    res.writeHead(403); res.end('Forbidden'); return;
+  }
 
   fs.readFile(filePath, function(err, data) {
     if (err) { res.writeHead(404, { 'Content-Type': 'text/plain' }); res.end('Not found: ' + urlPath); return; }
