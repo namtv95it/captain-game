@@ -49,7 +49,7 @@ body {
 /* ── Marquee Ticker Banner (Chữ Chạy Thông Báo) ────────────────── */
 .marquee-ticker-container {
   width: 100%;
-  max-width: 960px;
+  max-width: 520px;
   margin: 0 auto 4px auto;
   background: linear-gradient(90deg, #ff0050, #00f2fe, #7c6fee);
   background-size: 200% 200%;
@@ -132,13 +132,20 @@ body {
 }
 
 .live-tag {
-  font-size: 0.62rem;
+  font-size: 0.75rem;
   font-weight: 800;
-  color: #ff0050;
+  color: #ffffff;
   letter-spacing: 0.8px;
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 5px;
+  text-shadow: 0 0 8px rgba(255, 0, 80, 0.8);
+}
+
+.live-tag i {
+  color: #ff0050;
+  font-size: 0.85rem;
+  filter: drop-shadow(0 0 6px #ff0050);
 }
 
 .live-tag.pulse i {
@@ -2014,7 +2021,7 @@ body {
 /* ── Toast Stack Container (Nhiều thông báo nẩy đè lên nhau) ──────── */
 .toast-container {
   position: fixed;
-  top: 80px;
+  top: 105px;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
