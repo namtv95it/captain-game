@@ -6,13 +6,14 @@
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 const DEFAULT_CAPACITY = 4;
-const BALL_SIZE        = 52;   // px – base size, dynamically scaled in applyLevelSizing
-const BALL_GAP         = 4;    // px – gap inside .tube
-const TUBE_PAD_TOP     = 4;    // px – padding-top inside .tube
-const MAX_UNDO         = 40;
-const SAVE_KEY         = 'bsp_v1';   // bump version if save format changes
+const BALL_SIZE = 52;   // px – base size, dynamically scaled in applyLevelSizing
+const BALL_GAP = 4;    // px – gap inside .tube
+const TUBE_PAD_TOP = 4;    // px – padding-top inside .tube
+const MAX_UNDO = 40;
+const SAVE_KEY = 'bsp_v1';   // bump version if save format changes
+const LIVE_SESSION_KEY = 'tiktok_xep_bong_live_state'; // Key riêng cho dữ liệu phiên live TikTok
 
-const DIFFICULTY_NAME  = ['', 'DỄ', 'DỄ', 'TB', 'TB', 'KHÓ', 'KHÓ', 'SIÊU KHÓ'];
+const DIFFICULTY_NAME = ['', 'DỄ', 'DỄ', 'TB', 'TB', 'KHÓ', 'KHÓ', 'SIÊU KHÓ'];
 
 const COLORS = [
   { bg: 'linear-gradient(145deg, #ff6b6b, #ee5253)', shadow: 'rgba(238, 82, 83, 0.45)' }, // 0 Đỏ san hô
@@ -42,7 +43,7 @@ function loadSoundSettings() {
       if (typeof data.volume === 'number') soundVolume = Math.max(0, Math.min(1, data.volume));
       if (typeof data.muted === 'boolean') isSoundMuted = data.muted;
     }
-  } catch (_) {}
+  } catch (_) { }
 }
 
 function saveSoundSettings() {
@@ -51,7 +52,7 @@ function saveSoundSettings() {
       volume: soundVolume,
       muted: isSoundMuted
     }));
-  } catch (_) {}
+  } catch (_) { }
 }
 
 loadSoundSettings();
@@ -74,7 +75,7 @@ function snd(fn) {
   try {
     const ctx = getCtx();
     if (ctx) fn(ctx, soundVolume);
-  } catch (_) {}
+  } catch (_) { }
 }
 
 const SFX = {
@@ -113,7 +114,7 @@ const SFX = {
     snd((ctx, vol) => {
       const t = ctx.currentTime;
       const size = Math.floor(ctx.sampleRate * 0.18);
-      const buf  = ctx.createBuffer(1, size, ctx.sampleRate);
+      const buf = ctx.createBuffer(1, size, ctx.sampleRate);
       const data = buf.getChannelData(0);
       for (let i = 0; i < size; i++) data[i] = (Math.random() * 2 - 1) * (1 - i / size) ** 2;
       const src = ctx.createBufferSource();
@@ -263,7 +264,7 @@ function getLevelConfig(level) {
  *  3. Kiểm tra hợp lệ: phải có ít nhất 1 nước đi và chưa thắng sẵn.
  */
 function generateLevel(cfg) {
-  const cap    = cfg.capacity || DEFAULT_CAPACITY;
+  const cap = cfg.capacity || DEFAULT_CAPACITY;
   const colors = cfg.colors;
   const MAX_RUN = Math.max(2, Math.floor(cap / 3)); // chuỗi tối đa cho phép trong ống
 
@@ -346,7 +347,7 @@ function generateLevel(cfg) {
     const emptyCount = tubes.filter(t => t.length === 0).length;
     if (emptyCount === 0) {
       const sortedIdx = tubes.map((t, idx) => ({ idx, len: t.length }))
-                             .sort((a, b) => a.len - b.len);
+        .sort((a, b) => a.len - b.len);
       const emptiest = sortedIdx[0].idx;
       while (tubes[emptiest].length > 0) {
         const ball = tubes[emptiest].pop();
@@ -527,7 +528,7 @@ function applyLevelSizing() {
   // Ống có nhiều bóng (cap >= 12, cap = 16 ở mức khó) cần trừ bù khoảng cách an toàn lớn hơn
   const safeMargin = cap >= 12 ? 65 : (cap >= 8 ? 50 : 35);
   const availableH = Math.max(60, areaH - safeMargin);
-  
+
   // ballGap nhỏ hơn ở các ống dài để tiết kiệm chiều cao
   const ballGap = cap >= 12 ? 1 : (cap >= 8 ? 2 : Math.max(2, Math.min(4, Math.floor(maxBallW / 12))));
 
@@ -557,27 +558,27 @@ const liveChannel = new BroadcastChannel(LIVE_CHANNEL_NAME);
 let liveData = {
   tiktokId: '',
   currentLevel: 1,
-  totalLevels: 50,
+  totalLevels: 100,   // Mặc định 100 màn thử thách
   isPaused: false,
   tickerText: 'Hãy Follow và Tặng quà để cộng thêm màn thử thách cho Streamer nhé!',
   tickerSpeed: 'normal',
   tickerVisible: true
 };
 
-// Đọc liveState từ localStorage nếu có sẵn
+// Đọc liveState từ LIVE_SESSION_KEY nếu có sẵn (lưu riêng cho phiên live)
 try {
-  const savedLive = localStorage.getItem('tiktok_xep_bong_live_state');
+  const savedLive = localStorage.getItem(LIVE_SESSION_KEY);
   if (savedLive) {
     liveData = { ...liveData, ...JSON.parse(savedLive) };
   }
-} catch (_) {}
+} catch (_) { }
 
 // Lắng nghe tín hiệu đồng bộ thời gian thực từ control.html
 liveChannel.onmessage = (e) => {
   if (e.data && e.data.type === 'STATE_UPDATE') {
     const prevTotal = liveData.totalLevels;
     liveData = { ...liveData, ...e.data.payload };
-    
+
     // Nếu có sự kiện cộng màn (Follow / Gift) -> Hiện Toast thông báo phía TRÊN kèm tên khán giả
     const detail = e.data.eventDetail;
     if (detail) {
@@ -622,6 +623,13 @@ function renderHeader() {
     if (progressText) {
       progressText.textContent = `${G.level} / ${liveData.totalLevels}`;
     }
+
+    // Lưu currentLevel vào LIVE_SESSION_KEY để bảo toàn tiến trình phiên live
+    try {
+      const saved = JSON.parse(localStorage.getItem(LIVE_SESSION_KEY) || '{}');
+      saved.currentLevel = G.level;
+      localStorage.setItem(LIVE_SESSION_KEY, JSON.stringify(saved));
+    } catch (_) {}
 
     // Bắn ngược Level hiện tại về Control Panel
     liveChannel.postMessage({
@@ -669,7 +677,7 @@ function renderTubes() {
 
   G.tubes.forEach((tube, idx) => {
     const isSelected = G.selectedTube === idx;
-    const stackSize  = isSelected ? getStackSize(idx) : 0;
+    const stackSize = isSelected ? getStackSize(idx) : 0;
 
     const wrapper = document.createElement('div');
     wrapper.className = 'tube-wrapper' + (isSelected ? ' selected' : '');
@@ -685,7 +693,7 @@ function renderTubes() {
     // Render balls reversed (top game-ball → first DOM element)
     // This works with flex-direction:column + justify-content:flex-end
     [...tube].reverse().forEach((ball, domIdx) => {
-      const isTopBall   = isSelected && domIdx === 0;
+      const isTopBall = isSelected && domIdx === 0;
       const isStackBall = isSelected && domIdx > 0 && domIdx < stackSize;
       tubeEl.appendChild(makeBallEl(ball, isTopBall, isStackBall));
     });
@@ -729,14 +737,14 @@ function renderTubes() {
 function makeBallEl(ball, isTopBall = false, isStackBall = false) {
   const el = document.createElement('div');
   el.className = ['ball',
-    isTopBall   ? 'ball-lifted' : '',
-    isStackBall ? 'ball-stack'  : '',
+    isTopBall ? 'ball-lifted' : '',
+    isStackBall ? 'ball-stack' : '',
   ].filter(Boolean).join(' ');
 
   const c = COLORS[ball.colorIndex];
   if (c) {
     el.style.background = c.bg;
-    el.style.boxShadow  = `0 4px 10px ${c.shadow}, inset 0 1px 1px rgba(255, 255, 255, 0.4)`;
+    el.style.boxShadow = `0 4px 10px ${c.shadow}, inset 0 1px 1px rgba(255, 255, 255, 0.4)`;
   }
   return el;
 }
@@ -761,40 +769,40 @@ function makeBallEl(ball, isTopBall = false, isStackBall = false) {
 function animateAndMove(fromIdx, toIdx, afterCb) {
   G.isAnimating = true;
 
-  const fromTubeEl    = document.getElementById(`tube-${fromIdx}`);
-  const toTubeEl      = document.getElementById(`tube-${toIdx}`);
+  const fromTubeEl = document.getElementById(`tube-${fromIdx}`);
+  const toTubeEl = document.getElementById(`tube-${toIdx}`);
   const fromWrapperEl = document.getElementById(`tube-wrapper-${fromIdx}`);
-  const toWrapperEl   = document.getElementById(`tube-wrapper-${toIdx}`);
+  const toWrapperEl = document.getElementById(`tube-wrapper-${toIdx}`);
 
   if (!fromTubeEl || !toTubeEl) { G.isAnimating = false; afterCb(); return; }
 
   const stackSize = getStackSize(fromIdx);
-  const ballEls   = [...fromTubeEl.querySelectorAll('.ball')].slice(0, stackSize);
+  const ballEls = [...fromTubeEl.querySelectorAll('.ball')].slice(0, stackSize);
   if (!ballEls.length) { G.isAnimating = false; afterCb(); return; }
 
-  const toRect    = toTubeEl.getBoundingClientRect();
-  const N         = G.tubes[toIdx].length;
-  const cap       = getTubeCapacity();
+  const toRect = toTubeEl.getBoundingClientRect();
+  const N = G.tubes[toIdx].length;
+  const cap = getTubeCapacity();
   const sampleBall = ballEls[0];
-  const ballH     = sampleBall ? sampleBall.offsetHeight : BALL_SIZE;
-  const STEP      = ballH + BALL_GAP;
-  const srcTube   = G.tubes[fromIdx];
+  const ballH = sampleBall ? sampleBall.offsetHeight : BALL_SIZE;
+  const STEP = ballH + BALL_GAP;
+  const srcTube = G.tubes[fromIdx];
   // stack[0] = top ball of source, stack[last] = bottom of stack
-  const stack     = srcTube.slice(srcTube.length - stackSize).reverse();
+  const stack = srcTube.slice(srcTube.length - stackSize).reverse();
 
   // Cruising altitude – clear both tube caps by ≥ 28 px
   const fromCapTop = fromWrapperEl ? fromWrapperEl.getBoundingClientRect().top : 0;
-  const toCapTop   = toWrapperEl   ? toWrapperEl.getBoundingClientRect().top   : 0;
-  const highY  = Math.min(fromCapTop, toCapTop) - ballH - 28;
-  const destX  = toRect.left + (toRect.width - ballH) / 2;
+  const toCapTop = toWrapperEl ? toWrapperEl.getBoundingClientRect().top : 0;
+  const highY = Math.min(fromCapTop, toCapTop) - ballH - 28;
+  const destX = toRect.left + (toRect.width - ballH) / 2;
 
   // ── Timing ───────────────────────────────────────────────────────────────
-  const T_RISE  = 55;    // ms – rise phase
+  const T_RISE = 55;    // ms – rise phase
   const T_SLIDE = 75;    // ms – horizontal slide
-  const T_DROP  = 70;    // ms – drop into tube
+  const T_DROP = 70;    // ms – drop into tube
   const STAGGER = 65;    // ms between starting each ball
 
-  const flyEls  = [];
+  const flyEls = [];
   let doneCount = 0;     // incremented each time a ball lands; triggers cleanup at stackSize
   SFX.move();
 
@@ -803,16 +811,16 @@ function animateAndMove(fromIdx, toIdx, afterCb) {
    * Called via staggered setTimeout so balls overlap in motion.
    */
   function startBall(i) {
-    const ball     = stack[i];
-    const domEl    = ballEls[i];
+    const ball = stack[i];
+    const domEl = ballEls[i];
     const ballRect = domEl.getBoundingClientRect();
 
     // i=0 (top ball) → lowest dest slot (N);  i=last → highest slot (N+stackSize-1)
     const slotIdx = N + i;
-    const destY   = toRect.top + TUBE_PAD_TOP + (cap - 1 - slotIdx) * STEP;
+    const destY = toRect.top + TUBE_PAD_TOP + (cap - 1 - slotIdx) * STEP;
 
     const fly = document.createElement('div');
-    const c   = COLORS[ball.colorIndex];
+    const c = COLORS[ball.colorIndex];
     fly.className = 'ball';   // inherits CSS shine via ::after
     fly.style.cssText = `
       position:fixed; z-index:${9999 - i}; pointer-events:none;
@@ -892,7 +900,7 @@ function onTubeClick(idx) {
 
   // ── Attempt move ──────────────────────────────────────────────────────────
   if (canMove(G.selectedTube, idx)) {
-    const from     = G.selectedTube;
+    const from = G.selectedTube;
     G.selectedTube = null;
     render();  // remove selection highlight before animation starts
 
@@ -950,7 +958,7 @@ function clearHint() {
 function onUndo() {
   if (!G.undoStack.length || G.isAnimating) return;
   hideNoMoves();
-  G.tubes     = G.undoStack.pop();
+  G.tubes = G.undoStack.pop();
   G.moveCount = Math.max(0, G.moveCount - 1);
   G.selectedTube = null;
   SFX.select();
@@ -960,12 +968,12 @@ function onUndo() {
 
 function onReset() {
   hideNoMoves();
-  G.tubes        = cloneTubes(G.initialTubes);
-  G.moveCount    = 0;
-  G.undoStack    = [];
+  G.tubes = cloneTubes(G.initialTubes);
+  G.moveCount = 0;
+  G.undoStack = [];
   G.selectedTube = null;
-  G.hintsUsed    = 0;
-  G.isAnimating  = false;
+  G.hintsUsed = 0;
+  G.isAnimating = false;
   clearHint();
   render();
 }
@@ -1004,8 +1012,8 @@ function showWin() {
   const stars = calcStars();
   for (let i = 1; i <= 3; i++) {
     const s = document.createElement('span');
-    s.className   = 'win-star' + (i <= stars ? ' active' : '');
-    s.innerHTML   = i <= stars ? '<i class="fa-solid fa-star" style="color: #f1c40f;"></i>' : '<i class="fa-regular fa-star" style="color: rgba(255,255,255,0.3);"></i>';
+    s.className = 'win-star' + (i <= stars ? ' active' : '');
+    s.innerHTML = i <= stars ? '<i class="fa-solid fa-star" style="color: #f1c40f;"></i>' : '<i class="fa-regular fa-star" style="color: rgba(255,255,255,0.3);"></i>';
     starsEl.appendChild(s);
   }
 
@@ -1051,7 +1059,7 @@ function showWin() {
 }
 
 function launchConfetti() {
-  const palette = ['#ff6b6b','#ffeaa7','#55efc4','#a29bfe','#74b9ff','#fd79a8','#81ecec','#b8e994'];
+  const palette = ['#ff6b6b', '#ffeaa7', '#55efc4', '#a29bfe', '#74b9ff', '#fd79a8', '#81ecec', '#b8e994'];
   for (let i = 0; i < 90; i++) {
     setTimeout(() => {
       const p = document.createElement('div');
@@ -1104,16 +1112,16 @@ function showToast(msg, duration = 5000) {
 // ── Level Init ─────────────────────────────────────────────────────────────────
 function startLevel(level) {
   hideNoMoves();
-  G.level        = level;
-  const cfg      = getLevelConfig(level);
-  G.config       = cfg;
-  G.tubes        = generateLevel(cfg);
+  G.level = level;
+  const cfg = getLevelConfig(level);
+  G.config = cfg;
+  G.tubes = generateLevel(cfg);
   G.initialTubes = cloneTubes(G.tubes);
   G.selectedTube = null;
-  G.moveCount    = 0;
-  G.undoStack    = [];
-  G.hintsUsed    = 0;
-  G.isAnimating  = false;
+  G.moveCount = 0;
+  G.undoStack = [];
+  G.hintsUsed = 0;
+  G.isAnimating = false;
   clearHint();
   render();
   saveGame();
@@ -1151,10 +1159,10 @@ function saveGame() {
     const current = loadGameData();
     const newMaxLevel = Math.max(current.maxLevel, G.level || 1);
     localStorage.setItem(SAVE_KEY, JSON.stringify({
-      maxLevel:     newMaxLevel,
+      maxLevel: newMaxLevel,
       currentLevel: G.level || 1
     }));
-  } catch (_) {}
+  } catch (_) { }
 }
 
 // ── Menu Screen ────────────────────────────────────────────────────────────────
@@ -1426,7 +1434,7 @@ function init() {
     }
 
     if (btnMuteToggle) {
-      btnMuteToggle.innerHTML = isSoundMuted 
+      btnMuteToggle.innerHTML = isSoundMuted
         ? '<i class="fa-solid fa-volume-xmark" style="color:#ff7675;"></i>'
         : '<i class="fa-solid fa-volume-high"></i>';
     }
@@ -1488,7 +1496,7 @@ function setupCustomCursor() {
   const colors = [
     { border: 'rgba(124, 111, 238, 0.75)', glow: 'rgba(124, 111, 238, 0.45)', bg: 'rgba(124, 111, 238, 0.08)' },
     { border: 'rgba(116, 185, 255, 0.75)', glow: 'rgba(116, 185, 255, 0.45)', bg: 'rgba(116, 185, 255, 0.08)' },
-    { border: 'rgba(85, 239, 196, 0.75)',  glow: 'rgba(85, 239, 196, 0.45)',  bg: 'rgba(85, 239, 196, 0.08)' },
+    { border: 'rgba(85, 239, 196, 0.75)', glow: 'rgba(85, 239, 196, 0.45)', bg: 'rgba(85, 239, 196, 0.08)' },
     { border: 'rgba(255, 234, 167, 0.75)', glow: 'rgba(255, 234, 167, 0.45)', bg: 'rgba(255, 234, 167, 0.08)' },
     { border: 'rgba(253, 121, 168, 0.75)', glow: 'rgba(253, 121, 168, 0.45)', bg: 'rgba(253, 121, 168, 0.08)' },
     { border: 'rgba(255, 159, 243, 0.75)', glow: 'rgba(255, 159, 243, 0.45)', bg: 'rgba(255, 159, 243, 0.08)' },
@@ -1502,7 +1510,7 @@ function setupCustomCursor() {
     const isBubble = Math.random() > 0.35; // Ưu tiên phần lớn là bong bóng trong suốt
     const size = isBubble ? (Math.floor(Math.random() * 9) + 7) : (Math.floor(Math.random() * 3) + 2);
     const colorObj = colors[Math.floor(Math.random() * colors.length)];
-    
+
     // Tỏa nhẹ quanh vị trí chuột
     const angle = Math.random() * Math.PI * 2;
     const distance = Math.random() * 18 + 4;
@@ -1568,7 +1576,7 @@ async function showLeaderboardOverlay() {
         const ms = item.timestamp.toMillis ? item.timestamp.toMillis() : Number(item.timestamp);
         if (!isNaN(ms)) {
           const d = new Date(ms);
-          dateStr = `${d.getDate()}/${d.getMonth()+1}/${d.getFullYear()}`;
+          dateStr = `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()}`;
         }
       }
       const metaHtml = dateStr ? `<span class="lb-meta">Đạt được: ${dateStr}</span>` : '';
@@ -1600,7 +1608,7 @@ function hideLeaderboardOverlay() {
 
 /** Helper escape HTML tránh XSS */
 function escapeHtml(str) {
-  return str.replace(/[&<>'"]/g, 
+  return str.replace(/[&<>'"]/g,
     tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
   );
 }

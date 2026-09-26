@@ -14,7 +14,7 @@ const broadcastChannel = new BroadcastChannel(CHANNEL_NAME);
 let liveState = {
   tiktokId: '',
   currentLevel: 1,
-  totalLevels: 50,
+  totalLevels: 100,   // Mặc định 100 màn thử thách
   isPaused: false, // Trạng thái tạm dừng nhận thử thách
   tickerText: 'Hãy Follow và Tặng quà để cộng thêm màn thử thách cho Streamer nhé!',
   tickerSpeed: 'normal', // fast, normal, slow
@@ -116,12 +116,17 @@ function addLevelsManual(count) {
 
 // 5.4. Đặt lại thử thách phiên live
 function resetChallenge() {
-  if (confirm('Bạn có chắc muốn đặt lại Thử thách phiên live về Màn 1 / Mặc định 50 màn?')) {
+  if (confirm('Bạn có chắc muốn ĐẶT LẠI TOÀN BỘ PHÊN LIVE này?\n\u2022 Xóa toàn bộ dữ liệu phiên live trong localStorage\n\u2022 Đặt về Màn 1 / Mặc định 100 màn\n\u2022 Xóa danh sách Follower đã lưu')) {
+    // Xóa toàn bộ dữ liệu phiên live trong localStorage
+    localStorage.removeItem(STORAGE_KEY_STATE);
+
+    // Reset lại liveState về mặc định
     liveState.currentLevel = 1;
-    liveState.totalLevels = 50;
+    liveState.totalLevels = 100;
     liveState.isPaused = false;
     liveState.followedUsers = [];
-    addLog('Đặt lại Thử thách phiên live về Màn 1 / 50 Màn', 'warn');
+    liveState.logs = [];
+    addLog('\u0110ã ĐẶT LẠI phiên live: Xóa dữ liệu localStorage + về Màn 1 / 100 Màn', 'warn');
     renderAll();
     broadcastStateToGame();
   }
@@ -398,10 +403,12 @@ function initEventListeners() {
       renderAll();
       saveStateToStorage();
     } else if (event.data.type === 'RESET_ALL') {
+      // Xóa dữ liệu phiên live trong localStorage trước
+      localStorage.removeItem(STORAGE_KEY_STATE);
       liveState = {
         tiktokId: '',
         currentLevel: 1,
-        totalLevels: 50,
+        totalLevels: 100,   // Mặc định 100 màn
         isPaused: false,
         tickerText: 'Hãy Follow và Tặng quà để cộng thêm màn thử thách cho Streamer nhé!',
         tickerSpeed: 'normal',

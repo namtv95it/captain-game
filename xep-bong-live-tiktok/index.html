@@ -32,7 +32,8 @@
     <!-- ── Banner Chữ Chạy Thông Báo (Marquee Ticker) ── -->
     <div class="marquee-ticker-container" id="marquee-ticker" style="display: none;">
       <div class="marquee-content" id="marquee-content">
-        <i class="fa-solid fa-bullhorn"></i> <span id="marquee-text">Hãy Follow và Tặng quà để cộng thêm màn thử thách cho Streamer nhé!</span>
+        <i class="fa-solid fa-bullhorn"></i> <span id="marquee-text">Hãy Follow và Tặng quà để cộng thêm màn thử thách
+          cho Streamer nhé!</span>
       </div>
     </div>
 
@@ -48,16 +49,8 @@
             <span class="difficulty-label" id="difficulty-name">DỄ</span>
           </div>
         </div>
-      </div>
 
-      <div class="header-center">
-        <!-- Logo Mặc Định khi Chơi Thường -->
-        <div class="game-logo" id="default-game-logo">
-          <img src="../captain.png" alt="Logo" class="logo-img" />
-          <span class="logo-text">Captain Áo Xanh</span>
-        </div>
-
-        <!-- TikTok Live HUD Counter (Chỉ hiện ở Chế độ TikTok Live) -->
+        <!-- TikTok Live HUD Counter (Đặt ở góc trái Header) -->
         <div class="live-hud-box" id="live-hud-box" style="display: none;">
           <div class="live-tag"><i class="fa-brands fa-tiktok"></i> TIKTOK LIVE</div>
           <div class="live-counter">
@@ -65,6 +58,14 @@
             <strong id="live-progress-text">1 / 50</strong>
             <span>màn</span>
           </div>
+        </div>
+      </div>
+
+      <div class="header-center">
+        <!-- Logo Mặc Định khi Chơi Thường -->
+        <div class="game-logo" id="default-game-logo">
+          <img src="../captain.png" alt="Logo" class="logo-img" />
+          <span class="logo-text">Captain Áo Xanh</span>
         </div>
       </div>
 
@@ -82,7 +83,8 @@
               <button class="btn-mute-toggle" id="btn-mute-toggle" title="Bật/Tắt âm">
                 <i class="fa-solid fa-volume-xmark"></i>
               </button>
-              <input type="range" id="sound-slider" min="0" max="100" value="80" step="5" aria-label="Âm lượng hiệu ứng" />
+              <input type="range" id="sound-slider" min="0" max="100" value="80" step="5"
+                aria-label="Âm lượng hiệu ứng" />
             </div>
           </div>
         </div>
@@ -124,7 +126,7 @@
       <div class="menu-actions">
         <!-- NHÓM 1: CHẾ ĐỘ CHƠI GIAO DIỆN CHÍNH -->
         <div class="menu-group-label"><i class="fa-solid fa-gamepad"></i> CHỌN CHẾ ĐỘ CHƠI</div>
-        
+
         <div class="menu-grid-2col">
           <!-- Nút 1: Chơi Thường (Classic) -->
           <button class="menu-btn menu-btn-continue" id="btn-menu-classic">
@@ -146,8 +148,9 @@
         </div>
 
         <!-- NHÓM 2: DÀNH CHO STREAMER & BẢNG XẾP HẠNG -->
-        <div class="menu-group-label" style="margin-top: 10px;"><i class="fa-solid fa-sliders"></i> DÀNH CHO STREAMER</div>
-        
+        <div class="menu-group-label" style="margin-top: 10px;"><i class="fa-solid fa-sliders"></i> DÀNH CHO STREAMER
+        </div>
+
         <!-- Nút 3: Mở Bảng Điều Khiển Streamer -->
         <a href="control.html" target="_blank" class="menu-btn menu-btn-control" style="text-decoration: none;">
           <span class="menu-btn-icon text-accent"><i class="fa-solid fa-sliders"></i></span>
@@ -168,7 +171,8 @@
             <span id="auth-btn-icon"><i class="fa-brands fa-google"></i></span> <span id="auth-btn-title">Google</span>
           </button>
 
-          <a href="../index.html" class="menu-btn-sm menu-btn-hub" style="text-decoration: none;" title="Về Captain Hub">
+          <a href="../index.html" class="menu-btn-sm menu-btn-hub" style="text-decoration: none;"
+            title="Về Captain Hub">
             <i class="fa-solid fa-house"></i> <span>Game Hub</span>
           </a>
         </div>
@@ -187,16 +191,18 @@
       <h2 class="win-title" id="win-title">Xuất Sắc!</h2>
       <p class="win-subtitle" id="win-moves">Hoàn thành trong 0 bước!</p>
       <div class="win-stars" id="win-stars" aria-label="Điểm sao"></div>
-      
+
       <!-- Thông báo Hoàn Thành Tất Cả Thử Thách Live -->
       <div class="live-complete-card" id="live-complete-card" style="display: none;">
         <i class="fa-solid fa-crown" style="color: #f1c40f; font-size: 1.8rem;"></i>
         <h3>ĐÃ HOÀN THÀNH TẤT CẢ MÀN THỬ THÁCH!</h3>
-        <p>Streamer đã xuất sắc vượt qua toàn bộ màn chơi. Khán giả hãy tiếp tục <strong>Follow</strong> hoặc <strong>Tặng Quà</strong> để tạo thêm màn thử thách mới nhé!</p>
+        <p>Streamer đã xuất sắc vượt qua toàn bộ màn chơi. Khán giả hãy tiếp tục <strong>Follow</strong> hoặc
+          <strong>Tặng Quà</strong> để tạo thêm màn thử thách mới nhé!</p>
       </div>
-      
+
       <div class="win-actions">
-        <button class="btn-next" id="btn-next">Màn tiếp theo <i class="fa-solid fa-arrow-right" style="margin-left: 6px;"></i></button>
+        <button class="btn-next" id="btn-next">Màn tiếp theo <i class="fa-solid fa-arrow-right"
+            style="margin-left: 6px;"></i></button>
         <a href="index.html" class="btn-win-home" id="btn-win-home">
           <i class="fa-solid fa-house"></i> Trang chủ
         </a>
@@ -208,12 +214,14 @@
   <div class="leaderboard-overlay" id="leaderboard-overlay" role="dialog" aria-modal="true" aria-hidden="true">
     <div class="leaderboard-card">
       <div class="leaderboard-header">
-        <button class="btn-back" id="btn-leaderboard-back" aria-label="Quay lại"><i class="fa-solid fa-arrow-left"></i></button>
-        <h2 class="leaderboard-title"><i class="fa-solid fa-trophy" style="color: #f1c40f; margin-right: 8px;"></i>Bảng Xếp Hạng</h2>
+        <button class="btn-back" id="btn-leaderboard-back" aria-label="Quay lại"><i
+            class="fa-solid fa-arrow-left"></i></button>
+        <h2 class="leaderboard-title"><i class="fa-solid fa-trophy" style="color: #f1c40f; margin-right: 8px;"></i>Bảng
+          Xếp Hạng</h2>
         <div class="levels-placeholder"></div>
       </div>
       <p class="leaderboard-subtitle">Top 10 người chơi xuất sắc nhất</p>
-      
+
       <div class="leaderboard-list-container">
         <ul class="leaderboard-list" id="leaderboard-list">
           <li class="lb-loading">Đang tải bảng xếp hạng...</li>
