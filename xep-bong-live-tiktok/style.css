@@ -86,7 +86,7 @@ html, body {
 .live-hud-box {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-start;
   background: rgba(15, 23, 42, 0.85);
   border: 1px solid rgba(255, 0, 80, 0.35);
   padding: 6px 18px;
@@ -562,6 +562,8 @@ html, body {
   align-items: center;
   justify-content: center;
   overflow: hidden;
+  margin-top: 60px;
+  transition: margin-top 0.3s ease;
 }
 
 .tubes-container {
@@ -1201,9 +1203,9 @@ html, body {
   transition: all 0.2s ease;
 }
 
-.menu-btn-sm:hover {
-  background: rgba(255, 255, 255, 0.12);
-  transform: translateY(-2px);
+.menu-btn-sm.menu-btn-reset-all:hover {
+  background: rgba(239, 68, 68, 0.2);
+  border-color: rgba(239, 68, 68, 0.5);
 }
 
 .text-tiktok { color: #ff0050; }
@@ -1704,30 +1706,65 @@ html, body {
   border-color: rgba(255,255,255,0.3);
 }
 
-/* ── Toast (Thông báo nổi phía TRÊN màn hình) ──────────────────── */
-.toast {
+/* ── Toast Stack Container (Nhiều thông báo nẩy đè lên nhau) ──────── */
+.toast-container {
   position: fixed;
-  top: 75px;
+  top: 80px;
   left: 50%;
-  transform: translateX(-50%) translateY(-20px);
-  background: rgba(15, 23, 42, 0.92);
-  border: 1.5px solid rgba(255, 0, 80, 0.4);
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  z-index: 350;
+  pointer-events: none;
+  width: max-content;
+  max-width: 90vw;
+}
+
+.toast-item {
+  background: rgba(15, 23, 42, 0.95);
+  border: 1.5px solid rgba(255, 0, 80, 0.5);
   color: var(--text);
   padding: 10px 24px;
   border-radius: 50px;
   font-size: 14px;
   font-weight: 600;
   backdrop-filter: blur(16px);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 20px rgba(255, 0, 80, 0.25);
-  pointer-events: none;
-  opacity: 0;
-  z-index: 300;
-  transition: opacity 0.3s var(--ease-spring), transform 0.3s var(--ease-spring);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 25px rgba(255, 0, 80, 0.3);
   white-space: nowrap;
+  animation: toastPopOverlay 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+  transition: all 0.3s ease;
 }
-.toast.show {
-  opacity: 1;
-  transform: translateX(-50%) translateY(0);
+
+.toast-item.hiding {
+  animation: toastFadeOut 0.35s ease-in forwards;
+}
+
+@keyframes toastPopOverlay {
+  0% {
+    opacity: 0;
+    transform: translateY(-30px) scale(0.7);
+  }
+  60% {
+    opacity: 1;
+    transform: translateY(5px) scale(1.08);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes toastFadeOut {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.8);
+  }
 }
 
 /* ── Confetti ─────────────────────────────────────────────────── */

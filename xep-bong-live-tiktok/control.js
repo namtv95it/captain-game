@@ -114,62 +114,98 @@ function addLevelsManual(count) {
   broadcastStateToGame({ type: 'MANUAL', username: 'Streamer', addedLevels: count });
 }
 
-// 5.4. Đặt lại thử thách
+// 5.4. Đặt lại thử thách phiên live
 function resetChallenge() {
-  if (confirm('Bạn có chắc muốn đặt lại Thử thách về Màn 1 / Mặc định 50 màn?')) {
+  if (confirm('Bạn có chắc muốn đặt lại Thử thách phiên live về Màn 1 / Mặc định 50 màn?')) {
     liveState.currentLevel = 1;
     liveState.totalLevels = 50;
     liveState.isPaused = false;
     liveState.followedUsers = [];
-    addLog('Đặt lại Thử thách về Màn 1 / 50 Màn', 'warn');
+    addLog('Đặt lại Thử thách phiên live về Màn 1 / 50 Màn', 'warn');
     renderAll();
     broadcastStateToGame();
   }
 }
 
-// 5.5. Xử lý sự kiện Follow (CHỐNG UNFOLLOW SPAM)
-function handleUserFollow(username) {
-  const user = username.trim() || 'Khán giả';
-  const cleanUser = user.toLowerCase();
-  if (!user) return;
-
-  if (liveState.isPaused) {
-    addLog(`Bỏ qua Follow từ @${user} (Do đang tạm dừng nhận)`, 'warn');
-    return;
+// Xóa riêng danh sách Follower chống spam của phiên live này
+function clearFollowersList() {
+  if (confirm('Bạn có chắc muốn xóa danh sách người dùng đã Follow của phiên live này? (Cho phép họ follow lại để cộng màn)')) {
+    liveState.followedUsers = [];
+    addLog('Đã xóa danh sách Follower của phiên live này', 'info');
+    renderAll();
+    saveStateToStorage();
   }
+}
 
-  // KIỂM TRA UNFOLLOW / RE-FOLLOW: Nếu đã follow rồi thì KHÔNG CỘNG MÀN
-  if (liveState.followedUsers.includes(cleanUser)) {
-    addLog(`Bỏ qua @${user} (Tài khoản này đã follow trước đó!)`, 'warn');
-    renderLogList();
-    return;
-  }
+// 5.5. Xử lý sự kiện Follow (CHỐNG UNFOLLOW SPAM + PHÁT TỪNG THÔNG BÁO RIÊNG BỆNH)
+function handleUserFollow(inputString) {
+  if (!inputString || !inputString.trim()) return;
 
-  // Đánh dấu người dùng đã follow & cộng +1 màn
-  liveState.followedUsers.push(cleanUser);
-  liveState.totalLevels += 1;
-  addLog(`@${user} đã Follow -> +1 Màn thử thách!`, 'follow');
+  // Tách danh sách người xem theo dấu phẩy ","
+  const userList = inputString.split(',').map(u => u.trim()).filter(Boolean);
+  if (userList.length === 0) return;
 
-  renderAll();
-  broadcastStateToGame({ type: 'FOLLOW', username: user, addedLevels: 1 });
+  let delay = 0;
+
+  userList.forEach(user => {
+    const cleanUser = user.toLowerCase();
+
+    if (liveState.isPaused) {
+      addLog(`Bỏ qua Follow từ @${user} (Do đang tạm dừng nhận)`, 'warn');
+      return;
+    }
+
+    // KIỂM TRA UNFOLLOW / RE-FOLLOW: Nếu đã follow rồi thì KHÔNG CỘNG MÀN
+    if (liveState.followedUsers.includes(cleanUser)) {
+      addLog(`Bỏ qua @${user} (Tài khoản này đã follow trước đó!)`, 'warn');
+      return;
+    }
+
+    // Đánh dấu người dùng đã follow & cộng +1 màn
+    liveState.followedUsers.push(cleanUser);
+    liveState.totalLevels += 1;
+    addLog(`@${user} đã Follow -> +1 Màn thử thách!`, 'follow');
+
+    renderAll();
+
+    // Phát lần lượt từng thông báo riêng cho từng người kèm khoảng trễ nhẹ (ví dụ 600ms)
+    setTimeout(() => {
+      broadcastStateToGame({ type: 'FOLLOW', username: user, addedLevels: 1 });
+    }, delay);
+
+    delay += 600;
+  });
 }
 
 // 5.6. Xử lý sự kiện Tặng Quà (Gift)
-function handleUserGift(username, giftName, coinValue) {
-  const user = username.trim() || 'Khán giả';
-  if (!coinValue || coinValue <= 0) return;
+function handleUserGift(inputString, giftName, coinValue) {
+  if (!inputString || !inputString.trim() || !coinValue || coinValue <= 0) return;
 
-  if (liveState.isPaused) {
-    addLog(`Bỏ qua Quà (${giftName}) từ @${user} (Do đang tạm dừng)`, 'warn');
-    return;
-  }
+  // Tách danh sách người tặng quà theo dấu phẩy ","
+  const userList = inputString.split(',').map(u => u.trim()).filter(Boolean);
+  if (userList.length === 0) return;
 
-  const addedLevels = coinValue; // 1 xu = 1 màn (hoặc tùy biến)
-  liveState.totalLevels += addedLevels;
-  addLog(`@${user} tặng ${giftName} (${coinValue} xu) -> +${addedLevels} Màn!`, 'gift');
+  let delay = 0;
 
-  renderAll();
-  broadcastStateToGame({ type: 'GIFT', username: user, giftName: giftName, addedLevels: addedLevels });
+  userList.forEach(user => {
+    if (liveState.isPaused) {
+      addLog(`Bỏ qua Quà (${giftName}) từ @${user} (Do đang tạm dừng)`, 'warn');
+      return;
+    }
+
+    const addedLevels = coinValue; // 1 xu = 1 màn
+    liveState.totalLevels += addedLevels;
+    addLog(`@${user} tặng ${giftName} (${coinValue} xu) -> +${addedLevels} Màn!`, 'gift');
+
+    renderAll();
+
+    // Bắn lần lượt từng thông báo tặng quà riêng biệt cho từng người
+    setTimeout(() => {
+      broadcastStateToGame({ type: 'GIFT', username: user, giftName: giftName, addedLevels: addedLevels });
+    }, delay);
+
+    delay += 600;
+  });
 }
 
 // 5.7. Thêm Nhật ký Event
@@ -302,8 +338,14 @@ function initEventListeners() {
     });
   });
 
-  // Reset
+  // Reset phiên live
   document.getElementById('btn-reset-challenge').addEventListener('click', resetChallenge);
+
+  // Xóa danh sách Follower của phiên live
+  const btnClearFollowers = document.getElementById('btn-clear-followers');
+  if (btnClearFollowers) {
+    btnClearFollowers.addEventListener('click', clearFollowersList);
+  }
 
   // Ticker Controls
   document.getElementById('btn-update-ticker').addEventListener('click', () => {
@@ -349,8 +391,26 @@ function initEventListeners() {
 
   // Lắng nghe xem nếu màn hình Game gửi cập nhật Level hiện tại về Control Panel
   broadcastChannel.onmessage = (event) => {
-    if (event.data && event.data.type === 'GAME_LEVEL_UPDATE') {
+    if (!event.data) return;
+
+    if (event.data.type === 'GAME_LEVEL_UPDATE') {
       liveState.currentLevel = event.data.payload.currentLevel;
+      renderAll();
+      saveStateToStorage();
+    } else if (event.data.type === 'RESET_ALL') {
+      liveState = {
+        tiktokId: '',
+        currentLevel: 1,
+        totalLevels: 50,
+        isPaused: false,
+        tickerText: 'Hãy Follow và Tặng quà để cộng thêm màn thử thách cho Streamer nhé!',
+        tickerSpeed: 'normal',
+        tickerVisible: true,
+        followedUsers: [],
+        logs: []
+      };
+      idHistory = [];
+      addLog('Đã làm mới toàn bộ Bảng điều khiển từ Game', 'warn');
       renderAll();
       saveStateToStorage();
     }

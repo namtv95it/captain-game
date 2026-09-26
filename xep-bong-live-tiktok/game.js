@@ -1070,15 +1070,35 @@ function launchConfetti() {
   }
 }
 
-// ── Toast ─────────────────────────────────────────────────────────────────────
-let _toastTimer = null;
+// ── Toast Stack (Thông báo mới sẽ rơi xuống đè lên thông báo cũ) ──────────────
 function showToast(msg, duration = 5000) {
-  const t = document.getElementById('toast');
-  if (!t) return;
-  if (_toastTimer) clearTimeout(_toastTimer);
-  t.innerHTML = msg;
-  t.classList.add('show');
-  _toastTimer = setTimeout(() => t.classList.remove('show'), duration);
+  let container = document.getElementById('toast-container');
+  if (!container) {
+    container = document.getElementById('toast');
+    if (!container) return;
+  }
+
+  const toastItem = document.createElement('div');
+  toastItem.className = 'toast-item';
+  toastItem.innerHTML = msg;
+
+  // Thêm thông báo mới vào ĐẦU container (hiện lên trên cùng đè lên thông báo cũ)
+  container.insertBefore(toastItem, container.firstChild);
+
+  // Giới hạn tối đa 2 thông báo hiển thị cùng lúc
+  while (container.children.length > 2) {
+    container.lastChild.remove();
+  }
+
+  // Tự động mờ dần và biến mất sau duration
+  setTimeout(() => {
+    toastItem.classList.add('hiding');
+    setTimeout(() => {
+      if (toastItem.parentNode) {
+        toastItem.parentNode.removeChild(toastItem);
+      }
+    }, 350);
+  }, duration);
 }
 
 // ── Level Init ─────────────────────────────────────────────────────────────────
@@ -1219,6 +1239,8 @@ function init() {
       setTimeout(() => showToast(`<i class="fa-brands fa-tiktok" style="color:#ff0050;margin-right:6px;"></i> Bắt đầu Chế Độ TikTok Live!`), 300);
     });
   }
+
+
 
   // Menu: Nút Đăng Nhập / Đăng Xuất Google
   const btnAuth = document.getElementById('btn-menu-auth');

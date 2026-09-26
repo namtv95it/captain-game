@@ -102,10 +102,14 @@
               </div>
             </div>
 
-            <!-- Reset Challenge -->
+            <!-- Reset Session Controls -->
             <div class="reset-box">
               <button class="btn btn-danger-outline" id="btn-reset-challenge">
-                <i class="fa-solid fa-rotate"></i> Đặt lại thử thách ban đầu (Màn 1 / 50 màn)
+                <i class="fa-solid fa-rotate"></i> Đặt lại phiên live (Màn 1 / 50 màn)
+              </button>
+
+              <button class="btn btn-outline-danger" id="btn-clear-followers" style="margin-top: 8px;">
+                <i class="fa-solid fa-user-slash"></i> Xóa danh sách Follower phiên live này (Chống spam)
               </button>
             </div>
           </div>
@@ -184,9 +188,9 @@
           <div class="card-body">
             <div class="sim-controls">
               <div class="sim-row">
-                <input type="text" id="sim-username" placeholder="Tên người xem (VD: user123)" value="viewer_demo" />
+                <input type="text" id="sim-username" placeholder="Nhập danh sách tên (VD: user1, user2, user3)" value="viewer1, viewer2, viewer3" />
                 <button class="btn btn-sim btn-sim-follow" id="btn-sim-follow">
-                  <i class="fa-solid fa-user-plus"></i> Test Follow (+1 Màn)
+                  <i class="fa-solid fa-user-plus"></i> Test Follow (+1 Màn/người)
                 </button>
               </div>
               <div class="sim-gift-row">

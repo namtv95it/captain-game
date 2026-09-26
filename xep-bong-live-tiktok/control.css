@@ -300,14 +300,14 @@ body {
   color: var(--accent);
 }
 
-.btn-danger-outline {
+.btn-danger-outline, .btn-outline-danger {
   width: 100%;
   background: rgba(239, 68, 68, 0.1);
   border: 1px solid rgba(239, 68, 68, 0.3);
   color: var(--danger);
 }
 
-.btn-danger-outline:hover {
+.btn-danger-outline:hover, .btn-outline-danger:hover {
   background: rgba(239, 68, 68, 0.25);
 }
 
