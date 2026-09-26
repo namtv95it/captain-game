@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Xếp bóng - Captain Áo Xanh</title>
+  <meta name="description" content="Trò chơi xếp bóng màu – Sắp xếp các bóng vào đúng ống của chúng!" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800;900&display=swap&subset=vietnamese"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <link rel="icon" type="image/png" href="xep-bong.png" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+
+  <!-- Animated background -->
+  <div class="bg-scene" aria-hidden="true">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+    <div class="grid-overlay"></div>
+  </div>
+
+  <!-- Main Game Container -->
+  <div class="game-container">
+
+    <!-- ── Header ── -->
+    <header class="header">
+      <div class="header-left">
+        <button class="btn-home" id="btn-home" aria-label="Màn hình chính" title="Màn hình chính">
+          <i class="fa-solid fa-house"></i>
+        </button>
+        <div class="level-info">
+          <div class="level-badge" id="level-badge">Màn 1</div>
+          <div class="meta-row">
+            <span class="difficulty-label" id="difficulty-name">DỄ</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="header-center">
+        <div class="game-logo">
+          <img src="../captain.png" alt="Logo" class="logo-img" />
+          <span class="logo-text">Captain Áo Xanh</span>
+        </div>
+      </div>
+
+      <div class="header-right">
+        <div class="sound-control-wrapper">
+          <button class="btn-sound" id="btn-sound" aria-label="Âm thanh" title="Âm thanh">
+            <i class="fa-solid fa-volume-high" id="sound-icon"></i>
+          </button>
+          <div class="sound-popover" id="sound-popover">
+            <div class="sound-popover-header">
+              <span>Âm lượng</span>
+              <span id="sound-volume-val">80%</span>
+            </div>
+            <div class="sound-slider-row">
+              <button class="btn-mute-toggle" id="btn-mute-toggle" title="Bật/Tắt âm">
+                <i class="fa-solid fa-volume-xmark"></i>
+              </button>
+              <input type="range" id="sound-slider" min="0" max="100" value="80" step="5" aria-label="Âm lượng hiệu ứng" />
+            </div>
+          </div>
+        </div>
+
+        <div class="moves-box">
+          <span class="moves-num" id="move-count">0</span>
+          <span class="moves-lbl">bước</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- ── Tubes Area ── -->
+    <main class="tubes-area">
+      <div class="tubes-container" id="tubes-container"></div>
+    </main>
+
+  </div><!-- /.game-container -->
+
+  <!-- ── Main Menu Overlay ── -->
+  <div class="menu-overlay" id="menu-overlay" role="dialog" aria-modal="true">
+    <div class="menu-card">
+      <div class="menu-decor">
+        <span class="decor-ball decor-ball-1"></span>
+        <span class="decor-ball decor-ball-2"></span>
+        <span class="decor-ball decor-ball-3"></span>
+      </div>
+      <div class="menu-logo-box">
+        <img src="../captain.png" alt="Logo" class="menu-logo-img" />
+        <h1 class="menu-title">Captain Áo Xanh</h1>
+        <p class="menu-subtitle">Xếp Bóng</p>
+      </div>
+
+      <div class="menu-actions">
+        <button class="menu-btn menu-btn-continue" id="btn-menu-continue">
+          <span class="menu-btn-icon"><i class="fa-solid fa-play"></i></span>
+          <span class="menu-btn-text">
+            <strong>Tiếp tục</strong>
+            <small id="menu-continue-desc">Màn 1</small>
+          </span>
+        </button>
+
+        <button class="menu-btn menu-btn-leaderboard" id="btn-menu-leaderboard">
+          <span class="menu-btn-icon"><i class="fa-solid fa-trophy"></i></span>
+          <span class="menu-btn-text">
+            <strong>Bảng Xếp Hạng</strong>
+            <small>Top cao thủ xếp bóng</small>
+          </span>
+        </button>
+
+        <button class="menu-btn menu-btn-auth" id="btn-menu-auth">
+          <span class="menu-btn-icon" id="auth-btn-icon"><i class="fa-brands fa-google"></i></span>
+          <span class="menu-btn-text">
+            <strong id="auth-btn-title">Đăng nhập Google</strong>
+            <small id="auth-btn-sub">Đồng bộ tên & avatar</small>
+          </span>
+        </button>
+
+        <a href="../index.html" class="menu-btn menu-btn-hub" style="text-decoration: none;">
+          <span class="menu-btn-icon"><i class="fa-solid fa-house"></i></span>
+          <span class="menu-btn-text">
+            <strong>Về Captain Game Hub</strong>
+            <small>Chọn trò chơi khác</small>
+          </span>
+        </a>
+      </div>
+
+      <div class="menu-footer">
+        <span id="menu-stats" style="display: none;"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Win Overlay ── -->
+  <div class="win-overlay" id="win-overlay" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="win-card">
+      <img src="../captain.png" alt="Logo" class="win-logo-img" />
+      <h2 class="win-title">Xuất Sắc!</h2>
+      <p class="win-subtitle" id="win-moves">Hoàn thành trong 0 bước!</p>
+      <div class="win-stars" id="win-stars" aria-label="Điểm sao"></div>
+      
+      <div class="win-actions">
+        <button class="btn-next" id="btn-next">Màn tiếp theo <i class="fa-solid fa-arrow-right" style="margin-left: 6px;"></i></button>
+        <a href="index.html" class="btn-win-home" id="btn-win-home">
+          <i class="fa-solid fa-house"></i> Trang chủ
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Leaderboard Overlay ── -->
+  <div class="leaderboard-overlay" id="leaderboard-overlay" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="leaderboard-card">
+      <div class="leaderboard-header">
+        <button class="btn-back" id="btn-leaderboard-back" aria-label="Quay lại"><i class="fa-solid fa-arrow-left"></i></button>
+        <h2 class="leaderboard-title"><i class="fa-solid fa-trophy" style="color: #f1c40f; margin-right: 8px;"></i>Bảng Xếp Hạng</h2>
+        <div class="levels-placeholder"></div>
+      </div>
+      <p class="leaderboard-subtitle">Top 10 người chơi xuất sắc nhất</p>
+      
+      <div class="leaderboard-list-container">
+        <ul class="leaderboard-list" id="leaderboard-list">
+          <li class="lb-loading">Đang tải bảng xếp hạng...</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── No Moves Left (Hết nước đi) Overlay ── -->
+  <div class="no-moves-overlay" id="no-moves-overlay" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="no-moves-card">
+      <div class="no-moves-emoji"><i class="fa-solid fa-lock"></i></div>
+      <h2 class="no-moves-title">Hết Nước Đi!</h2>
+      <p class="no-moves-subtitle">Không còn nước đi hợp lệ nào nữa. Bạn muốn thử lại không?</p>
+
+      <div class="no-moves-actions">
+        <button class="no-moves-btn btn-no-moves-reset" id="btn-nomove-reset">
+          <span class="btn-icon"><i class="fa-solid fa-rotate-right"></i></span>
+          <span>Chơi lại màn này</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Confirm Dialog (Đăng xuất) ── -->
+  <div class="confirm-overlay" id="confirm-overlay" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="confirm-card">
+      <div class="confirm-icon"><i class="fa-solid fa-right-from-bracket"></i></div>
+      <h3 class="confirm-title">Đăng xuất?</h3>
+      <p class="confirm-msg">Tiến trình sẽ được đặt lại về Màn 1. Bạn có chắc muốn đăng xuất không?</p>
+      <div class="confirm-actions">
+        <button class="confirm-btn confirm-btn-cancel" id="btn-confirm-cancel">
+          <i class="fa-solid fa-xmark"></i> Hủy
+        </button>
+        <button class="confirm-btn confirm-btn-ok" id="btn-confirm-ok">
+          <i class="fa-solid fa-check"></i> Đăng xuất
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Toast ── -->
+  <div class="toast" id="toast" role="alert" aria-live="polite"></div>
+
+  <!-- Firebase Modular SDK -->
+  <script type="module" src="firebase-config.js"></script>
+  <script src="game.js"></script>
+</body>
+
+</html>
