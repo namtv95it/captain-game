@@ -613,10 +613,12 @@ function renderHeader() {
 
   const defaultLogo = document.getElementById('default-game-logo');
   const liveHudBox = document.getElementById('live-hud-box');
+  const levelInfo = document.querySelector('.level-info');
 
   if (G.isLiveMode) {
-    // Chế độ TikTok Live: Ẩn logo thường, hiện Live HUD đếm màn
+    // Chế độ TikTok Live: Ẩn logo thường và level-info cũ, hiện Live HUD đếm màn
     if (defaultLogo) defaultLogo.style.display = 'none';
+    if (levelInfo) levelInfo.style.display = 'none';
     if (liveHudBox) liveHudBox.style.display = 'flex';
 
     const progressText = document.getElementById('live-progress-text');
@@ -637,8 +639,9 @@ function renderHeader() {
       payload: { currentLevel: G.level }
     });
   } else {
-    // Chơi Thường: Hiện logo game truyền thống, ẩn toàn bộ Live HUD
+    // Chơi Thường: Hiện logo game truyền thống và level-info, ẩn toàn bộ Live HUD
     if (defaultLogo) defaultLogo.style.display = 'flex';
+    if (levelInfo) levelInfo.style.display = 'flex';
     if (liveHudBox) liveHudBox.style.display = 'none';
   }
 }
