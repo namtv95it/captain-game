@@ -49,8 +49,8 @@ body {
 /* ── Marquee Ticker Banner (Chữ Chạy Thông Báo) ────────────────── */
 .marquee-ticker-container {
   width: 100%;
-  max-width: 520px;
-  margin: 0 auto 4px auto;
+  max-width: 800px;
+  margin: 20px auto 4px auto;
   background: linear-gradient(90deg, #ff0050, #00f2fe, #7c6fee);
   background-size: 200% 200%;
   animation: gradientShift 6s ease infinite;
@@ -362,8 +362,8 @@ body {
   justify-content: space-between;
   flex-shrink: 0;
   width: 100%;
-  max-width: 520px;
-  margin: 0 auto;
+  max-width: 800px;
+  margin: 10px auto 0 auto;
 }
 
 .header-left {
