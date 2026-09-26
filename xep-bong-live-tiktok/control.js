@@ -16,6 +16,9 @@ let liveState = {
   currentLevel: 1,
   totalLevels: 50,
   isPaused: false, // Trạng thái tạm dừng nhận thử thách
+  tickerText: 'Hãy Follow và Tặng quà để cộng thêm màn thử thách cho Streamer nhé!',
+  tickerSpeed: 'normal', // fast, normal, slow
+  tickerVisible: true,
   followedUsers: [], // Set/Array danh sách username đã follow (Chống spam unfollow/follow lại)
   logs: []
 };
@@ -211,6 +214,26 @@ function renderAll() {
     iconPause.className = 'fa-solid fa-pause';
   }
 
+  // Render Ticker Controls
+  const inputTickerText = document.getElementById('ticker-text-input');
+  if (inputTickerText && !inputTickerText.matches(':focus')) {
+    inputTickerText.value = liveState.tickerText || '';
+  }
+  const selectTickerSpeed = document.getElementById('ticker-speed-select');
+  if (selectTickerSpeed) {
+    selectTickerSpeed.value = liveState.tickerSpeed || 'normal';
+  }
+  const btnToggleTicker = document.getElementById('btn-toggle-ticker');
+  if (btnToggleTicker) {
+    if (liveState.tickerVisible) {
+      btnToggleTicker.classList.add('is-active');
+      btnToggleTicker.innerHTML = `<i class="fa-solid fa-eye"></i> <span>Đang HIỂN THỊ Banner</span>`;
+    } else {
+      btnToggleTicker.classList.remove('is-active');
+      btnToggleTicker.innerHTML = `<i class="fa-solid fa-eye-slash"></i> <span>Đang ẨN Banner</span>`;
+    }
+  }
+
   renderLogList();
 }
 
@@ -267,6 +290,25 @@ function initEventListeners() {
 
   // Reset
   document.getElementById('btn-reset-challenge').addEventListener('click', resetChallenge);
+
+  // Ticker Controls
+  document.getElementById('btn-update-ticker').addEventListener('click', () => {
+    const text = document.getElementById('ticker-text-input').value;
+    const speed = document.getElementById('ticker-speed-select').value;
+    liveState.tickerText = text;
+    liveState.tickerSpeed = speed;
+    addLog('Cập nhật nội dung Chữ Chạy thông báo lên Game', 'info');
+    renderAll();
+    broadcastStateToGame();
+  });
+
+  document.getElementById('btn-toggle-ticker').addEventListener('click', () => {
+    liveState.tickerVisible = !liveState.tickerVisible;
+    const msg = liveState.tickerVisible ? 'Đã BẬT Banner chữ chạy' : 'Đã ẨN Banner chữ chạy';
+    addLog(msg, 'info');
+    renderAll();
+    broadcastStateToGame();
+  });
 
   // Simulation: Test Follow
   document.getElementById('btn-sim-follow').addEventListener('click', () => {

@@ -26,6 +26,13 @@
     <div class="grid-overlay"></div>
   </div>
 
+  <!-- ── Banner Chữ Chạy Thông Báo (Marquee Ticker) ── -->
+  <div class="marquee-ticker-container" id="marquee-ticker" style="display: none;">
+    <div class="marquee-content" id="marquee-content">
+      <i class="fa-solid fa-bullhorn"></i> <span id="marquee-text">Hãy Follow và Tặng quà để cộng thêm màn thử thách cho Streamer nhé!</span>
+    </div>
+  </div>
+
   <!-- Main Game Container -->
   <div class="game-container">
 
@@ -44,9 +51,14 @@
       </div>
 
       <div class="header-center">
-        <div class="game-logo">
-          <img src="../captain.png" alt="Logo" class="logo-img" />
-          <span class="logo-text">Captain Áo Xanh</span>
+        <!-- TikTok Live HUD Counter -->
+        <div class="live-hud-box">
+          <div class="live-tag"><i class="fa-brands fa-tiktok"></i> TIKTOK LIVE</div>
+          <div class="live-counter">
+            <span>Thử thách:</span>
+            <strong id="live-progress-text">1 / 50</strong>
+            <span>màn</span>
+          </div>
         </div>
       </div>
 
@@ -75,6 +87,12 @@
         </div>
       </div>
     </header>
+
+    <!-- Banner Tạm dừng nhận thử thách -->
+    <div class="pause-live-banner" id="pause-live-banner" style="display: none;">
+      <i class="fa-solid fa-circle-pause"></i>
+      <span>ĐÃ TẠM DỪNG NHẬN THỬ THÁCH - Streamer đang hoàn thành nốt các màn để xuống live!</span>
+    </div>
 
     <!-- ── Tubes Area ── -->
     <main class="tubes-area">

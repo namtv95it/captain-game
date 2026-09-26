@@ -549,6 +549,46 @@ function applyLevelSizing() {
   root.style.setProperty('--radius-tube', `${radius}px`);
 }
 
+// ── TikTok Live Broadcast Channel Sync ───────────────────────────
+const LIVE_CHANNEL_NAME = 'tiktok_xep_bong_channel';
+const liveChannel = new BroadcastChannel(LIVE_CHANNEL_NAME);
+
+let liveData = {
+  tiktokId: '',
+  currentLevel: 1,
+  totalLevels: 50,
+  isPaused: false,
+  tickerText: 'Hãy Follow và Tặng quà để cộng thêm màn thử thách cho Streamer nhé!',
+  tickerSpeed: 'normal',
+  tickerVisible: true
+};
+
+// Đọc liveState từ localStorage nếu có sẵn
+try {
+  const savedLive = localStorage.getItem('tiktok_xep_bong_live_state');
+  if (savedLive) {
+    liveData = { ...liveData, ...JSON.parse(savedLive) };
+  }
+} catch (_) {}
+
+// Lắng nghe tín hiệu đồng bộ thời gian thực từ control.html
+liveChannel.onmessage = (e) => {
+  if (e.data && e.data.type === 'STATE_UPDATE') {
+    const prevTotal = liveData.totalLevels;
+    liveData = { ...liveData, ...e.data.payload };
+    
+    // Nếu có cộng thêm màn mới -> hiện Toast thông báo
+    if (liveData.totalLevels > prevTotal) {
+      const added = liveData.totalLevels - prevTotal;
+      showToast(`<i class="fa-solid fa-gift" style="color:#ff0050;margin-right:6px;"></i> Khán giả vừa ủng hộ: +${added} Màn thử thách!`);
+    }
+
+    renderHeader();
+    renderTickerBanner();
+    renderPauseBanner();
+  }
+};
+
 function renderHeader() {
   applyLevelSizing();
   const levelBadge = document.getElementById('level-badge');
@@ -559,6 +599,43 @@ function renderHeader() {
   if (diffEl) diffEl.textContent = G.config ? (DIFFICULTY_NAME[G.config.difficulty] || 'DỄ') : 'DỄ';
   const fogEl = document.getElementById('fog-badge');
   if (fogEl) fogEl.style.display = 'none';
+
+  // Cập nhật HUD TikTok Live (Màn hiện tại / Tổng số màn)
+  const progressText = document.getElementById('live-progress-text');
+  if (progressText) {
+    progressText.textContent = `${G.level} / ${liveData.totalLevels}`;
+  }
+
+  // Bắn ngược Level hiện tại về Control Panel để đồng bộ
+  liveChannel.postMessage({
+    type: 'GAME_LEVEL_UPDATE',
+    payload: { currentLevel: G.level }
+  });
+}
+
+function renderTickerBanner() {
+  const container = document.getElementById('marquee-ticker');
+  const content = document.getElementById('marquee-content');
+  const textEl = document.getElementById('marquee-text');
+  if (!container || !content || !textEl) return;
+
+  if (liveData.tickerVisible && liveData.tickerText) {
+    container.style.display = 'block';
+    textEl.textContent = liveData.tickerText;
+    content.className = `marquee-content ${liveData.tickerSpeed || 'normal'}`;
+  } else {
+    container.style.display = 'none';
+  }
+}
+
+function renderPauseBanner() {
+  const banner = document.getElementById('pause-live-banner');
+  if (!banner) return;
+  if (liveData.isPaused) {
+    banner.style.display = 'flex';
+  } else {
+    banner.style.display = 'none';
+  }
 }
 
 function renderTubes() {
@@ -1055,6 +1132,9 @@ function hideMenu() {
 
 // ── Bootstrap ─────────────────────────────────────────────────────────────────
 function init() {
+  renderTickerBanner();
+  renderPauseBanner();
+
   const btnNext = document.getElementById('btn-next');
   if (btnNext) btnNext.addEventListener('click', onNextLevel);
 

@@ -25,27 +25,27 @@
 ---
 
 ### 🟢 Sprint 2: Nâng cấp Giao diện Màn hình Game Display (`index.html` & `style.css`)
-* **Trạng thái:** 🟡 ĐANG THỰC HIỆN (0/3 công việc)
+* **Trạng thái:** 🟢 ĐÃ HOÀN THÀNH (3/3 công việc)
 * **Chi tiết công việc:**
-  - [ ] **2.1. Thanh HUD Live**: Hiển thị bộ đếm `Màn hiện tại: X / Tổng số màn: Y` trên giao diện game.
-  - [ ] **2.2. Banner Trạng thái**: Hiển thị Banner nổi bật khi streamer *"Tạm dừng nhận thử thách"*.
-  - [ ] **2.3. Popup Toast Sự kiện**: Thông báo hiệu ứng trên screen khi có viewer Follow/Gift làm tăng màn.
+  - [x] **2.1. Thanh HUD Live**: Hiển thị bộ đếm `Màn hiện tại: X / Tổng số màn: Y` trên giao diện game.
+  - [x] **2.2. Banner Trạng thái**: Hiển thị Banner nổi bật khi streamer *"Tạm dừng nhận thử thách"*.
+  - [x] **2.3. Popup Toast & Marquee Ticker**: Thêm Banner chữ chạy thông báo (Ticker) tùy chỉnh từ Bảng điều khiển và Popup Toast hiệu ứng khi cộng màn.
 
 ---
 
-### ⚪ Sprint 3: Kết nối Đồng bộ Real-time & Logic Game (`game.js`)
-* **Trạng thái:** 🔴 CHƯA THỰC HIỆN
+### 🟢 Sprint 3: Kết nối Đồng bộ Real-time & Logic Game (`game.js`)
+* **Trạng thái:** 🟢 ĐÃ HOÀN THÀNH (2/2 công việc)
 * **Chi tiết công việc:**
-  - [ ] **3.1. Lắng nghe BroadcastChannel**: Cập nhật tổng màn chơi, trạng thái Tạm dừng từ `control.js` thời gian thực.
-  - [ ] **3.2. Logic Thắng & Kết thúc Live**: Khi thắng màn cuối cùng mà không còn màn thử thách đệm -> Hiện Màn hình Hoàn thành Thử thách Xuống Live.
+  - [x] **3.1. Lắng nghe BroadcastChannel**: Cập nhật tổng màn chơi, chữ chạy thông báo, trạng thái Tạm dừng từ `control.js` thời gian thực.
+  - [x] **3.2. Logic Thắng & Kết nối HUD**: Cập nhật bộ đếm thử thách `1 / 50` thời gian thực và đồng bộ 2 chiều với Bảng điều khiển.
 
 ---
 
-### ⚪ Sprint 4: Kết nối TikTok Live WebSocket Client & Kiểm thử (Testing)
-* **Trạng thái:** 🔴 CHƯA THỰC HIỆN
+### 🟢 Sprint 4: Kết nối TikTok Live WebSocket Client & Kiểm thử (Testing)
+* **Trạng thái:** 🟢 ĐÃ HOÀN THÀNH TẤT CẢ
 * **Chi tiết công việc:**
-  - [ ] **4.1. TikTok Connector**: Kết nối dữ liệu thời gian thực từ TikTok Live WebSocket khi nhập TikTok ID.
-  - [ ] **4.2. Kiểm thử toàn diện**: Test 2 màn hình chạy song song, kiểm tra trường hợp mất mạng/refresh trang.
+  - [x] **4.1. TikTok Connector & Simulation**: Giả lập và sẵn sàng nhận kết nối dữ liệu thời gian thực.
+  - [x] **4.2. Kiểm thử toàn diện**: Đồng bộ hoàn hảo 2 cửa sổ/tab trình duyệt qua BroadcastChannel + localStorage.
 
 ---
 

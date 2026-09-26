@@ -103,11 +103,48 @@
             </div>
           </div>
         </div>
+
+        <!-- Card 3: CÀI ĐẶT THÔNG BÁO CHỮ CHẠY (MARQUEE TICKER) -->
+        <div class="ctrl-card">
+          <div class="card-header">
+            <i class="fa-solid fa-bullhorn card-icon text-warning"></i>
+            <h2>Cài Đặt Chữ Chạy Thông Báo (Ticker)</h2>
+          </div>
+          <div class="card-body">
+            <div class="form-group">
+              <label for="ticker-text-input">Nội dung thông báo (Chữ chạy trên game):</label>
+              <input type="text" id="ticker-text-input" placeholder="VD: Hãy Follow và Tặng quà để cộng màn thử thách cho Streamer nhé!" class="full-input" />
+            </div>
+            
+            <div class="form-row-2col">
+              <div class="form-group">
+                <label for="ticker-speed-select">Tốc độ chạy:</label>
+                <select id="ticker-speed-select" class="full-input">
+                  <option value="fast">Nhanh</option>
+                  <option value="normal" selected>Vừa phải</option>
+                  <option value="slow">Chậm</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="ticker-toggle-btn">Bật/Tắt hiển thị:</label>
+                <button class="btn btn-outline btn-toggle-ticker" id="btn-toggle-ticker">
+                  <i class="fa-solid fa-eye"></i> <span>Đang Ẩn Banner</span>
+                </button>
+              </div>
+            </div>
+
+            <button class="btn btn-primary full-btn" id="btn-update-ticker">
+              <i class="fa-solid fa-paper-plane"></i> Cập Nhật Chữ Chạy Lên Game
+            </button>
+          </div>
+        </div>
+
       </div>
 
       <!-- Column 2: Dashboard Stats & Event Simulation -->
       <div class="ctrl-col">
-        <!-- Card 3: Live Stats HUD -->
+        <!-- Card 4: Live Stats HUD -->
         <div class="ctrl-card">
           <div class="card-header">
             <i class="fa-solid fa-chart-line card-icon text-warning"></i>
@@ -131,7 +168,7 @@
           </div>
         </div>
 
-        <!-- Card 4: TikTok Live Simulator & Anti-Spam Check -->
+        <!-- Card 5: TikTok Live Simulator & Anti-Spam Check -->
         <div class="ctrl-card">
           <div class="card-header">
             <i class="fa-solid fa-flask card-icon text-info"></i>
