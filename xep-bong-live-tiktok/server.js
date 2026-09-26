@@ -76,27 +76,15 @@ function connectToLive(username) {
     return { uniqueId: uniqueId, nickname: nickname };
   }
 
-  // FOLLOW (social event chua follow hoac member)
+  // FOLLOW
   tiktokConnection.on(WebcastEvent.FOLLOW, function(data) {
     var u = getUserInfo(data);
     console.log('[Follow] @' + u.uniqueId + ' (' + u.nickname + ')');
     broadcast('follow', { uniqueId: u.uniqueId, nickname: u.nickname });
   });
 
-  tiktokConnection.on('follow', function(data) {
-    var u = getUserInfo(data);
-    console.log('[Follow] @' + u.uniqueId);
-    broadcast('follow', { uniqueId: u.uniqueId, nickname: u.nickname });
-  });
-
   // SHARE
   tiktokConnection.on(WebcastEvent.SHARE, function(data) {
-    var u = getUserInfo(data);
-    console.log('[Share] @' + u.uniqueId);
-    broadcast('share', { uniqueId: u.uniqueId, nickname: u.nickname });
-  });
-
-  tiktokConnection.on('share', function(data) {
     var u = getUserInfo(data);
     console.log('[Share] @' + u.uniqueId);
     broadcast('share', { uniqueId: u.uniqueId, nickname: u.nickname });

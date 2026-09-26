@@ -591,9 +591,6 @@ liveChannel.onmessage = (e) => {
       } else if (detail.type === 'MANUAL') {
         showToast(`<i class="fa-solid fa-plus-circle" style="color:#38bdf8;margin-right:6px;"></i> Streamer đã cộng thủ công: +${detail.addedLevels} Màn!`);
       }
-    } else if (liveData.totalLevels > prevTotal) {
-      const added = liveData.totalLevels - prevTotal;
-      showToast(`<i class="fa-solid fa-gift" style="color:#ff0050;margin-right:6px;"></i> Khán giả vừa ủng hộ: +${added} Màn thử thách!`);
     }
 
     // Nếu Control Panel reset màn hoặc thay đổi currentLevel -> Đồng bộ lại màn chơi
@@ -621,12 +618,14 @@ function renderHeader() {
   const defaultLogo = document.getElementById('default-game-logo');
   const liveHudBox = document.getElementById('live-hud-box');
   const levelInfo = document.querySelector('.level-info');
+  const rulesWidget = document.getElementById('live-rules-widget');
 
   if (G.isLiveMode) {
-    // Chế độ TikTok Live: Ẩn logo thường và level-info cũ, hiện Live HUD đếm màn
+    // Chế độ TikTok Live: Ẩn logo thường và level-info cũ, hiện Live HUD đếm màn & Bảng quy tắc nổi
     if (defaultLogo) defaultLogo.style.display = 'none';
     if (levelInfo) levelInfo.style.display = 'none';
     if (liveHudBox) liveHudBox.style.display = 'flex';
+    if (rulesWidget) rulesWidget.style.display = 'flex';
 
     const progressText = document.getElementById('live-progress-text');
     if (progressText) {
@@ -646,10 +645,11 @@ function renderHeader() {
       payload: { currentLevel: G.level }
     });
   } else {
-    // Chơi Thường: Hiện logo game truyền thống và level-info, ẩn toàn bộ Live HUD
+    // Chơi Thường: Hiện logo game truyền thống và level-info, ẩn toàn bộ Live HUD & Bảng quy tắc
     if (defaultLogo) defaultLogo.style.display = 'flex';
     if (levelInfo) levelInfo.style.display = 'flex';
     if (liveHudBox) liveHudBox.style.display = 'none';
+    if (rulesWidget) rulesWidget.style.display = 'none';
   }
 }
 
@@ -1089,12 +1089,21 @@ function launchConfetti() {
 }
 
 // ── Toast Stack (Thông báo mới sẽ rơi xuống đè lên thông báo cũ) ──────────────
+let lastToastInfo = { text: '', time: 0 };
+
 function showToast(msg, duration = 5000) {
   let container = document.getElementById('toast-container');
   if (!container) {
     container = document.getElementById('toast');
     if (!container) return;
   }
+
+  // Chống duplicate: Nếu tin nhắn giống hệt vừa hiện trong vòng 1.5 giây thì bỏ qua
+  const now = Date.now();
+  if (lastToastInfo.text === msg && (now - lastToastInfo.time) < 1500) {
+    return;
+  }
+  lastToastInfo = { text: msg, time: now };
 
   const toastItem = document.createElement('div');
   toastItem.className = 'toast-item';
@@ -1199,6 +1208,9 @@ function showMenu() {
     }
   }
 
+  const rulesWidget = document.getElementById('live-rules-widget');
+  if (rulesWidget) rulesWidget.style.display = 'none';
+
   overlay.classList.add('show');
   overlay.setAttribute('aria-hidden', 'false');
 }
@@ -1207,6 +1219,8 @@ function hideMenu() {
   const overlay = document.getElementById('menu-overlay');
   overlay.classList.remove('show');
   overlay.setAttribute('aria-hidden', 'true');
+  const rulesWidget = document.getElementById('live-rules-widget');
+  if (rulesWidget && G.isLiveMode) rulesWidget.style.display = 'flex';
 }
 
 // ── Bootstrap ─────────────────────────────────────────────────────────────────

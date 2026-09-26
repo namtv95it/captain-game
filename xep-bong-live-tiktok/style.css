@@ -2461,3 +2461,158 @@ body {
 .confirm-btn-ok:hover {
   box-shadow: 0 8px 28px rgba(239, 68, 68, 0.65);
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   BẢNG QUY TẮC THỬ THÁCH TIKTOK LIVE (WIDGET NỔI CẠNH TRÁI)
+   ═══════════════════════════════════════════════════════════════ */
+.live-rules-widget {
+  display: none; /* Chỉ hiện khi ở chế độ TikTok Live */
+  flex-direction: column;
+  position: fixed;
+  left: 28px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 85;
+  pointer-events: none; /* Chuột click xuyên qua bảng, không vướng khi chơi */
+  user-select: none;
+  width: 250px;
+  padding: 18px 18px 16px;
+  background: rgba(18, 22, 36, 0.55); /* Kính mờ dày dặn, nhìn siêu rõ chữ */
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1.5px solid rgba(255, 255, 255, 0.16);
+  border-radius: 22px;
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  animation: fadeInLeftRules 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes fadeInLeftRules {
+  from {
+    opacity: 0;
+    transform: translateY(-50%) translateX(-25px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(-50%) translateX(0);
+  }
+}
+
+.rules-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  font-size: 15px;
+  font-weight: 900;
+  letter-spacing: 1.5px;
+  color: #fff;
+  padding: 8px 14px;
+  margin-bottom: 14px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 30px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+}
+
+.rules-header i {
+  font-size: 18px;
+}
+
+.rules-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.rule-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.rule-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.rule-icon-box {
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  font-size: 17px;
+  background: rgba(255, 255, 255, 0.1);
+  flex-shrink: 0;
+}
+
+.icon-follow {
+  color: #25f4ee;
+  background: rgba(37, 244, 238, 0.2);
+  filter: drop-shadow(0 0 6px rgba(37, 244, 238, 0.6));
+}
+
+.icon-share {
+  color: #38bdf8;
+  background: rgba(56, 189, 248, 0.2);
+  filter: drop-shadow(0 0 6px rgba(56, 189, 248, 0.6));
+}
+
+.icon-rose, .icon-gift {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.rule-label {
+  font-size: 15px;
+  font-weight: 700;
+  color: #ffffff;
+  white-space: nowrap;
+  letter-spacing: 0.2px;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
+}
+
+.rule-arrow {
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 13px;
+  margin: 0 4px;
+}
+
+.rule-reward {
+  font-weight: 900;
+  font-size: 17px;
+  color: #fbbf24; /* Vàng cam sáng rực rỡ */
+  text-shadow: 0 0 14px rgba(251, 191, 36, 0.65), 0 2px 4px rgba(0, 0, 0, 0.8);
+  white-space: nowrap;
+}
+
+/* Tối ưu khi màn hình thu nhỏ */
+@media (max-width: 950px) {
+  .live-rules-widget {
+    left: 10px;
+    width: 200px;
+    padding: 12px 10px;
+  }
+  .rules-header {
+    font-size: 13px;
+    padding: 6px 10px;
+  }
+  .rule-icon-box {
+    width: 28px;
+    height: 28px;
+    font-size: 14px;
+  }
+  .rule-label {
+    font-size: 13px;
+  }
+  .rule-reward {
+    font-size: 14px;
+  }
+}
