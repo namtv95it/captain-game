@@ -408,8 +408,21 @@ function startNewGame(size) {
 }
 
 function updateMenuContinueDesc() {
-  const el = document.getElementById('menu-continue-desc');
-  if (el) el.textContent = `Chơi mới – ${G.size}×${G.size}`;
+  const btnContinue = document.getElementById('btn-menu-continue');
+  const desc = document.getElementById('menu-continue-desc');
+
+  const saved = loadGame();
+  const hasSaved = saved && saved.tiles && saved.tiles.length > 0 && !isSolved(saved.tiles, saved.size);
+
+  if (hasSaved) {
+    if (btnContinue) btnContinue.style.display = 'flex';
+    if (desc) desc.textContent = `Ván ${saved.size}×${saved.size} • ${saved.moves || 0} bước`;
+  } else if (G.running && !G.won && G.tiles && G.tiles.length > 0) {
+    if (btnContinue) btnContinue.style.display = 'flex';
+    if (desc) desc.textContent = `Ván ${G.size}×${G.size} • ${G.moves} bước`;
+  } else {
+    if (btnContinue) btnContinue.style.display = 'none';
+  }
 }
 
 // ── Menu ──────────────────────────────────────────────────────────
@@ -707,8 +720,14 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // ── Menu: Chơi Ngay button → opens Difficulty Modal ──
-  document.getElementById('btn-menu-start')?.addEventListener('click', () => {
+  // ── Menu: Tiếp Tục button ──
+  document.getElementById('btn-menu-continue')?.addEventListener('click', () => {
+    SFX.select();
+    hideMenu();
+  });
+
+  // ── Menu: Chơi Mới button → opens Difficulty Modal ──
+  document.getElementById('btn-menu-new')?.addEventListener('click', () => {
     SFX.select();
     showDiffModal();
   });

@@ -365,6 +365,20 @@ button { cursor: pointer; border: none; outline: none; background: none; font-fa
   background: linear-gradient(135deg, #a855f7, #6c5ce7);
   color: #fff; box-shadow: 0 4px 14px rgba(108,92,231,0.6);
 }
+.menu-btn-new {
+  background: linear-gradient(135deg, rgba(0,184,148,0.22), rgba(9,132,227,0.12));
+  border-color: rgba(0,184,148,0.45);
+  box-shadow: 0 6px 22px rgba(0,184,148,0.18);
+}
+.menu-btn-new:hover {
+  background: linear-gradient(135deg, rgba(0,184,148,0.4), rgba(9,132,227,0.22));
+  border-color: rgba(0,184,148,0.7);
+  box-shadow: 0 10px 28px rgba(0,184,148,0.32);
+}
+.menu-btn-new .menu-btn-icon {
+  background: linear-gradient(135deg, #00b894, #0984e3);
+  color: #fff; box-shadow: 0 4px 14px rgba(0,184,148,0.5);
+}
 .menu-btn-leaderboard {
   background: linear-gradient(135deg, rgba(251,191,36,0.18), rgba(245,158,11,0.08));
   border-color: rgba(251,191,36,0.42);
