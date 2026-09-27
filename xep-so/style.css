@@ -702,3 +702,31 @@ button { cursor: pointer; border: none; outline: none; background: none; font-fa
   .stats-box { padding: 6px 10px; gap: 8px; }
   .stat-num { font-size: 15px; }
 }
+
+/* ── Keyboard Controls Hint ───────────────────────────────────── */
+.controls-hint {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 8px;
+  font-size: 13px;
+  color: var(--text-dim);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border);
+  padding: 6px 14px;
+  border-radius: 20px;
+  backdrop-filter: blur(8px);
+}
+.controls-hint i {
+  color: var(--accent);
+  font-size: 14px;
+}
+.controls-hint b {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-weight: 600;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}

@@ -192,7 +192,9 @@ function applyBoardSizing() {
   // Use clientWidth/clientHeight for reliable measurement even before layout
   const areaW = boardArea.clientWidth || boardArea.offsetWidth || window.innerWidth;
   const areaH = boardArea.clientHeight || boardArea.offsetHeight || (window.innerHeight - 60);
-  const pauseH = pauseBtn ? (pauseBtn.offsetHeight || 32) + 8 : 0;
+  const hintEl = document.querySelector('.controls-hint');
+  const hintH = hintEl ? (hintEl.offsetHeight || 24) + 8 : 0;
+  const pauseH = (pauseBtn ? (pauseBtn.offsetHeight || 32) + 8 : 0) + hintH;
 
   // Available space: full area minus pause button height and small padding
   const availW = Math.max(60, areaW - 8);
@@ -627,6 +629,51 @@ document.addEventListener('DOMContentLoaded', () => {
     if (e.code === 'Space' || e.key === ' ') {
       e.preventDefault();
       togglePause();
+      return;
+    }
+
+    if (!G.running || G.won) return;
+    const hasActiveOverlay = document.querySelector('.menu-overlay.show, .diff-modal-overlay.show, .win-overlay.show, .leaderboard-overlay.show, .pause-overlay.show');
+    if (hasActiveOverlay) return;
+
+    const key = e.key.toLowerCase();
+    const code = e.code;
+
+    const row = Math.floor(G.emptyIdx / G.size);
+    const col = G.emptyIdx % G.size;
+    let targetIdx = -1;
+
+    // Up (W or ArrowUp): slide tile below UP into empty slot
+    if (code === 'ArrowUp' || code === 'KeyW' || key === 'arrowup' || key === 'w') {
+      e.preventDefault();
+      if (row + 1 < G.size) {
+        targetIdx = G.emptyIdx + G.size;
+      }
+    }
+    // Down (S or ArrowDown): slide tile above DOWN into empty slot
+    else if (code === 'ArrowDown' || code === 'KeyS' || key === 'arrowdown' || key === 's') {
+      e.preventDefault();
+      if (row - 1 >= 0) {
+        targetIdx = G.emptyIdx - G.size;
+      }
+    }
+    // Left (A or ArrowLeft): slide tile right LEFT into empty slot
+    else if (code === 'ArrowLeft' || code === 'KeyA' || key === 'arrowleft' || key === 'a') {
+      e.preventDefault();
+      if (col + 1 < G.size) {
+        targetIdx = G.emptyIdx + 1;
+      }
+    }
+    // Right (D or ArrowRight): slide tile left RIGHT into empty slot
+    else if (code === 'ArrowRight' || code === 'KeyD' || key === 'arrowright' || key === 'd') {
+      e.preventDefault();
+      if (col - 1 >= 0) {
+        targetIdx = G.emptyIdx - 1;
+      }
+    }
+
+    if (targetIdx !== -1) {
+      onTileClick(targetIdx);
     }
   });
 
