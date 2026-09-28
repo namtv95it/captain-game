@@ -17,7 +17,7 @@ const S = {
   charImg: null,          // Ảnh nhân vật gốc
   steps: [],            // Array of { emojiImg, resultImg } (up to 4)
   stepCount: 1,             // Current number of blend steps rendered
-  style: 'marble',
+  style: 'swirl',
   animId: null,
   running: false,
   time: 0,
