@@ -1,41 +1,41 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Marble Blend – Hòa Trộn Hình Ảnh</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+    rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
 </head>
-<body>
-<div class="split-layout">
 
-  <!-- ════════════════════════════════
+<body>
+  <div class="split-layout">
+
+    <!-- ════════════════════════════════
        LEFT PANEL – Settings
   ════════════════════════════════ -->
-  <aside class="left-panel">
+    <aside class="left-panel">
 
-    <!-- Header -->
-    <div class="panel-header">
-      <div class="logo">
-        <span class="logo-icon">🌀</span>
-        <span class="logo-text">Marble<span class="logo-accent">Blend</span></span>
+      <!-- Header -->
+      <div class="panel-header">
+        <div class="logo">
+          <span class="logo-icon">🌀</span>
+          <span class="logo-text">Marble<span class="logo-accent">Blend</span></span>
+        </div>
+        <p class="header-sub">Chọn nhân vật · Thêm 1-4 emoji · Nhấn Blend ✨</p>
       </div>
-      <p class="header-sub">Chọn 3 ảnh · Nhấn Blend · Xem phép màu ✨</p>
-    </div>
 
-    <!-- ── Upload Cards ── -->
-    <div class="section-label">📁 Chọn ảnh nguồn</div>
-
-    <div class="source-row">
-      <!-- Card 1 -->
+      <!-- ── Character Upload ── -->
+      <div class="section-label">🦸 Ảnh nhân vật gốc</div>
       <div class="upload-card card-1" id="card-1">
         <input type="file" id="file-1" accept="image/*" hidden />
         <div class="card-tag tag-1">🦸 Nhân vật</div>
         <div class="card-empty" id="body-1">
           <div class="empty-icon">🖼️</div>
-          <div class="empty-hint">Ảnh nhân vật</div>
+          <div class="empty-hint">Ảnh nhân vật gốc</div>
           <button class="pick-btn btn-1" onclick="pickFile(1)">Chọn</button>
         </div>
         <div class="card-preview" id="prev-1" style="display:none">
@@ -44,126 +44,262 @@
         </div>
       </div>
 
-      <div class="plus-sep"><div class="plus-circle">+</div></div>
+      <!-- ── Emoji + Result Steps ── -->
+      <div class="section-label" style="margin-top:6px;">🎨 Các bước blend (1–4 emoji)</div>
 
-      <!-- Card 2 -->
-      <div class="upload-card card-2" id="card-2">
-        <input type="file" id="file-2" accept="image/*" hidden />
-        <div class="card-tag tag-2">🌟 Emoji</div>
-        <div class="card-empty" id="body-2">
-          <div class="empty-icon">🎨</div>
-          <div class="empty-hint">Emoji / PNG</div>
-          <button class="pick-btn btn-2" onclick="pickFile(2)">Chọn</button>
+      <div class="steps-list" id="steps-list">
+        <!-- Step 1 -->
+        <div class="blend-step" id="step-0" data-index="0">
+          <div class="step-header">
+            <span class="step-badge">Bước 1</span>
+            <button class="step-remove-btn" onclick="removeStep(0)" title="Xóa bước">✕</button>
+          </div>
+          <div class="step-row">
+            <div class="step-card step-emoji" id="emoji-card-0" onclick="pickStepFile(0,'emoji')">
+              <input type="file" id="emoji-file-0" accept="image/*" hidden />
+              <div class="step-empty" id="emoji-body-0">
+                <div class="step-empty-icon">🌟</div>
+                <div class="step-empty-hint">Emoji</div>
+              </div>
+              <div class="step-preview" id="emoji-prev-0" style="display:none">
+                <img id="emoji-img-0" alt="emoji" />
+                <button class="x-btn x-btn-sm" onclick="clearStepSlot(event,0,'emoji')">✕</button>
+              </div>
+            </div>
+            <div class="step-arrow">→</div>
+            <div class="step-card step-result" id="result-card-0" onclick="pickStepFile(0,'result')">
+              <input type="file" id="result-file-0" accept="image/*" hidden />
+              <div class="step-empty" id="result-body-0">
+                <div class="step-empty-icon">🎁</div>
+                <div class="step-empty-hint">Kết quả</div>
+              </div>
+              <div class="step-preview" id="result-prev-0" style="display:none">
+                <img id="result-img-0" alt="result" />
+                <button class="x-btn x-btn-sm" onclick="clearStepSlot(event,0,'result')">✕</button>
+              </div>
+            </div>
+          </div>
         </div>
-        <div class="card-preview" id="prev-2" style="display:none">
-          <img id="pimg-2" alt="img2" />
-          <button class="x-btn" onclick="clearSlot(2)">✕</button>
+
+        <!-- Step 2 -->
+        <div class="blend-step" id="step-1" data-index="1">
+          <div class="step-header">
+            <span class="step-badge">Bước 2</span>
+            <button class="step-remove-btn" onclick="removeStep(1)" title="Xóa bước">✕</button>
+          </div>
+          <div class="step-row">
+            <div class="step-card step-emoji" id="emoji-card-1" onclick="pickStepFile(1,'emoji')">
+              <input type="file" id="emoji-file-1" accept="image/*" hidden />
+              <div class="step-empty" id="emoji-body-1">
+                <div class="step-empty-icon">🌟</div>
+                <div class="step-empty-hint">Emoji</div>
+              </div>
+              <div class="step-preview" id="emoji-prev-1" style="display:none">
+                <img id="emoji-img-1" alt="emoji" />
+                <button class="x-btn x-btn-sm" onclick="clearStepSlot(event,1,'emoji')">✕</button>
+              </div>
+            </div>
+            <div class="step-arrow">→</div>
+            <div class="step-card step-result" id="result-card-1" onclick="pickStepFile(1,'result')">
+              <input type="file" id="result-file-1" accept="image/*" hidden />
+              <div class="step-empty" id="result-body-1">
+                <div class="step-empty-icon">🎁</div>
+                <div class="step-empty-hint">Kết quả</div>
+              </div>
+              <div class="step-preview" id="result-prev-1" style="display:none">
+                <img id="result-img-1" alt="result" />
+                <button class="x-btn x-btn-sm" onclick="clearStepSlot(event,1,'result')">✕</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="blend-step" id="step-2" data-index="2">
+          <div class="step-header">
+            <span class="step-badge">Bước 3</span>
+            <button class="step-remove-btn" onclick="removeStep(2)" title="Xóa bước">✕</button>
+          </div>
+          <div class="step-row">
+            <div class="step-card step-emoji" id="emoji-card-2" onclick="pickStepFile(2,'emoji')">
+              <input type="file" id="emoji-file-2" accept="image/*" hidden />
+              <div class="step-empty" id="emoji-body-2">
+                <div class="step-empty-icon">🌟</div>
+                <div class="step-empty-hint">Emoji</div>
+              </div>
+              <div class="step-preview" id="emoji-prev-2" style="display:none">
+                <img id="emoji-img-2" alt="emoji" />
+                <button class="x-btn x-btn-sm" onclick="clearStepSlot(event,2,'emoji')">✕</button>
+              </div>
+            </div>
+            <div class="step-arrow">→</div>
+            <div class="step-card step-result" id="result-card-2" onclick="pickStepFile(2,'result')">
+              <input type="file" id="result-file-2" accept="image/*" hidden />
+              <div class="step-empty" id="result-body-2">
+                <div class="step-empty-icon">🎁</div>
+                <div class="step-empty-hint">Kết quả</div>
+              </div>
+              <div class="step-preview" id="result-prev-2" style="display:none">
+                <img id="result-img-2" alt="result" />
+                <button class="x-btn x-btn-sm" onclick="clearStepSlot(event,2,'result')">✕</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 4 -->
+        <div class="blend-step" id="step-3" data-index="3">
+          <div class="step-header">
+            <span class="step-badge">Bước 4</span>
+            <button class="step-remove-btn" onclick="removeStep(3)" title="Xóa bước">✕</button>
+          </div>
+          <div class="step-row">
+            <div class="step-card step-emoji" id="emoji-card-3" onclick="pickStepFile(3,'emoji')">
+              <input type="file" id="emoji-file-3" accept="image/*" hidden />
+              <div class="step-empty" id="emoji-body-3">
+                <div class="step-empty-icon">🌟</div>
+                <div class="step-empty-hint">Emoji</div>
+              </div>
+              <div class="step-preview" id="emoji-prev-3" style="display:none">
+                <img id="emoji-img-3" alt="emoji" />
+                <button class="x-btn x-btn-sm" onclick="clearStepSlot(event,3,'emoji')">✕</button>
+              </div>
+            </div>
+            <div class="step-arrow">→</div>
+            <div class="step-card step-result" id="result-card-3" onclick="pickStepFile(3,'result')">
+              <input type="file" id="result-file-3" accept="image/*" hidden />
+              <div class="step-empty" id="result-body-3">
+                <div class="step-empty-icon">🎁</div>
+                <div class="step-empty-hint">Kết quả</div>
+              </div>
+              <div class="step-preview" id="result-prev-3" style="display:none">
+                <img id="result-img-3" alt="result" />
+                <button class="x-btn x-btn-sm" onclick="clearStepSlot(event,3,'result')">✕</button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
 
-    <!-- Card 3 -->
-    <div class="section-label" style="margin-top:10px;">🎁 Ảnh kết quả (sau khi blend)</div>
-    <div class="upload-card card-3" id="card-3">
-      <input type="file" id="file-3" accept="image/*" hidden />
-      <div class="card-tag tag-3">🎁 Kết quả</div>
-      <div class="card-empty" id="body-3">
-        <div class="empty-icon">🌈</div>
-        <div class="empty-hint">Ảnh xuất hiện sau khi blend xong</div>
-        <button class="pick-btn btn-3" onclick="pickFile(3)">Chọn ảnh</button>
-      </div>
-      <div class="card-preview" id="prev-3" style="display:none">
-        <img id="pimg-3" alt="img3" />
-        <button class="x-btn" onclick="clearSlot(3)">✕</button>
-      </div>
-    </div>
+      <!-- Add Step Button -->
+      <button class="add-step-btn" id="add-step-btn" onclick="addStep()">
+        <span class="add-step-icon">+</span> Thêm bước blend
+      </button>
 
-    <!-- ── Controls ── -->
-    <div class="section-label" style="margin-top:10px;">⚙️ Cài đặt hiệu ứng</div>
-
-    <div class="ctrl-card">
-      <div class="ctrl-item">
-        <label class="ctrl-lbl">🌀 Cường độ xoáy <span class="ctrl-num" id="val-swirl">60</span></label>
-        <input type="range" class="ctrl-range" id="sl-swirl" min="10" max="100" value="60" oninput="syncVal('swirl')" />
-      </div>
-      <div class="ctrl-item">
-        <label class="ctrl-lbl">⚡ Tốc độ <span class="ctrl-num" id="val-speed">5</span></label>
-        <input type="range" class="ctrl-range" id="sl-speed" min="1" max="10" value="5" oninput="syncVal('speed')" />
-      </div>
-      <div class="ctrl-item">
-        <label class="ctrl-lbl">✨ Kiểu blend</label>
-        <div class="style-row">
-          <button class="pill active" data-style="marble"  onclick="setStyle('marble')">Marble</button>
-          <button class="pill"        data-style="swirl"   onclick="setStyle('swirl')">Swirl</button>
-          <button class="pill"        data-style="wave"    onclick="setStyle('wave')">Wave</button>
-          <button class="pill"        data-style="dissolve" onclick="setStyle('dissolve')">Dissolve</button>
+      <!-- ── Final Screen Settings ── -->
+      <div class="section-label" style="margin-top:6px;">📊 Final Screen / Màn kết thúc</div>
+      <div class="ctrl-card">
+        <div class="ctrl-item">
+          <label class="ctrl-lbl">💬 Question / Câu hỏi <span class="hint-sub">(Tiếng Anh hiển thị)</span></label>
+          <input type="text" class="ctrl-input" id="final-question-input" value="WHICH VERSION DO YOU LIKE MOST?"
+            placeholder="WHICH VERSION DO YOU LIKE MOST?" />
+        </div>
+        <div class="ctrl-item">
+          <label class="ctrl-lbl">🏷️ Badge Type / Loại nhãn</label>
+          <select class="ctrl-select" id="badge-type-select">
+            <option value="actions">Actions (👍 Like, 💬 Comment, 🔄 Share, 🔔 Subscribe)</option>
+            <option value="numbers">Numbers (1, 2, 3, 4)</option>
+            <option value="hearts">Hearts (❤️ #1, 💖 #2, 💗 #3, 💓 #4)</option>
+          </select>
         </div>
       </div>
-    </div>
 
-    <!-- ── Action Buttons ── -->
-    <div class="action-col">
-      <button class="act-btn act-blend" id="btn-blend" onclick="runBlend()">🌀 Bắt đầu Blend</button>
-      <button class="act-btn act-chain" id="btn-chain" style="display:none" onclick="continueChain()">🔗 Chuyển Kết Quả sang Ảnh 1 (Hòa trộn tiếp)</button>
-      <div class="action-row-sm">
-        <button class="act-btn act-reset" onclick="resetAll()">↺ Reset từ đầu</button>
-        <button class="act-btn act-dl" id="btn-dl" style="display:none" onclick="downloadFinal()">⬇ Tải xuống</button>
+      <!-- ── Controls ── -->
+      <div class="section-label" style="margin-top:6px;">⚙️ Cài đặt hiệu ứng</div>
+
+      <div class="ctrl-card">
+        <div class="ctrl-item">
+          <label class="ctrl-lbl">🌀 Cường độ xoáy <span class="ctrl-num" id="val-swirl">60</span></label>
+          <input type="range" class="ctrl-range" id="sl-swirl" min="10" max="100" value="60"
+            oninput="syncVal('swirl')" />
+        </div>
+        <div class="ctrl-item">
+          <label class="ctrl-lbl">⚡ Tốc độ <span class="ctrl-num" id="val-speed">10</span></label>
+          <input type="range" class="ctrl-range" id="sl-speed" min="1" max="10" value="10" oninput="syncVal('speed')" />
+        </div>
+        <div class="ctrl-item">
+          <label class="ctrl-lbl">✨ Kiểu blend</label>
+          <div class="style-row">
+            <button class="pill active" data-style="marble" onclick="setStyle('marble')">Marble</button>
+            <button class="pill" data-style="swirl" onclick="setStyle('swirl')">Swirl</button>
+            <button class="pill" data-style="wave" onclick="setStyle('wave')">Wave</button>
+            <button class="pill" data-style="dissolve" onclick="setStyle('dissolve')">Dissolve</button>
+          </div>
+        </div>
       </div>
-    </div>
 
-    <!-- ── Phase Indicator ── -->
-    <div class="phase-bar">
-      <div class="phase-step" id="ph-1"><div class="ph-dot"></div><span>Ảnh 1</span></div>
-      <div class="ph-line" id="ph-line-1"></div>
-      <div class="phase-step" id="ph-2"><div class="ph-dot"></div><span>Ảnh 2</span></div>
-      <div class="ph-line" id="ph-line-2"></div>
-      <div class="phase-step" id="ph-3"><div class="ph-dot"></div><span>Blend</span></div>
-      <div class="ph-line" id="ph-line-3"></div>
-      <div class="phase-step" id="ph-4"><div class="ph-dot"></div><span>Kết quả</span></div>
-    </div>
+      <!-- ── Action Buttons ── -->
+      <div class="action-col">
+        <button class="act-btn act-blend" id="btn-blend" onclick="runBlend()">🌀 Bắt đầu Blend</button>
+        <div class="action-row-sm">
+          <button class="act-btn act-reset" onclick="resetAll()">↺ Reset từ đầu</button>
+          <button class="act-btn act-dl" id="btn-dl" style="display:none" onclick="downloadFinal()">⬇ Tải xuống</button>
+        </div>
+      </div>
 
-  </aside>
+      <!-- ── Phase Indicator ── -->
+      <div class="phase-bar" id="phase-bar">
+        <!-- Dynamically generated by JS -->
+      </div>
 
-  <!-- ════════════════════════════════
+    </aside>
+
+    <!-- ════════════════════════════════
        RIGHT PANEL – 9:16 Theater
   ════════════════════════════════ -->
-  <main class="right-panel">
-    <div class="theater-shell">
+    <main class="right-panel">
+      <div class="theater-shell">
 
-      <!-- 9:16 box -->
-      <div class="theater" id="theater">
+        <!-- 9:16 box -->
+        <div class="theater" id="theater">
 
-        <!-- Full-frame Character Layer (Background) -->
-        <div class="bg-char-wrap" id="bg-char-wrap">
-          <img id="bg-char-img" alt="" />
-        </div>
+          <!-- Emoji Header Bar (inside theater, display only) -->
+          <div class="emoji-header-bar" id="emoji-header-bar">
+            <div class="emoji-header-inner" id="emoji-header-inner">
+              <span class="emoji-header-placeholder" id="emoji-header-placeholder">Emoji sẽ hiển thị ở đây ✨</span>
+            </div>
+          </div>
+          <!-- Full-frame Character Layer (Background) -->
+          <div class="bg-char-wrap" id="bg-char-wrap">
+            <img id="bg-char-img" alt="" />
+          </div>
 
-        <!-- Flying images -->
-        <div class="fly-box fly-box--1" id="fly-1">
-          <img id="fly-img-1" alt="" />
-        </div>
-        <div class="fly-box fly-box--2" id="fly-2">
-          <img id="fly-img-2" alt="" />
-        </div>
+          <!-- Flying images -->
+          <div class="fly-box fly-box--1" id="fly-1">
+            <img id="fly-img-1" alt="" />
+          </div>
+          <div class="fly-box fly-box--2" id="fly-2">
+            <img id="fly-img-2" alt="" />
+          </div>
 
-        <!-- Blend canvas -->
-        <canvas id="blend-canvas"></canvas>
+          <!-- Blend canvas -->
+          <canvas id="blend-canvas"></canvas>
 
-        <!-- Result reveal -->
-        <div class="result-wrap" id="result-reveal">
-          <div class="result-glow"></div>
-          <img id="result-img" alt="Result" />
-        </div>
+          <!-- Result reveal -->
+          <div class="result-wrap" id="result-reveal">
+            <div class="result-glow"></div>
+            <img id="result-img" alt="Result" />
+          </div>
 
-      </div><!-- .theater -->
-    </div>
-  </main>
+          <!-- Final Grid Screen (End View) -->
+          <div class="final-grid-wrap" id="final-grid-wrap">
+            <div class="final-question-box" id="final-question-box">Which version do you like most?</div>
+            <div class="final-grid-container" id="final-grid-container"></div>
+          </div>
 
-</div><!-- .split-layout -->
+          <!-- Step label overlay -->
+          <div class="step-label-overlay" id="step-label-overlay"></div>
 
-<!-- Toast -->
-<div class="toast" id="toast"></div>
+        </div><!-- .theater -->
+      </div>
+    </main>
 
-<script src="blend.js"></script>
+  </div><!-- .split-layout -->
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <script src="blend.js"></script>
 </body>
+
 </html>
