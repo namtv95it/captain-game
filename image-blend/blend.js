@@ -562,11 +562,12 @@ function finishAllSteps() {
 function showFinalGridScreen() {
   const finalGridWrap = document.getElementById('final-grid-wrap');
   const finalQuestionBox = document.getElementById('final-question-box');
-  const finalGridContainer = document.getElementById('final-grid-container');
+  const finalGridTop = document.getElementById('final-grid-top');
+  const finalGridBottom = document.getElementById('final-grid-bottom');
   const questionInput = document.getElementById('final-question-input');
   const badgeTypeSelect = document.getElementById('badge-type-select');
 
-  if (!finalGridWrap || !finalGridContainer) return;
+  if (!finalGridWrap || !finalGridTop || !finalGridBottom) return;
 
   // Question text
   const questionText = (questionInput?.value.trim() || 'WHICH VERSION DO YOU LIKE MOST?').toUpperCase();
@@ -583,8 +584,9 @@ function showFinalGridScreen() {
     badgeLabels = ['1️⃣ Option 1', '2️⃣ Option 2', '3️⃣ Option 3', '4️⃣ Option 4'];
   }
 
-  // Clear container
-  finalGridContainer.innerHTML = '';
+  // Clear containers
+  finalGridTop.innerHTML = '';
+  finalGridBottom.innerHTML = '';
 
   // Get all completed step results
   const resultSteps = (S._pendingSteps || S.steps).filter(s => s && s.resultImg);
@@ -598,12 +600,20 @@ function showFinalGridScreen() {
     img.alt = `Result ${idx + 1}`;
 
     const badge = document.createElement('div');
-    badge.className = 'final-item-badge';
+    // Top 2 images (idx 0, 1): badge at bottom
+    // Bottom 2 images (idx 2, 3): badge pushed to top
+    const badgePosClass = idx < 2 ? 'badge-bottom' : 'badge-top';
+    badge.className = `final-item-badge ${badgePosClass}`;
     badge.textContent = badgeLabels[idx] || `Option ${idx + 1}`;
 
     item.appendChild(img);
     item.appendChild(badge);
-    finalGridContainer.appendChild(item);
+
+    if (idx < 2) {
+      finalGridTop.appendChild(item);
+    } else {
+      finalGridBottom.appendChild(item);
+    }
   });
 
   // Hide single result reveal animation if active
@@ -862,11 +872,11 @@ function phase4() {
     if (currentIdx + 1 < allSteps.length) {
       setTimeout(() => {
         if (!S.running) return;
-        // Hide result
+        // Set resultImg as background charImg so it stays visible seamlessly
+        bgCharImg.src = S._currentResultImg.src;
+        bgCharWrap.classList.add('show');
         resultWrap.classList.remove('show');
-        setTimeout(() => {
-          runChainStep(allSteps, currentIdx + 1);
-        }, 400);
+        runChainStep(allSteps, currentIdx + 1);
       }, pauseMs);
     } else {
       // All done
