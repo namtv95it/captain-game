@@ -341,17 +341,38 @@ function phase1() {
   setTimeout(phase2, 200);
 }
 
-/* ─────────────────────── PHASE 2 – Emoji / PNG flies in from BOTTOM ─────────────────────── */
+// Random directional entrance states
+let currentDir = 'bottom';
+
+/* ─────────────────────── PHASE 2 – Emoji / PNG flies in from RANDOM DIRECTION ─────────────────────── */
 function phase2() {
   setPhase(2);
   fly2.style.opacity = '1';
   playSfxSwoosh(true);
 
-  // Emoji flies in smoother and slower to vertical center (~38% from bottom) (850ms)
-  animatePct(fly2, 'bottom', -60, 38, 850, () => {
-    // Hold emoji at center for 800ms so viewers can see it clearly before blending!
-    setTimeout(phase3, 800);
+  // Pick random entry direction: 'bottom', 'top', 'left', 'right'
+  const directions = ['bottom', 'top', 'left', 'right'];
+  currentDir = directions[Math.floor(Math.random() * directions.length)];
+
+  // Set initial offscreen position based on random direction
+  setFlyStyle(fly2, {
+    top: 'auto', bottom: 'auto', left: 'auto', right: 'auto',
+    transform: 'none'
   });
+
+  if (currentDir === 'bottom') {
+    setFlyStyle(fly2, { left: '50%', transform: 'translateX(-50%)', bottom: '-60%' });
+    animateDir(fly2, 'bottom', -60, 38, 850, () => setTimeout(phase3, 800));
+  } else if (currentDir === 'top') {
+    setFlyStyle(fly2, { left: '50%', transform: 'translateX(-50%)', top: '-60%' });
+    animateDir(fly2, 'top', -60, 38, 850, () => setTimeout(phase3, 800));
+  } else if (currentDir === 'left') {
+    setFlyStyle(fly2, { top: '50%', transform: 'translateY(-50%)', left: '-60%' });
+    animateDir(fly2, 'left', -60, 22.5, 850, () => setTimeout(phase3, 800));
+  } else if (currentDir === 'right') {
+    setFlyStyle(fly2, { top: '50%', transform: 'translateY(-50%)', right: '-60%' });
+    animateDir(fly2, 'right', -60, 22.5, 850, () => setTimeout(phase3, 800));
+  }
 }
 
 /* ─────────────────────── PHASE 3 – Convergence / Impact with Character ─────────────────────── */
@@ -360,7 +381,10 @@ function phase3() {
 
   // Smooth contraction pulse into collision point (400ms)
   const convergeMs = 400;
-  animatePct(fly2, 'bottom', 38, 42, convergeMs, () => {
+  let targetVal = 42;
+  if (currentDir === 'left' || currentDir === 'right') targetVal = 22.5;
+
+  animateDir(fly2, currentDir, (currentDir === 'left' || currentDir === 'right') ? 22.5 : 38, targetVal, convergeMs, () => {
     doCollisionFlash();
   });
 }
@@ -695,13 +719,15 @@ function setFlyStyle(el, styles) {
 }
 
 /**
- * Animate a CSS property (top/bottom) using % values.
- * from / to are percentage numbers (e.g. -60 = '-60%', 22 = '22%')
+ * Animate a CSS property (top/bottom/left/right) using % values.
  */
-function animatePct(el, prop, from, to, durMs, onDone) {
-  const other = prop === 'top' ? 'bottom' : 'top';
-  el.style[other] = 'auto';
-  el.style[prop]  = from + '%';
+function animateDir(el, prop, from, to, durMs, onDone) {
+  ['top', 'bottom', 'left', 'right'].forEach(p => {
+    if (p !== prop && ((prop === 'top' && p === 'bottom') || (prop === 'bottom' && p === 'top') || (prop === 'left' && p === 'right') || (prop === 'right' && p === 'left'))) {
+      el.style[p] = 'auto';
+    }
+  });
+  el.style[prop] = from + '%';
   el.style.opacity = '1';
   const start = performance.now();
 
@@ -713,6 +739,10 @@ function animatePct(el, prop, from, to, durMs, onDone) {
     else { el.style[prop] = to + '%'; onDone(); }
   }
   requestAnimationFrame(step);
+}
+
+function animatePct(el, prop, from, to, durMs, onDone) {
+  animateDir(el, prop, from, to, durMs, onDone);
 }
 
 function easeOutSpring(t) {
