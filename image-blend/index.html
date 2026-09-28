@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Marble Blend – Hòa Trộn Hình Ảnh</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+<div class="split-layout">
+
+  <!-- ════════════════════════════════
+       LEFT PANEL – Settings
+  ════════════════════════════════ -->
+  <aside class="left-panel">
+
+    <!-- Header -->
+    <div class="panel-header">
+      <div class="logo">
+        <span class="logo-icon">🌀</span>
+        <span class="logo-text">Marble<span class="logo-accent">Blend</span></span>
+      </div>
+      <p class="header-sub">Chọn 3 ảnh · Nhấn Blend · Xem phép màu ✨</p>
+    </div>
+
+    <!-- ── Upload Cards ── -->
+    <div class="section-label">📁 Chọn ảnh nguồn</div>
+
+    <div class="source-row">
+      <!-- Card 1 -->
+      <div class="upload-card card-1" id="card-1">
+        <input type="file" id="file-1" accept="image/*" hidden />
+        <div class="card-tag tag-1">🦸 Nhân vật</div>
+        <div class="card-empty" id="body-1">
+          <div class="empty-icon">🖼️</div>
+          <div class="empty-hint">Ảnh nhân vật</div>
+          <button class="pick-btn btn-1" onclick="pickFile(1)">Chọn</button>
+        </div>
+        <div class="card-preview" id="prev-1" style="display:none">
+          <img id="pimg-1" alt="img1" />
+          <button class="x-btn" onclick="clearSlot(1)">✕</button>
+        </div>
+      </div>
+
+      <div class="plus-sep"><div class="plus-circle">+</div></div>
+
+      <!-- Card 2 -->
+      <div class="upload-card card-2" id="card-2">
+        <input type="file" id="file-2" accept="image/*" hidden />
+        <div class="card-tag tag-2">🌟 Emoji</div>
+        <div class="card-empty" id="body-2">
+          <div class="empty-icon">🎨</div>
+          <div class="empty-hint">Emoji / PNG</div>
+          <button class="pick-btn btn-2" onclick="pickFile(2)">Chọn</button>
+        </div>
+        <div class="card-preview" id="prev-2" style="display:none">
+          <img id="pimg-2" alt="img2" />
+          <button class="x-btn" onclick="clearSlot(2)">✕</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 3 -->
+    <div class="section-label" style="margin-top:10px;">🎁 Ảnh kết quả (sau khi blend)</div>
+    <div class="upload-card card-3" id="card-3">
+      <input type="file" id="file-3" accept="image/*" hidden />
+      <div class="card-tag tag-3">🎁 Kết quả</div>
+      <div class="card-empty" id="body-3">
+        <div class="empty-icon">🌈</div>
+        <div class="empty-hint">Ảnh xuất hiện sau khi blend xong</div>
+        <button class="pick-btn btn-3" onclick="pickFile(3)">Chọn ảnh</button>
+      </div>
+      <div class="card-preview" id="prev-3" style="display:none">
+        <img id="pimg-3" alt="img3" />
+        <button class="x-btn" onclick="clearSlot(3)">✕</button>
+      </div>
+    </div>
+
+    <!-- ── Controls ── -->
+    <div class="section-label" style="margin-top:10px;">⚙️ Cài đặt hiệu ứng</div>
+
+    <div class="ctrl-card">
+      <div class="ctrl-item">
+        <label class="ctrl-lbl">🌀 Cường độ xoáy <span class="ctrl-num" id="val-swirl">60</span></label>
+        <input type="range" class="ctrl-range" id="sl-swirl" min="10" max="100" value="60" oninput="syncVal('swirl')" />
+      </div>
+      <div class="ctrl-item">
+        <label class="ctrl-lbl">⚡ Tốc độ <span class="ctrl-num" id="val-speed">5</span></label>
+        <input type="range" class="ctrl-range" id="sl-speed" min="1" max="10" value="5" oninput="syncVal('speed')" />
+      </div>
+      <div class="ctrl-item">
+        <label class="ctrl-lbl">✨ Kiểu blend</label>
+        <div class="style-row">
+          <button class="pill active" data-style="marble"  onclick="setStyle('marble')">Marble</button>
+          <button class="pill"        data-style="swirl"   onclick="setStyle('swirl')">Swirl</button>
+          <button class="pill"        data-style="wave"    onclick="setStyle('wave')">Wave</button>
+          <button class="pill"        data-style="dissolve" onclick="setStyle('dissolve')">Dissolve</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Action Buttons ── -->
+    <div class="action-col">
+      <button class="act-btn act-blend" id="btn-blend" onclick="runBlend()">🌀 Bắt đầu Blend</button>
+      <div class="action-row-sm">
+        <button class="act-btn act-reset" onclick="resetAll()">↺ Reset</button>
+        <button class="act-btn act-dl" id="btn-dl" style="display:none" onclick="downloadFinal()">⬇ Tải xuống</button>
+      </div>
+    </div>
+
+    <!-- ── Phase Indicator ── -->
+    <div class="phase-bar">
+      <div class="phase-step" id="ph-1"><div class="ph-dot"></div><span>Ảnh 1</span></div>
+      <div class="ph-line" id="ph-line-1"></div>
+      <div class="phase-step" id="ph-2"><div class="ph-dot"></div><span>Ảnh 2</span></div>
+      <div class="ph-line" id="ph-line-2"></div>
+      <div class="phase-step" id="ph-3"><div class="ph-dot"></div><span>Blend</span></div>
+      <div class="ph-line" id="ph-line-3"></div>
+      <div class="phase-step" id="ph-4"><div class="ph-dot"></div><span>Kết quả</span></div>
+    </div>
+
+  </aside>
+
+  <!-- ════════════════════════════════
+       RIGHT PANEL – 9:16 Theater
+  ════════════════════════════════ -->
+  <main class="right-panel">
+    <div class="theater-shell">
+
+      <!-- 9:16 box -->
+      <div class="theater" id="theater">
+
+        <!-- Idle placeholder -->
+        <div class="idle-over" id="idle-overlay"></div>
+
+        <!-- Flying images -->
+        <div class="fly-box fly-box--1" id="fly-1">
+          <img id="fly-img-1" alt="" />
+        </div>
+        <div class="fly-box fly-box--2" id="fly-2">
+          <img id="fly-img-2" alt="" />
+        </div>
+
+        <!-- Blend canvas -->
+        <canvas id="blend-canvas"></canvas>
+
+        <!-- Result reveal -->
+        <div class="result-wrap" id="result-reveal">
+          <div class="result-glow"></div>
+          <img id="result-img" alt="Result" />
+        </div>
+
+      </div><!-- .theater -->
+    </div>
+  </main>
+
+</div><!-- .split-layout -->
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script src="blend.js"></script>
+</body>
+</html>
