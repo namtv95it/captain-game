@@ -320,10 +320,9 @@ function phase1() {
   fly1.style.opacity = '1';
   playSfxSwoosh(false);
 
-  // Use percentage strings for the 9:16 theater (% of theater height)
-  // Target: upper-center area  ~22% from top
-  animatePct(fly1, 'top', -60, 22, 950, () => {
-    setTimeout(phase2, 350);
+  // Faster fly in (550ms)
+  animatePct(fly1, 'top', -60, 22, 550, () => {
+    setTimeout(phase2, 200);
   });
 }
 
@@ -333,9 +332,9 @@ function phase2() {
   fly2.style.opacity = '1';
   playSfxSwoosh(true);
 
-  // Target: lower-center area ~22% from bottom
-  animatePct(fly2, 'bottom', -60, 22, 950, () => {
-    setTimeout(phase3, 400);
+  // Faster fly in (550ms)
+  animatePct(fly2, 'bottom', -60, 22, 550, () => {
+    setTimeout(phase3, 220);
   });
 }
 
@@ -343,8 +342,8 @@ function phase2() {
 function phase3() {
   setPhase(3);
 
-  // Step A: both images fly toward center simultaneously
-  const convergeMs = 550;
+  // Step A: both images fly toward center faster (350ms)
+  const convergeMs = 350;
   let doneCount = 0;
 
   function onConverged() {
@@ -354,7 +353,7 @@ function phase3() {
     doCollisionFlash();
   }
 
-  // img1: top 22% → top 38% (slide toward center)
+  // img1: top 22% → top 38%
   animatePct(fly1, 'top',    22, 38, convergeMs, onConverged);
   // img2: bottom 22% → bottom 38%
   animatePct(fly2, 'bottom', 22, 38, convergeMs, onConverged);
@@ -404,7 +403,7 @@ function doCollisionFlash() {
 function startSwirlLoop() {
   S.time = 0;
   let elapsed  = 0;
-  const totalMs = 3800;
+  const totalMs = 1800; // Fast blend duration (1.8s instead of 3.8s)
   const speed   = parseFloat(document.getElementById('sl-speed').value);
 
   playSfxSwirlDrone(totalMs);
@@ -413,8 +412,8 @@ function startSwirlLoop() {
     if (!S.running) return;
     const progress = Math.min(1, elapsed / totalMs);
     renderFrame(progress);
-    S.time  += speed * 0.06;
-    elapsed += 16 * (speed / 5);
+    S.time  += speed * 0.14; // Faster swirl motion step
+    elapsed += 16 * (speed / 3.5);
     if (elapsed < totalMs) S.animId = requestAnimationFrame(loop);
     else phase4();
   }
