@@ -14,35 +14,35 @@
 
 /* ─────────────────────── STATE ─────────────────────── */
 const S = {
-  charImg:   null,          // Ảnh nhân vật gốc
-  steps:     [],            // Array of { emojiImg, resultImg } (up to 4)
+  charImg: null,          // Ảnh nhân vật gốc
+  steps: [],            // Array of { emojiImg, resultImg } (up to 4)
   stepCount: 1,             // Current number of blend steps rendered
-  style:     'marble',
-  animId:    null,
-  running:   false,
-  time:      0,
-  chainIdx:  0,             // current step index being blended
+  style: 'marble',
+  animId: null,
+  running: false,
+  time: 0,
+  chainIdx: 0,             // current step index being blended
   chainPrev: null,          // Image used as "character" in current chain step
   lastResultImg: null,      // Last completed result image object
 };
 
 /* ─────────────────────── DOM ─────────────────────── */
-const canvas         = document.getElementById('blend-canvas');
-const ctx            = canvas.getContext('2d');
-const theater        = document.getElementById('theater');
-const fly1           = document.getElementById('fly-1');
-const fly2           = document.getElementById('fly-2');
-const flyImg1        = document.getElementById('fly-img-1');
-const flyImg2        = document.getElementById('fly-img-2');
-const resultWrap     = document.getElementById('result-reveal');
-const resultImg      = document.getElementById('result-img');
-const bgCharWrap     = document.getElementById('bg-char-wrap');
-const bgCharImg      = document.getElementById('bg-char-img');
-const toastEl        = document.getElementById('toast');
-const stepLabelOv    = document.getElementById('step-label-overlay');
-const emojiHeaderEl  = document.getElementById('emoji-header-inner');
+const canvas = document.getElementById('blend-canvas');
+const ctx = canvas.getContext('2d');
+const theater = document.getElementById('theater');
+const fly1 = document.getElementById('fly-1');
+const fly2 = document.getElementById('fly-2');
+const flyImg1 = document.getElementById('fly-img-1');
+const flyImg2 = document.getElementById('fly-img-2');
+const resultWrap = document.getElementById('result-reveal');
+const resultImg = document.getElementById('result-img');
+const bgCharWrap = document.getElementById('bg-char-wrap');
+const bgCharImg = document.getElementById('bg-char-img');
+const toastEl = document.getElementById('toast');
+const stepLabelOv = document.getElementById('step-label-overlay');
+const emojiHeaderEl = document.getElementById('emoji-header-inner');
 const emojiPlaceholder = document.getElementById('emoji-header-placeholder');
-const phaseBar       = document.getElementById('phase-bar');
+const phaseBar = document.getElementById('phase-bar');
 
 /* ─────────────────────── CHARACTER UPLOAD ─────────────────────── */
 function pickFile(n) {
@@ -50,15 +50,15 @@ function pickFile(n) {
 }
 
 const charInput = document.getElementById('file-1');
-const charCard  = document.getElementById('card-1');
+const charCard = document.getElementById('card-1');
 
 charInput.addEventListener('change', e => {
   const f = e.target.files[0];
   if (f) loadCharSlot(f);
 });
 
-charCard.addEventListener('dragover',  e => { e.preventDefault(); charCard.classList.add('drag-over'); });
-charCard.addEventListener('dragleave', ()  => charCard.classList.remove('drag-over'));
+charCard.addEventListener('dragover', e => { e.preventDefault(); charCard.classList.add('drag-over'); });
+charCard.addEventListener('dragleave', () => charCard.classList.remove('drag-over'));
 charCard.addEventListener('drop', e => {
   e.preventDefault();
   charCard.classList.remove('drag-over');
@@ -89,8 +89,8 @@ function clearSlot(n) {
   if (n === 1) {
     S.charImg = null;
     document.getElementById('body-1').style.display = 'flex';
-    document.getElementById('prev-1').style.display  = 'none';
-    document.getElementById('file-1').value           = '';
+    document.getElementById('prev-1').style.display = 'none';
+    document.getElementById('file-1').value = '';
     bgCharWrap.classList.remove('show');
     bgCharImg.src = '';
     resetAll();
@@ -367,7 +367,7 @@ function buildPhaseBar(totalSteps) {
   // Phases per step: Char, Emoji, Blend, Result + pauses between steps
   // Simplified: one dot per step + final
   const labels = [];
-  for (let i = 0; i < totalSteps; i++) labels.push(`Bước ${i+1}`);
+  for (let i = 0; i < totalSteps; i++) labels.push(`Bước ${i + 1}`);
   labels.push('Hoàn tất');
 
   labels.forEach((lbl, i) => {
@@ -391,7 +391,7 @@ function setPhase(p, total) {
     const step = document.getElementById(`ph-${i}`);
     if (!step) continue;
     step.classList.remove('active', 'done');
-    if (i < p)       step.classList.add('done');
+    if (i < p) step.classList.add('done');
     else if (i === p) step.classList.add('active');
   }
   for (let i = 0; i < count - 1; i++) {
@@ -430,7 +430,7 @@ function resetAll() {
   if (emojiHeaderBar) emojiHeaderBar.classList.remove('hidden');
 
   document.getElementById('btn-blend').textContent = '🌀 Bắt đầu Blend';
-  document.getElementById('btn-dl').style.display    = 'none';
+  document.getElementById('btn-dl').style.display = 'none';
 
   // Reset step highlight states
   document.querySelectorAll('.blend-step').forEach(el => {
@@ -507,7 +507,7 @@ function runChainStep(steps, idx) {
   // Step label hidden (removed by request)
 
   const rect = theater.getBoundingClientRect();
-  canvas.width  = rect.width;
+  canvas.width = rect.width;
   canvas.height = rect.height;
 
   resultWrap.classList.remove('show');
@@ -529,11 +529,11 @@ function runChainStep(steps, idx) {
   setFlyStyle(fly2, { bottom: '-60%', left: '50%', transform: 'translateX(-50%)', opacity: '0', top: 'auto', right: 'auto' });
 
   // Store refs for render
-  S._currentCharImg  = charImgForStep;
+  S._currentCharImg = charImgForStep;
   S._currentEmojiImg = emojiImgForStep;
   S._currentResultImg = step.resultImg;
   S._pendingSteps = steps;
-  S._pendingIdx   = idx;
+  S._pendingIdx = idx;
 
   setTimeout(() => phase1(), 200);
 }
@@ -646,7 +646,7 @@ function playSfxSwoosh(isBottom = false) {
     osc.type = 'sine';
     const now = ctx.currentTime;
     const startFreq = isBottom ? 180 : 650;
-    const endFreq   = isBottom ? 550 : 220;
+    const endFreq = isBottom ? 550 : 220;
     osc.frequency.setValueAtTime(startFreq, now);
     osc.frequency.exponentialRampToValueAtTime(endFreq, now + 0.35);
     filter.type = 'lowpass';
@@ -659,7 +659,7 @@ function playSfxSwoosh(isBottom = false) {
     gain.connect(ctx.destination);
     osc.start(now);
     osc.stop(now + 0.35);
-  } catch (e) {}
+  } catch (e) { }
 }
 
 function playSfxImpact() {
@@ -696,7 +696,7 @@ function playSfxImpact() {
     nFilter.connect(nGain);
     nGain.connect(ctx.destination);
     noise.start(now);
-  } catch (e) {}
+  } catch (e) { }
 }
 
 function playSfxSwirlDrone(durMs) {
@@ -727,7 +727,7 @@ function playSfxSwirlDrone(durMs) {
     lfo.start(now);
     osc.stop(now + durSec);
     lfo.stop(now + durSec);
-  } catch (e) {}
+  } catch (e) { }
 }
 
 function playSfxReveal() {
@@ -748,7 +748,7 @@ function playSfxReveal() {
       osc.start(now + idx * 0.07);
       osc.stop(now + idx * 0.07 + 0.6);
     });
-  } catch (e) {}
+  } catch (e) { }
 }
 
 /* ─────────────────────── ANIMATION PHASES ─────────────────────── */
@@ -827,9 +827,9 @@ function doCollisionFlash() {
 
 function startSwirlLoop() {
   S.time = 0;
-  let elapsed  = 0;
+  let elapsed = 0;
   const totalMs = 1800;
-  const speed   = parseFloat(document.getElementById('sl-speed').value);
+  const speed = parseFloat(document.getElementById('sl-speed').value);
 
   playSfxSwirlDrone(totalMs);
 
@@ -837,7 +837,7 @@ function startSwirlLoop() {
     if (!S.running) return;
     const progress = Math.min(1, elapsed / totalMs);
     renderFrame(progress);
-    S.time  += speed * 0.14;
+    S.time += speed * 0.14;
     elapsed += 16 * (speed / 3.5);
     if (elapsed < totalMs) S.animId = requestAnimationFrame(loop);
     else phase4();
@@ -864,7 +864,7 @@ function phase4() {
     S.lastResultImg = S._currentResultImg;
 
     const currentIdx = S._pendingIdx;
-    const allSteps   = S._pendingSteps;
+    const allSteps = S._pendingSteps;
 
     // After showing result, pause 2-3 seconds then continue
     const pauseMs = 2000 + Math.random() * 1000; // 2-3 seconds
@@ -893,18 +893,18 @@ function renderFrame(progress) {
 
   const offA = drawToOff(S._currentCharImg, W, H);
   const offB = drawToOff(S._currentEmojiImg, W, H);
-  const pxA  = offA.getImageData(0, 0, W, H).data;
-  const pxB  = offB.getImageData(0, 0, W, H).data;
-  const out  = ctx.createImageData(W, H);
+  const pxA = offA.getImageData(0, 0, W, H).data;
+  const pxB = offB.getImageData(0, 0, W, H).data;
+  const out = ctx.createImageData(W, H);
 
   const swirl = parseFloat(document.getElementById('sl-swirl').value) / 100;
-  const t     = S.time;
+  const t = S.time;
 
   switch (S.style) {
-    case 'marble':   fxMarble(pxA, pxB, out.data, W, H, t, progress, swirl); break;
-    case 'swirl':    fxSwirl(pxA, pxB, out.data, W, H, t, progress, swirl);  break;
-    case 'wave':     fxWave(pxA, pxB, out.data, W, H, t, progress, swirl);   break;
-    case 'dissolve': fxDissolve(pxA, pxB, out.data, W, H, t, progress);       break;
+    case 'marble': fxMarble(pxA, pxB, out.data, W, H, t, progress, swirl); break;
+    case 'swirl': fxSwirl(pxA, pxB, out.data, W, H, t, progress, swirl); break;
+    case 'wave': fxWave(pxA, pxB, out.data, W, H, t, progress, swirl); break;
+    case 'dissolve': fxDissolve(pxA, pxB, out.data, W, H, t, progress); break;
   }
 
   ctx.putImageData(out, 0, 0);
@@ -917,7 +917,7 @@ function drawToOff(img, W, H) {
   const ar = img.width / img.height;
   let sw, sh, sx, sy;
   if (ar > W / H) { sh = H; sw = sh * ar; sx = (W - sw) / 2; sy = 0; }
-  else             { sw = W; sh = sw / ar; sx = 0; sy = (H - sh) / 2; }
+  else { sw = W; sh = sw / ar; sx = 0; sy = (H - sh) / 2; }
   c.drawImage(img, sx, sy, sw, sh);
   return c;
 }
@@ -928,9 +928,9 @@ function fxMarble(a, b, out, W, H, t, p, swirl) {
   const maxR = Math.sqrt(cx * cx + cy * cy);
   for (let y = 0; y < H; y++) {
     for (let x = 0; x < W; x++) {
-      const i  = (y * W + x) * 4;
+      const i = (y * W + x) * 4;
       const nx = (x - cx) / W, ny = (y - cy) / H;
-      const r  = Math.sqrt((x-cx)**2 + (y-cy)**2);
+      const r = Math.sqrt((x - cx) ** 2 + (y - cy) ** 2);
       const a0 = Math.atan2(ny, nx);
       const s1 = Math.sin(r * 0.04 - t * 1.5 + a0 * 4) * swirl * 0.45;
       const s2 = Math.cos(r * 0.025 + t * 1.1 - a0 * 3) * swirl * 0.35;
@@ -941,74 +941,74 @@ function fxMarble(a, b, out, W, H, t, p, swirl) {
       const sy = clamp(y + dy, 0, H - 1);
       const si = (sy * W + sx) * 4;
       const wavePattern = Math.sin(nx * 14 + s1 * 8 + t) * Math.cos(ny * 14 + s2 * 8 - t);
-      const spiralMask  = Math.sin(a0 * 5 + r * 0.03 - t * 1.8);
-      const blendMask   = clamp(p * 0.6 + (wavePattern + spiralMask) * 0.35 + 0.15, 0, 1);
-      const r_ = lerp(a[si],   b[si],   blendMask);
-      const g_ = lerp(a[si+1], b[si+1], blendMask);
-      const b_ = lerp(a[si+2], b[si+2], blendMask);
+      const spiralMask = Math.sin(a0 * 5 + r * 0.03 - t * 1.8);
+      const blendMask = clamp(p * 0.6 + (wavePattern + spiralMask) * 0.35 + 0.15, 0, 1);
+      const r_ = lerp(a[si], b[si], blendMask);
+      const g_ = lerp(a[si + 1], b[si + 1], blendMask);
+      const b_ = lerp(a[si + 2], b[si + 2], blendMask);
       const glow = (1 - Math.abs(blendMask - 0.5) * 2) * 25 * Math.sin(t * 2);
-      out[i]   = clamp(r_ + glow, 0, 255)|0;
-      out[i+1] = clamp(g_ + glow, 0, 255)|0;
-      out[i+2] = clamp(b_ + glow, 0, 255)|0;
-      out[i+3] = 255;
+      out[i] = clamp(r_ + glow, 0, 255) | 0;
+      out[i + 1] = clamp(g_ + glow, 0, 255) | 0;
+      out[i + 2] = clamp(b_ + glow, 0, 255) | 0;
+      out[i + 3] = 255;
     }
   }
 }
 
 function fxSwirl(a, b, out, W, H, t, p, swirl) {
-  const cx = W/2, cy = H/2;
-  const maxR = Math.sqrt(cx*cx + cy*cy);
+  const cx = W / 2, cy = H / 2;
+  const maxR = Math.sqrt(cx * cx + cy * cy);
   for (let y = 0; y < H; y++) {
     for (let x = 0; x < W; x++) {
-      const i  = (y*W+x)*4;
-      const dx = x-cx, dy = y-cy;
-      const r  = Math.sqrt(dx*dx + dy*dy);
-      const ang = Math.atan2(dy,dx);
+      const i = (y * W + x) * 4;
+      const dx = x - cx, dy = y - cy;
+      const r = Math.sqrt(dx * dx + dy * dy);
+      const ang = Math.atan2(dy, dx);
       const normR = r / maxR;
       const swirlAng = swirl * 8 * Math.pow(1 - normR, 1.5) * p + t * 0.05;
-      const na  = ang + swirlAng;
-      const sx = clamp(Math.round(cx + r*Math.cos(na)), 0, W-1);
-      const sy = clamp(Math.round(cy + r*Math.sin(na)), 0, H-1);
-      const si = (sy*W+sx)*4;
+      const na = ang + swirlAng;
+      const sx = clamp(Math.round(cx + r * Math.cos(na)), 0, W - 1);
+      const sy = clamp(Math.round(cy + r * Math.sin(na)), 0, H - 1);
+      const si = (sy * W + sx) * 4;
       const band = Math.sin(ang * 6 + r / maxR * Math.PI * 5 - t * 2) * .5 + .5;
-      const alpha = clamp(p * band + p * (1-normR)*0.5, 0, 1);
-      let r_ = lerp(a[si],   b[si],   alpha);
-      let g_ = lerp(a[si+1], b[si+1], alpha);
-      let b_ = lerp(a[si+2], b[si+2], alpha);
+      const alpha = clamp(p * band + p * (1 - normR) * 0.5, 0, 1);
+      let r_ = lerp(a[si], b[si], alpha);
+      let g_ = lerp(a[si + 1], b[si + 1], alpha);
+      let b_ = lerp(a[si + 2], b[si + 2], alpha);
       const centerGlow = Math.max(0, 1 - normR * 2) * 30 * p;
-      out[i]   = clamp(r_ + centerGlow, 0, 255)|0;
-      out[i+1] = clamp(g_ + centerGlow, 0, 255)|0;
-      out[i+2] = clamp(b_ + centerGlow, 0, 255)|0;
-      out[i+3] = 255;
+      out[i] = clamp(r_ + centerGlow, 0, 255) | 0;
+      out[i + 1] = clamp(g_ + centerGlow, 0, 255) | 0;
+      out[i + 2] = clamp(b_ + centerGlow, 0, 255) | 0;
+      out[i + 3] = 255;
     }
   }
 }
 
 function fxWave(a, b, out, W, H, t, p, swirl) {
-  const cx = W/2, cy = H/2;
+  const cx = W / 2, cy = H / 2;
   for (let y = 0; y < H; y++) {
     for (let x = 0; x < W; x++) {
-      const i  = (y*W+x)*4;
-      const nx = x/W, ny = y/H;
-      const dx = (x-cx)/W, dy = (y-cy)/H;
-      const r  = Math.sqrt(dx*dx + dy*dy);
+      const i = (y * W + x) * 4;
+      const nx = x / W, ny = y / H;
+      const dx = (x - cx) / W, dy = (y - cy) / H;
+      const r = Math.sqrt(dx * dx + dy * dy);
       const ripple = Math.sin(r * Math.PI * 10 - t * 2) * swirl * 40 * p;
-      const wx = Math.sin(ny*Math.PI*10 + t*1.3) * swirl * 40 + Math.cos(r*8-t) * ripple;
-      const wy = Math.cos(nx*Math.PI*10 + t*0.9) * swirl * 35 + Math.sin(r*8-t) * ripple;
-      const sx = clamp(Math.round(x+wx), 0, W-1);
-      const sy = clamp(Math.round(y+wy), 0, H-1);
-      const si = (sy*W+sx)*4;
+      const wx = Math.sin(ny * Math.PI * 10 + t * 1.3) * swirl * 40 + Math.cos(r * 8 - t) * ripple;
+      const wy = Math.cos(nx * Math.PI * 10 + t * 0.9) * swirl * 35 + Math.sin(r * 8 - t) * ripple;
+      const sx = clamp(Math.round(x + wx), 0, W - 1);
+      const sy = clamp(Math.round(y + wy), 0, H - 1);
+      const si = (sy * W + sx) * 4;
       const waveFront = clamp(1 - Math.abs(r - p * 0.9) / 0.35, 0, 1);
       const base = smoothstep(0, 0.6, p);
       const alpha = clamp(base * 0.5 + waveFront * 0.8, 0, 1);
-      let r_ = lerp(a[si],   b[si],   alpha);
-      let g_ = lerp(a[si+1], b[si+1], alpha);
-      let b_ = lerp(a[si+2], b[si+2], alpha);
+      let r_ = lerp(a[si], b[si], alpha);
+      let g_ = lerp(a[si + 1], b[si + 1], alpha);
+      let b_ = lerp(a[si + 2], b[si + 2], alpha);
       const shimmer = waveFront * 25;
-      out[i]   = clamp(r_ + shimmer * 0.8, 0, 255)|0;
-      out[i+1] = clamp(g_ + shimmer * 0.3, 0, 255)|0;
-      out[i+2] = clamp(b_ + shimmer,        0, 255)|0;
-      out[i+3] = 255;
+      out[i] = clamp(r_ + shimmer * 0.8, 0, 255) | 0;
+      out[i + 1] = clamp(g_ + shimmer * 0.3, 0, 255) | 0;
+      out[i + 2] = clamp(b_ + shimmer, 0, 255) | 0;
+      out[i + 3] = 255;
     }
   }
 }
@@ -1016,19 +1016,19 @@ function fxWave(a, b, out, W, H, t, p, swirl) {
 function fxDissolve(a, b, out, W, H, t, p) {
   for (let y = 0; y < H; y++) {
     for (let x = 0; x < W; x++) {
-      const i   = (y*W+x)*4;
-      const nx  = x/W, ny = y/H;
-      const n   = fbm(nx*6, ny*6, t*.18);
+      const i = (y * W + x) * 4;
+      const nx = x / W, ny = y / H;
+      const n = fbm(nx * 6, ny * 6, t * .18);
       const thr = p * 1.5 - 0.25;
       const alpha = smoothstep(thr - 0.08, thr + 0.08, n);
-      const edge = smoothstep(thr-0.12, thr, n) * smoothstep(thr+0.12, thr, n);
-      let r_ = lerp(a[i],   b[i],   alpha);
-      let g_ = lerp(a[i+1], b[i+1], alpha);
-      let b_ = lerp(a[i+2], b[i+2], alpha);
-      out[i]   = clamp(r_ + edge * 80,  0, 255)|0;
-      out[i+1] = clamp(g_ + edge * 20,  0, 255)|0;
-      out[i+2] = clamp(b_ + edge * 120, 0, 255)|0;
-      out[i+3] = 255;
+      const edge = smoothstep(thr - 0.12, thr, n) * smoothstep(thr + 0.12, thr, n);
+      let r_ = lerp(a[i], b[i], alpha);
+      let g_ = lerp(a[i + 1], b[i + 1], alpha);
+      let b_ = lerp(a[i + 2], b[i + 2], alpha);
+      out[i] = clamp(r_ + edge * 80, 0, 255) | 0;
+      out[i + 1] = clamp(g_ + edge * 20, 0, 255) | 0;
+      out[i + 2] = clamp(b_ + edge * 120, 0, 255) | 0;
+      out[i + 3] = 255;
     }
   }
 }
@@ -1048,7 +1048,7 @@ function animateDir(el, prop, from, to, durMs, onDone) {
   el.style.opacity = '1';
   const start = performance.now();
   function step(now) {
-    const t    = Math.min(1, (now - start) / durMs);
+    const t = Math.min(1, (now - start) / durMs);
     const ease = easeOutSpring(t);
     el.style[prop] = (from + (to - from) * ease) + '%';
     if (t < 1) requestAnimationFrame(step);
@@ -1066,7 +1066,7 @@ function downloadFinal() {
   if (!S.lastResultImg) return;
   const a = document.createElement('a');
   a.download = `marble-blend-${Date.now()}.png`;
-  a.href     = S.lastResultImg.src;
+  a.href = S.lastResultImg.src;
   a.click();
 }
 
@@ -1090,14 +1090,14 @@ function fbm(x, y, t) {
 function noise2(x, y) {
   const xi = Math.floor(x), yi = Math.floor(y);
   const xf = x - xi, yf = y - yi;
-  const n00 = hash2(xi,   yi),   n10 = hash2(xi+1, yi);
-  const n01 = hash2(xi,   yi+1), n11 = hash2(xi+1, yi+1);
-  const ux = xf*xf*(3-2*xf), uy = yf*yf*(3-2*yf);
-  return lerp(lerp(n00,n10,ux), lerp(n01,n11,ux), uy)*2 - 1;
+  const n00 = hash2(xi, yi), n10 = hash2(xi + 1, yi);
+  const n01 = hash2(xi, yi + 1), n11 = hash2(xi + 1, yi + 1);
+  const ux = xf * xf * (3 - 2 * xf), uy = yf * yf * (3 - 2 * yf);
+  return lerp(lerp(n00, n10, ux), lerp(n01, n11, ux), uy) * 2 - 1;
 }
 
 function hash2(x, y) {
-  const n = Math.sin(x*127.1 + y*311.7) * 43758.5453;
+  const n = Math.sin(x * 127.1 + y * 311.7) * 43758.5453;
   return n - Math.floor(n);
 }
 
