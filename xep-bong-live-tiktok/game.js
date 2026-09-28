@@ -558,7 +558,7 @@ const liveChannel = new BroadcastChannel(LIVE_CHANNEL_NAME);
 let liveData = {
   tiktokId: '',
   currentLevel: 1,
-  totalLevels: 100,   // Mặc định 100 màn thử thách
+  totalLevels: 50,   // Mặc định 50 màn thử thách
   isPaused: false,
   tickerText: 'Hãy Follow và Tặng quà để cộng thêm màn thử thách cho Streamer nhé!',
   tickerSpeed: 'normal',

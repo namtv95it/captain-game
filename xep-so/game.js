@@ -186,19 +186,23 @@ function applyBoardSizing() {
   const board = document.getElementById('puzzle-board');
   const boardArea = document.querySelector('.board-area');
   const pauseBtn = document.getElementById('btn-pause');
+  const sideLb = document.getElementById('side-leaderboard');
 
   if (!boardArea) return;
 
   // Use clientWidth/clientHeight for reliable measurement even before layout
   const areaW = boardArea.clientWidth || boardArea.offsetWidth || window.innerWidth;
   const areaH = boardArea.clientHeight || boardArea.offsetHeight || (window.innerHeight - 60);
-  const hintEl = document.querySelector('.controls-hint');
-  const hintH = hintEl ? (hintEl.offsetHeight || 24) + 8 : 0;
-  const pauseH = (pauseBtn ? (pauseBtn.offsetHeight || 32) + 8 : 0) + hintH;
+  const pauseH = pauseBtn ? (pauseBtn.offsetHeight || 32) + 8 : 0;
 
-  // Available space: full area minus pause button height and small padding
-  const availW = Math.max(60, areaW - 8);
-  const availH = Math.max(60, areaH - pauseH - 8);
+  let sideW = 0;
+  if (sideLb && window.getComputedStyle(sideLb).display !== 'none') {
+    sideW = (sideLb.offsetWidth || 260) + 24;
+  }
+
+  // Available space: full area minus pause button height, side panel width and padding
+  const availW = Math.max(60, areaW - sideW - 16);
+  const availH = Math.max(60, areaH - pauseH - 16);
 
   const gap = size >= 9 ? 2 : size >= 7 ? 3 : size >= 5 ? 4 : size >= 4 ? 5 : 7;
 
@@ -319,6 +323,7 @@ function onWin() {
     window.saveScoreToFirebase(name, G.moves, G.timerSecs, gameId).then(res => {
       if (res && res.success && res.updated) {
         showToast('<i class="fa-solid fa-trophy" style="color:#f1c40f;margin-right:6px;"></i> Kỷ lục mới được lưu!');
+        loadSidebarLeaderboard(G.size);
       }
     });
   }
@@ -348,7 +353,7 @@ function showWinOverlay(stars) {
   const starsEl = document.getElementById('win-stars');
   const harderBtn = document.getElementById('btn-harder');
 
-  if (infoEl) infoEl.textContent = `Hoàn thành trong ${G.moves} bước – ${formatTime(G.timerSecs)}!`;
+  if (infoEl) infoEl.textContent = `Hoàn thành trong ${formatTime(G.timerSecs)}!`;
 
   if (starsEl) {
     starsEl.innerHTML = '';
@@ -403,8 +408,9 @@ function startNewGame(size) {
   setTimeout(() => applyBoardSizing(), 50);
   setTimeout(() => applyBoardSizing(), 200);
 
-  // Update menu desc
+  // Update menu desc & load sidebar leaderboard
   updateMenuContinueDesc();
+  loadSidebarLeaderboard(size);
 }
 
 function updateMenuContinueDesc() {
@@ -416,10 +422,10 @@ function updateMenuContinueDesc() {
 
   if (hasSaved) {
     if (btnContinue) btnContinue.style.display = 'flex';
-    if (desc) desc.textContent = `Ván ${saved.size}×${saved.size} • ${saved.moves || 0} bước`;
+    if (desc) desc.textContent = `Ván ${saved.size}×${saved.size} • ${formatTime(saved.timerSecs || 0)}`;
   } else if (G.running && !G.won && G.tiles && G.tiles.length > 0) {
     if (btnContinue) btnContinue.style.display = 'flex';
-    if (desc) desc.textContent = `Ván ${G.size}×${G.size} • ${G.moves} bước`;
+    if (desc) desc.textContent = `Ván ${G.size}×${G.size} • ${formatTime(G.timerSecs)}`;
   } else {
     if (btnContinue) btnContinue.style.display = 'none';
   }
@@ -507,13 +513,61 @@ async function loadLeaderboard(size) {
           ${avatar}
           <div class="lb-info">
             <span class="lb-name">${s.name || 'Ẩn danh'}</span>
-            <span class="lb-meta">${s.moves || 0} bước</span>
+            <span class="lb-meta"><i class="fa-solid fa-clock" style="margin-right:4px;font-size:11px;"></i>${formatTime(s.level || 0)}</span>
           </div>
-          <div class="lb-badge"><i class="fa-solid fa-clock" style="margin-right:4px;font-size:10px;"></i>${formatTime(s.level || 0)}</div>
         </li>`;
     }).join('');
   } catch (e) {
     listEl.innerHTML = '<li class="lb-loading">Lỗi tải dữ liệu.</li>';
+  }
+}
+
+// ── Sidebar Leaderboard ─────────────────────────────────────────────
+async function loadSidebarLeaderboard(size) {
+  const sizeBadge = document.getElementById('side-lb-size-badge');
+  const listEl = document.getElementById('side-leaderboard-list');
+
+  if (sizeBadge) sizeBadge.textContent = `${size}×${size}`;
+  if (!listEl) return;
+
+  listEl.innerHTML = '<li class="side-lb-loading"><i class="fa-solid fa-spinner fa-spin"></i> Đang tải...</li>';
+
+  if (!window.getTopScoresFromFirebase) {
+    listEl.innerHTML = '<li class="side-lb-empty">Chưa kết nối dữ liệu.</li>';
+    return;
+  }
+
+  const gameId = `${GAME_ID_PREFIX}${size}`;
+  try {
+    const scores = await window.getTopScoresFromFirebase(gameId);
+    if (!scores || scores.length === 0) {
+      listEl.innerHTML = '<li class="side-lb-empty">Chưa có kỷ lục nào.</li>';
+      return;
+    }
+
+    listEl.innerHTML = scores.map((s, i) => {
+      const rank = i + 1;
+      const rankClass = rank === 1 ? 'side-rank-1' : rank === 2 ? 'side-rank-2' : rank === 3 ? 'side-rank-3' : '';
+      const badgeIcon = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : rank;
+      const avatarHtml = s.avatar
+        ? `<img src="${s.avatar}" class="side-avatar" alt="${s.name}" onerror="this.style.display='none'">`
+        : `<div class="side-avatar side-avatar-fallback">${(s.name || '?')[0].toUpperCase()}</div>`;
+
+      return `
+        <li class="side-lb-item ${rankClass}">
+          <span class="side-rank-badge">${badgeIcon}</span>
+          ${avatarHtml}
+          <div class="side-player-info">
+            <span class="side-player-name" title="${s.name || 'Ẩn danh'}">${s.name || 'Ẩn danh'}</span>
+          </div>
+          <span class="side-player-time">
+            <i class="fa-solid fa-clock"></i> ${formatTime(s.level || 0)}
+          </span>
+        </li>
+      `;
+    }).join('');
+  } catch (_) {
+    listEl.innerHTML = '<li class="side-lb-empty">Lỗi tải dữ liệu.</li>';
   }
 }
 
@@ -554,6 +608,8 @@ function spawnConfetti() {
 // ── Init ───────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
 
+  window.addEventListener('resize', () => applyBoardSizing());
+
   // Load saved game or show menu
   const saved = loadGame();
   if (saved && saved.tiles && saved.tiles.length > 0) {
@@ -568,14 +624,16 @@ document.addEventListener('DOMContentLoaded', () => {
     updateHeader();
     updateTimerDisplay();
     startTimer();
-    // Sync difficulty picker
+    // Sync difficulty picker & load sidebar leaderboard
     document.querySelectorAll('.diff-btn').forEach(btn => {
       btn.classList.toggle('active', Number(btn.dataset.size) === G.size);
     });
     updateMenuContinueDesc();
+    loadSidebarLeaderboard(G.size);
   } else {
     G.size = 3;
     showMenu();
+    loadSidebarLeaderboard(3);
   }
 
   // ── Home button → show menu ──

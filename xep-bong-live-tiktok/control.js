@@ -16,7 +16,7 @@ let liveState = {
   connectionState: 'disconnected', // 'disconnected' | 'connecting' | 'connected' | 'failed'
   connectionError: '',
   currentLevel: 1,
-  totalLevels: 100,   // Mặc định 100 màn thử thách
+  totalLevels: 50,   // Mặc định 50 màn thử thách
   isPaused: false, // Trạng thái tạm dừng nhận thử thách
   tickerText: 'Hãy Follow và Tặng quà để cộng thêm màn thử thách cho Streamer nhé!',
   tickerSpeed: 'normal', // fast, normal, slow
@@ -254,18 +254,18 @@ function addLevelsManual(count) {
 
 // 5.4. Đặt lại thử thách phiên live
 function resetChallenge() {
-  if (confirm('Bạn có chắc muốn ĐẶT LẠI TOÀN BỘ PHÊN LIVE này?\n• Xóa toàn bộ dữ liệu phiên live trong localStorage\n• Đặt về Màn 1 / Mặc định 100 màn\n• Xóa danh sách Follower đã lưu')) {
+  if (confirm('Bạn có chắc muốn ĐẶT LẠI TOÀN BỘ PHÊN LIVE này?\n• Xóa toàn bộ dữ liệu phiên live trong localStorage\n• Đặt về Màn 1 / Mặc định 50 màn\n• Xóa danh sách Follower đã lưu')) {
     // Xóa toàn bộ dữ liệu phiên live trong localStorage (cả state control và state game live)
     localStorage.removeItem(STORAGE_KEY_STATE);
     localStorage.removeItem('tiktok_xep_bong_live_state');
 
     // Reset lại liveState về mặc định
     liveState.currentLevel = 1;
-    liveState.totalLevels = 100;
+    liveState.totalLevels = 50;
     liveState.isPaused = false;
     liveState.followedUsers = [];
     liveState.logs = [];
-    addLog('Đã ĐẶT LẠI phiên live: Xóa dữ liệu localStorage + về Màn 1 / 100 Màn', 'warn');
+    addLog('Đã ĐẶT LẠI phiên live: Xóa dữ liệu localStorage + về Màn 1 / 50 Màn', 'warn');
     renderAll();
     broadcastStateToGame();
   }
@@ -670,7 +670,7 @@ function initEventListeners() {
       liveState = {
         tiktokId: '',
         currentLevel: 1,
-        totalLevels: 100,   // Mặc định 100 màn
+        totalLevels: 50,   // Mặc định 50 màn
         isPaused: false,
         tickerText: 'Hãy Follow và Tặng quà để cộng thêm màn thử thách cho Streamer nhé!',
         tickerSpeed: 'normal',
@@ -750,7 +750,7 @@ broadcastChannel.onmessage = (event) => {
     liveState = {
       tiktokId: '',
       currentLevel: 1,
-      totalLevels: 100,   // Mặc định 100 màn
+      totalLevels: 50,   // Mặc định 50 màn
       isPaused: false,
       tickerText: 'Hãy Follow và Tặng quà để cộng thêm màn thử thách cho Streamer nhé!',
       tickerSpeed: 'normal',

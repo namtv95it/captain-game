@@ -53,11 +53,6 @@
       <div class="header-right">
         <div class="stats-box">
           <div class="stat-item">
-            <span class="stat-num" id="move-count">0</span>
-            <span class="stat-lbl">bước</span>
-          </div>
-          <div class="stat-divider"></div>
-          <div class="stat-item">
             <span class="stat-num" id="timer-display">0:00</span>
             <span class="stat-lbl">thời gian</span>
           </div>
@@ -72,11 +67,23 @@
           <i class="fa-solid fa-pause"></i> Tạm Dừng
         </button>
         <div class="puzzle-board" id="puzzle-board" role="grid"></div>
-        <div class="controls-hint">
-          <i class="fa-solid fa-keyboard"></i>
-          <span>Dùng phím <b>Mũi tên</b> / <b>WASD</b> để di chuyển</span>
-        </div>
       </div>
+
+      <!-- Side Leaderboard Panel -->
+      <aside class="side-leaderboard" id="side-leaderboard">
+        <div class="side-lb-header">
+          <div class="side-lb-title-box">
+            <i class="fa-solid fa-trophy side-trophy-icon"></i>
+            <span class="side-lb-title">BẢNG XẾP HẠNG</span>
+          </div>
+          <span class="side-lb-badge" id="side-lb-size-badge">3x3</span>
+        </div>
+        <div class="side-lb-body">
+          <ul class="side-lb-list" id="side-leaderboard-list">
+            <li class="side-lb-loading"><i class="fa-solid fa-spinner fa-spin"></i> Đang tải...</li>
+          </ul>
+        </div>
+      </aside>
     </main>
 
   </div>
@@ -206,7 +213,7 @@
     <div class="win-card">
       <img src="../captain.png" alt="Logo" class="win-logo-img" />
       <h2 class="win-title">Xuất Sắc!</h2>
-      <p class="win-subtitle" id="win-info">Hoàn thành trong 0 bước!</p>
+      <p class="win-subtitle" id="win-info">Hoàn thành trong 0:00!</p>
       <div class="win-stars" id="win-stars"></div>
       <div class="win-actions">
         <button class="btn-play-again" id="btn-play-again">
