@@ -324,6 +324,20 @@ body::before {
 }
 .act-blend:hover { box-shadow: 0 0 28px rgba(124,58,237,.5); }
 
+.act-chain {
+  background: var(--grad-a);
+  color: #fff;
+  box-shadow: var(--glow-p);
+  width: 100%;
+  font-size: .86rem;
+  padding: 10px;
+  animation: pulseGlow 1.8s infinite alternate;
+}
+@keyframes pulseGlow {
+  0% { box-shadow: 0 0 10px rgba(219,39,119,.4); }
+  100% { box-shadow: 0 0 22px rgba(219,39,119,.8); }
+}
+
 .act-reset {
   flex: 1;
   background: rgba(124,58,237,.08);

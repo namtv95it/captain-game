@@ -125,7 +125,8 @@ function resetAll() {
   idleOverlay.classList.remove('hidden');
 
   document.getElementById('btn-blend').textContent = '🌀 Bắt đầu Blend';
-  document.getElementById('btn-dl').style.display  = 'none';
+  document.getElementById('btn-chain').style.display = 'none';
+  document.getElementById('btn-dl').style.display    = 'none';
 
   setPhase(0);
 }
@@ -438,9 +439,54 @@ function phase4() {
     playSfxReveal();
 
     S.running = false;
-    document.getElementById('btn-blend').textContent = '🌀 Bắt đầu Blend';
-    document.getElementById('btn-dl').style.display  = 'inline-flex';
+    document.getElementById('btn-blend').textContent = '🌀 Hòa trộn tiếp';
+    document.getElementById('btn-chain').style.display = 'block';
+    document.getElementById('btn-dl').style.display    = 'inline-flex';
   }, 550);
+}
+
+/* ─────────────────────── CHAIN WORKFLOW ─────────────────────── */
+function continueChain() {
+  if (!S.imgs[2]) return;
+
+  // Set result image (img3) into Slot 1 (Character / Previous Result)
+  S.imgs[0] = S.imgs[2];
+  document.getElementById('pimg-1').src = S.imgs[2].src;
+  document.getElementById('body-1').style.display = 'none';
+  document.getElementById('prev-1').style.display = 'flex';
+
+  // Clear Slot 2 (Emoji / png) so user can pick next image
+  S.imgs[1] = null;
+  document.getElementById('body-2').style.display = 'flex';
+  document.getElementById('prev-2').style.display = 'none';
+  document.getElementById('file-2').value          = '';
+
+  // Clear Slot 3 (Result) for the upcoming step
+  S.imgs[2] = null;
+  document.getElementById('body-3').style.display = 'flex';
+  document.getElementById('prev-3').style.display = 'none';
+  document.getElementById('file-3').value          = '';
+
+  // Reset animations and canvas (keep result shown in slot 1 UI)
+  if (S.animId) cancelAnimationFrame(S.animId);
+  S.running = false; S.time = 0;
+
+  setFlyStyle(fly1, { top: '-60%', opacity: '0', bottom: 'auto' });
+  setFlyStyle(fly2, { bottom: '-60%', opacity: '0', top: 'auto' });
+
+  canvas.classList.remove('visible');
+  canvas.style.opacity = '';
+  canvas.style.transition = '';
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  resultWrap.classList.remove('show');
+
+  document.getElementById('btn-chain').style.display = 'none';
+  document.getElementById('btn-dl').style.display    = 'none';
+  document.getElementById('btn-blend').textContent   = '🌀 Bắt đầu Blend';
+
+  setPhase(0);
+
+  toast('Đã chuyển Kết quả thành Ảnh 1! Hãy chọn Emoji/Ảnh mới 🌟');
 }
 
 /* ─────────────────────── RENDER ─────────────────────── */
