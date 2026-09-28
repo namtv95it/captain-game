@@ -29,6 +29,8 @@ const flyImg1     = document.getElementById('fly-img-1');
 const flyImg2     = document.getElementById('fly-img-2');
 const resultWrap  = document.getElementById('result-reveal');
 const resultImg   = document.getElementById('result-img');
+const bgCharWrap  = document.getElementById('bg-char-wrap');
+const bgCharImg   = document.getElementById('bg-char-img');
 const idleOverlay = document.getElementById('idle-overlay');
 const toastEl     = document.getElementById('toast');
 
@@ -66,6 +68,12 @@ function loadSlot(n, file) {
       const pv = document.getElementById(`prev-${n}`);
       pv.style.display = 'flex';
       document.getElementById(`pimg-${n}`).src = ev.target.result;
+
+      // If Slot 1 (Character) is loaded, display it full-frame in the theater right away!
+      if (n === 1) {
+        bgCharImg.src = ev.target.result;
+        bgCharWrap.classList.add('show');
+      }
     };
     img.src = ev.target.result;
   };
@@ -77,6 +85,10 @@ function clearSlot(n) {
   document.getElementById(`body-${n}`).style.display = 'flex';
   document.getElementById(`prev-${n}`).style.display  = 'none';
   document.getElementById(`file-${n}`).value           = '';
+  if (n === 1) {
+    bgCharWrap.classList.remove('show');
+    bgCharImg.src = '';
+  }
   resetAll();
 }
 
@@ -123,6 +135,7 @@ function resetAll() {
   resultWrap.classList.remove('show');
 
   idleOverlay.classList.remove('hidden');
+  bgCharWrap.classList.remove('show');
 
   document.getElementById('btn-blend').textContent = '🌀 Bắt đầu Blend';
   document.getElementById('btn-chain').style.display = 'none';
@@ -146,7 +159,9 @@ function runBlend() {
   canvas.width  = rect.width;
   canvas.height = rect.height;
 
-  idleOverlay.classList.add('hidden');
+  resultWrap.classList.remove('show');
+  canvas.classList.remove('visible');
+  canvas.style.opacity = '';
 
   flyImg1.src = S.imgs[0].src;
   flyImg2.src = S.imgs[1].src;
@@ -315,49 +330,39 @@ function playSfxReveal() {
   } catch (e) {}
 }
 
-/* ─────────────────────── PHASE 1 – img1 fly in from TOP ─────────────────────── */
+/* ─────────────────────── PHASE 1 – Character is already full-frame, show emoji fly-in ─────────────────────── */
 function phase1() {
   setPhase(1);
-  fly1.style.opacity = '1';
-  playSfxSwoosh(false);
-
-  // Faster fly in (550ms)
-  animatePct(fly1, 'top', -60, 22, 550, () => {
-    setTimeout(phase2, 200);
-  });
+  // Character image is already displayed full-frame in bgCharWrap
+  if (S.imgs[0]) {
+    bgCharImg.src = S.imgs[0].src;
+    bgCharWrap.classList.add('show');
+  }
+  setTimeout(phase2, 200);
 }
 
-/* ─────────────────────── PHASE 2 – img2 fly in from BOTTOM ─────────────────────── */
+/* ─────────────────────── PHASE 2 – Emoji / PNG flies in from BOTTOM ─────────────────────── */
 function phase2() {
   setPhase(2);
   fly2.style.opacity = '1';
   playSfxSwoosh(true);
 
-  // Faster fly in (550ms)
-  animatePct(fly2, 'bottom', -60, 22, 550, () => {
-    setTimeout(phase3, 220);
+  // Emoji flies in smoother and slower to vertical center (~38% from bottom) (850ms)
+  animatePct(fly2, 'bottom', -60, 38, 850, () => {
+    // Hold emoji at center for 800ms so viewers can see it clearly before blending!
+    setTimeout(phase3, 800);
   });
 }
 
-/* ─────────────────────── PHASE 3 – convergence + swirl ─────────────────────── */
+/* ─────────────────────── PHASE 3 – Convergence / Impact with Character ─────────────────────── */
 function phase3() {
   setPhase(3);
 
-  // Step A: both images fly toward center faster (350ms)
-  const convergeMs = 350;
-  let doneCount = 0;
-
-  function onConverged() {
-    doneCount++;
-    if (doneCount < 2) return;
-    // Both at center → flash collision
+  // Smooth contraction pulse into collision point (400ms)
+  const convergeMs = 400;
+  animatePct(fly2, 'bottom', 38, 42, convergeMs, () => {
     doCollisionFlash();
-  }
-
-  // img1: top 22% → top 38%
-  animatePct(fly1, 'top',    22, 38, convergeMs, onConverged);
-  // img2: bottom 22% → bottom 38%
-  animatePct(fly2, 'bottom', 22, 38, convergeMs, onConverged);
+  });
 }
 
 function doCollisionFlash() {
@@ -383,11 +388,10 @@ function doCollisionFlash() {
 
   theater.appendChild(flash);
 
-  // Immediately hide fly images
-  fly1.style.transition = 'opacity .2s';
+  // Hide fly image & full-frame character background as canvas swirl takes over
   fly2.style.transition = 'opacity .2s';
-  fly1.style.opacity = '0';
   fly2.style.opacity = '0';
+  bgCharWrap.classList.remove('show');
 
   // Show canvas
   canvas.classList.add('visible');
@@ -395,7 +399,6 @@ function doCollisionFlash() {
   // Start swirl loop after short pause
   setTimeout(() => {
     flash.remove();
-    fly1.style.transition = '';
     fly2.style.transition = '';
     startSwirlLoop();
   }, 300);
@@ -454,6 +457,10 @@ function continueChain() {
   document.getElementById('pimg-1').src = S.imgs[2].src;
   document.getElementById('body-1').style.display = 'none';
   document.getElementById('prev-1').style.display = 'flex';
+
+  // Immediately display this new character result full-frame in the background layer
+  bgCharImg.src = S.imgs[2].src;
+  bgCharWrap.classList.add('show');
 
   // Clear Slot 2 (Emoji / png) so user can pick next image
   S.imgs[1] = null;

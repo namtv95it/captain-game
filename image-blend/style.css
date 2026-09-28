@@ -468,6 +468,21 @@ body::before {
   z-index: 1;
 }
 
+/* ── Full-frame Character Layer ── */
+.bg-char-wrap {
+  position: absolute; inset: 0;
+  z-index: 2;
+  opacity: 0;
+  transition: opacity .4s ease;
+  pointer-events: none;
+}
+.bg-char-wrap.show { opacity: 1; }
+.bg-char-wrap img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
 /* ── Idle overlay ── */
 .idle-over {
   position: absolute; inset: 0;
@@ -524,7 +539,7 @@ body::before {
   width: 100% !important;
   height: 100% !important;
   opacity: 0;
-  z-index: 3;
+  z-index: 5;
   pointer-events: none;
   transition: opacity .3s;
 }
