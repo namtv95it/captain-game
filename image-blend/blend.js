@@ -246,12 +246,12 @@ function playSfxImpact() {
   } catch (e) {}
 }
 
-// SFX 3: Continuous Energy Swirl Drone
+// SFX 3: Continuous Energy Swirl Drone (plays seamlessly until result reveal)
 function playSfxSwirlDrone(durMs) {
   try {
     const ctx = getAudioCtx();
     const now = ctx.currentTime;
-    const durSec = durMs / 1000;
+    const durSec = (durMs + 650) / 1000; // Extend duration right up to reveal moment
 
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
@@ -259,21 +259,21 @@ function playSfxSwirlDrone(durMs) {
     const lfoGain = ctx.createGain();
 
     osc.type = 'sawtooth';
-    osc.frequency.setValueAtTime(120, now);
-    osc.frequency.linearRampToValueAtTime(280, now + durSec);
+    osc.frequency.setValueAtTime(140, now);
+    osc.frequency.linearRampToValueAtTime(360, now + durSec);
 
-    lfo.frequency.setValueAtTime(8, now);
-    lfoGain.gain.setValueAtTime(40, now);
+    lfo.frequency.setValueAtTime(10, now);
+    lfoGain.gain.setValueAtTime(50, now);
     lfo.connect(osc.frequency);
 
     const filter = ctx.createBiquadFilter();
     filter.type = 'lowpass';
-    filter.frequency.setValueAtTime(400, now);
-    filter.frequency.linearRampToValueAtTime(1400, now + durSec * 0.7);
+    filter.frequency.setValueAtTime(450, now);
+    filter.frequency.linearRampToValueAtTime(1800, now + durSec);
 
     gain.gain.setValueAtTime(0.01, now);
-    gain.gain.linearRampToValueAtTime(0.18, now + 0.4);
-    gain.gain.linearRampToValueAtTime(0.15, now + durSec - 0.4);
+    gain.gain.linearRampToValueAtTime(0.22, now + 0.3);
+    gain.gain.setValueAtTime(0.20, now + durSec - 0.2);
     gain.gain.exponentialRampToValueAtTime(0.001, now + durSec);
 
     osc.connect(filter);
