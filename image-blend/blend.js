@@ -168,6 +168,7 @@ function addStep() {
           </select>
           <div class="step-arrow"><i class="fa-solid fa-arrow-right"></i></div>
           <select class="step-reveal-select" id="step-reveal-${idx}" onchange="updateStepReveal(${idx}, this.value)" title="Hiệu ứng xuất hiện kết quả">
+            <option value="none">🚫 Không có hiệu ứng</option>
             <option value="eraser-stroke-up" selected>🪄 Tẩy ngang lên</option>
             <option value="eraser-up">⬆️ Tẩy thẳng</option>
             <option value="vortex-spiral">🌀 Xoáy ốc</option>
@@ -1324,6 +1325,8 @@ function doCollisionFlash() {
   }
 
   // Emoji "merges into" the character — shrinks, rotates, blurs out
+  // Temporarily lift above canvas (z-index:6) so animation is visible
+  fly2.style.zIndex    = '15';
   fly2.style.transition = 'none';
   fly2.style.animation  = 'fusionAbsorb 0.65s cubic-bezier(.4,0,.2,1) forwards';
 
@@ -1331,6 +1334,7 @@ function doCollisionFlash() {
   setTimeout(() => {
     fly2.style.animation  = '';
     fly2.style.opacity    = '0';
+    fly2.style.zIndex     = '';
     fly2.style.transition = '';
   }, 660);
 
@@ -1398,7 +1402,26 @@ function phase4() {
     }, 200);
   };
 
-  if (revealStyle === 'classic') {
+  if (revealStyle === 'none') {
+    // ── None: No reveal animation, show result immediately ──
+    resultWrap.classList.remove('reveal-eraser');
+    resultWrap.classList.remove('reveal-classic');
+    resultImg.src = S._currentResultImg.src;
+    resultWrap.classList.add('show');
+    canvas.classList.remove('visible');
+    canvas.style.transition = '';
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    canvas.style.opacity = '';
+    playSfxReveal();
+    S.chainPrev = S._currentResultImg;
+    S.lastResultImg = S._currentResultImg;
+    if (resultBadge) {
+      void resultBadge.offsetWidth;
+      resultBadge.classList.add('show');
+    }
+    _scheduleNextAfterReveal(2500);
+
+  } else if (revealStyle === 'classic') {
     // ── Classic: fade canvas out → morphReveal + shockwave ──
     canvas.style.transition = 'opacity .5s ease';
     canvas.style.opacity = '0';

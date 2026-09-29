@@ -882,22 +882,22 @@ body.recording-mode .theater {
 
 .emoji-header-item .step-num-badge {
   position: absolute;
-  top: -7px;
-  right: -7px;
-  min-width: 22px;
-  height: 22px;
+  top: -9px;
+  right: -9px;
+  min-width: 28px;
+  height: 28px;
   border-radius: 50%;
   background: var(--grad-v);
   color: #fff;
-  font-size: .75rem;
+  font-size: .95rem;
   font-weight: 800;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, .25);
-  border: 1.5px solid #fff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, .35);
+  border: 2px solid #fff;
   line-height: 1;
-  padding: 0 1px;
+  padding: 0 2px;
 }
 
 /* 9:16 box – height fills panel, width = height * 9/16 */
