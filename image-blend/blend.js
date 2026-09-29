@@ -705,7 +705,7 @@ function showFinalGridScreen() {
     // Top 2 images (idx 0, 1): badge at bottom
     // Bottom 2 images (idx 2, 3): badge pushed to top
     const badgePosClass = idx < 2 ? 'badge-bottom' : 'badge-top';
-    badge.className = `final-item-badge ${badgePosClass}`;
+    badge.className = `final-item-badge ${badgePosClass} badge-color-${idx % 4}`;
     badge.innerHTML = badgeLabels[idx] || `Option ${idx + 1}`;
 
     item.appendChild(img);
@@ -954,6 +954,7 @@ function phase4() {
   // Prepare Result Badge (do not show yet, wait for reveal to finish)
   const resultBadge = document.getElementById('result-badge');
   if (resultBadge) {
+    resultBadge.className = `result-badge badge-color-${S._pendingIdx % 4}`;
     resultBadge.innerHTML = getResultBadgeHTML(S._pendingIdx);
     resultBadge.classList.remove('show');
   }

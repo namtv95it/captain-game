@@ -1162,7 +1162,7 @@ body::before {
 
 .result-badge i {
   font-size: 1.25rem;
-  color: #fbbf24; /* Ánh vàng rực rỡ nổi bật */
+  color: #fbbf24;
   filter: drop-shadow(0 2px 8px rgba(245, 158, 11, 0.8));
 }
 
@@ -1692,10 +1692,36 @@ body::before {
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
 }
 
+.result-badge i,
 .final-item-badge i {
-  font-size: 1.15rem;
-  color: #fbbf24; /* Ánh vàng kim rực rỡ */
-  filter: drop-shadow(0 2px 6px rgba(245, 158, 11, 0.8));
+  font-size: 1.2rem;
+  transition: transform .2s ease;
+}
+
+/* 4 Icon Colors:
+   Option 0 (Like): Vibrant Blue
+   Option 1 (Comment): Electric Green / Emerald
+   Option 2 (Share): Radiant Gold / Orange
+   Option 3 (Subscribe): Hot Coral Red
+*/
+.badge-color-0 i {
+  color: #38bdf8 !important;
+  filter: drop-shadow(0 2px 8px rgba(56, 189, 248, 0.85)) !important;
+}
+
+.badge-color-1 i {
+  color: #34d399 !important;
+  filter: drop-shadow(0 2px 8px rgba(52, 211, 153, 0.85)) !important;
+}
+
+.badge-color-2 i {
+  color: #fbbf24 !important;
+  filter: drop-shadow(0 2px 8px rgba(251, 191, 36, 0.85)) !important;
+}
+
+.badge-color-3 i {
+  color: #f43f5e !important;
+  filter: drop-shadow(0 2px 8px rgba(244, 63, 94, 0.85)) !important;
 }
 
 /* Badge at bottom for top 2 images */
