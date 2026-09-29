@@ -1262,26 +1262,22 @@ function phase2() {
 
   if (currentDir === 'bottom') {
     setFlyStyle(fly2, { left: '50%', transform: 'translateX(-50%)', bottom: '-60%' });
-    animateDir(fly2, 'bottom', -60, 38, 850, () => setTimeout(phase3, 800));
+    animateDir(fly2, 'bottom', -60, 38, 750, () => setTimeout(phase3, 150));
   } else if (currentDir === 'top') {
     setFlyStyle(fly2, { left: '50%', transform: 'translateX(-50%)', top: '-60%' });
-    animateDir(fly2, 'top', -60, 38, 850, () => setTimeout(phase3, 800));
+    animateDir(fly2, 'top', -60, 38, 750, () => setTimeout(phase3, 150));
   } else if (currentDir === 'left') {
     setFlyStyle(fly2, { top: '50%', transform: 'translateY(-50%)', left: '-60%' });
-    animateDir(fly2, 'left', -60, 22.5, 850, () => setTimeout(phase3, 800));
+    animateDir(fly2, 'left', -60, 22.5, 750, () => setTimeout(phase3, 150));
   } else if (currentDir === 'right') {
     setFlyStyle(fly2, { top: '50%', transform: 'translateY(-50%)', right: '-60%' });
-    animateDir(fly2, 'right', -60, 22.5, 850, () => setTimeout(phase3, 800));
+    animateDir(fly2, 'right', -60, 22.5, 750, () => setTimeout(phase3, 150));
   }
 }
 
 function phase3() {
-  const convergeMs = 400;
-  let targetVal = 42;
-  if (currentDir === 'left' || currentDir === 'right') targetVal = 22.5;
-  animateDir(fly2, currentDir, (currentDir === 'left' || currentDir === 'right') ? 22.5 : 38, targetVal, convergeMs, () => {
-    doCollisionFlash();
-  });
+  // Directly start fusion animation at current landing position without extra movement
+  doCollisionFlash();
 }
 
 function doCollisionFlash() {
@@ -1310,25 +1306,27 @@ function doCollisionFlash() {
   canvas.classList.add('visible');
   startSwirlLoop(); // ← blend starts right away
 
-  // Inject fusion absorb keyframe once
-  if (!document.getElementById('fusion-absorb-kf')) {
-    const st = document.createElement('style');
+  // Dynamic fusion absorb keyframe: Spin in place (720deg rotation) matching the fly direction base transform
+  const baseTr = (currentDir === 'left' || currentDir === 'right') ? 'translateY(-50%)' : 'translateX(-50%)';
+  let st = document.getElementById('fusion-absorb-kf');
+  if (!st) {
+    st = document.createElement('style');
     st.id = 'fusion-absorb-kf';
-    st.textContent = `
-      @keyframes fusionAbsorb {
-        0%   { opacity: 1;   transform: translate(-50%,-50%) scale(1)    rotate(0deg);   filter: blur(0px);  }
-        30%  { opacity: 0.9; transform: translate(-50%,-50%) scale(1.08) rotate(15deg);  filter: blur(0px);  }
-        100% { opacity: 0;   transform: translate(-50%,-50%) scale(0.05) rotate(120deg); filter: blur(8px);  }
-      }
-    `;
     document.head.appendChild(st);
   }
+  st.textContent = `
+    @keyframes fusionAbsorb {
+      0%   { opacity: 1;   transform: ${baseTr} scale(1)    rotate(0deg);   filter: blur(0px); }
+      30%  { opacity: 0.95; transform: ${baseTr} scale(1.1)  rotate(240deg); filter: blur(0px); }
+      100% { opacity: 0;   transform: ${baseTr} scale(0.05) rotate(720deg); filter: blur(8px); }
+    }
+  `;
 
-  // Emoji "merges into" the character — shrinks, rotates, blurs out
+  // Emoji "merges into" the character — spins in place, shrinks, blurs out
   // Temporarily lift above canvas (z-index:6) so animation is visible
-  fly2.style.zIndex    = '15';
+  fly2.style.zIndex     = '15';
   fly2.style.transition = 'none';
-  fly2.style.animation  = 'fusionAbsorb 0.65s cubic-bezier(.4,0,.2,1) forwards';
+  fly2.style.animation  = 'fusionAbsorb 0.7s cubic-bezier(.4,0,.2,1) forwards';
 
   // Clean up after animation completes
   setTimeout(() => {
@@ -1336,7 +1334,7 @@ function doCollisionFlash() {
     fly2.style.opacity    = '0';
     fly2.style.zIndex     = '';
     fly2.style.transition = '';
-  }, 660);
+  }, 710);
 
   // Remove flash overlay after it fades
   setTimeout(() => flash.remove(), 580);
