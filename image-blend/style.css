@@ -937,7 +937,7 @@ body::before {
   justify-content: center;
   gap: 3px;
   flex-shrink: 0;
-  width: 78px;
+  width: 82px;
 }
 
 .step-style-select {
@@ -960,6 +960,29 @@ body::before {
 .step-style-select:focus {
   border-color: var(--p1);
   box-shadow: 0 0 8px rgba(124,58,237,.25);
+}
+
+/* Reveal effect selector — accent in pink/magenta to distinguish from blend selector */
+.step-reveal-select {
+  width: 100%;
+  padding: 3px 4px;
+  border-radius: 8px;
+  border: 1.5px solid #db2777;
+  background: #fff0f7;
+  color: #9d174d;
+  font-family: inherit;
+  font-size: .65rem;
+  font-weight: 700;
+  outline: none;
+  cursor: pointer;
+  text-align: center;
+  transition: border-color .18s, box-shadow .18s;
+  box-shadow: 0 1px 3px rgba(219,39,119,.1);
+}
+.step-reveal-select:hover,
+.step-reveal-select:focus {
+  border-color: #9d174d;
+  box-shadow: 0 0 8px rgba(219,39,119,.3);
 }
 
 .step-arrow {

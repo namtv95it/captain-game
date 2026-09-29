@@ -100,20 +100,22 @@ function clearSlot(n) {
 /* ─────────────────────── MULTI-STEP UI ─────────────────────── */
 
 // Steps data store: indexed by step index (0-based)
-// S.steps[i] = { emojiImg: Image|null, resultImg: Image|null, style: string }
+// S.steps[i] = { emojiImg, resultImg, style, revealStyle }
 // Initialize 4 steps by default with varied preset styles
 S.steps = [
-  { emojiImg: null, resultImg: null, style: 'swirl' },
-  { emojiImg: null, resultImg: null, style: 'marble' },
-  { emojiImg: null, resultImg: null, style: 'swirl' },
-  { emojiImg: null, resultImg: null, style: 'marble' }
+  { emojiImg: null, resultImg: null, style: 'swirl',  revealStyle: 'eraser' },
+  { emojiImg: null, resultImg: null, style: 'marble', revealStyle: 'eraser-stroke-up' },
+  { emojiImg: null, resultImg: null, style: 'swirl',  revealStyle: 'eraser' },
+  { emojiImg: null, resultImg: null, style: 'marble', revealStyle: 'classic' }
 ];
 S.stepCount = 4;
 
 function updateStepStyle(idx, styleVal) {
-  if (S.steps[idx]) {
-    S.steps[idx].style = styleVal;
-  }
+  if (S.steps[idx]) S.steps[idx].style = styleVal;
+}
+
+function updateStepReveal(idx, revealVal) {
+  if (S.steps[idx]) S.steps[idx].revealStyle = revealVal;
 }
 
 function addStep() {
@@ -122,7 +124,7 @@ function addStep() {
     return;
   }
   const idx = S.stepCount;
-  S.steps.push({ emojiImg: null, resultImg: null, style: 'swirl' });
+  S.steps.push({ emojiImg: null, resultImg: null, style: 'swirl', revealStyle: 'eraser' });
   S.stepCount++;
 
   const html = `
@@ -149,6 +151,12 @@ function addStep() {
             <option value="marble">🔮 Marble</option>
           </select>
           <div class="step-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+          <select class="step-reveal-select" id="step-reveal-${idx}" onchange="updateStepReveal(${idx}, this.value)" title="Hiệu ứng xuất hiện kết quả">
+            <option value="eraser" selected>🧹 Tẩy tâm</option>
+            <option value="eraser-stroke-up">🪄 Tẩy ngang lên</option>
+            <option value="eraser-up">⬆️ Tẩy thẳng</option>
+            <option value="classic">✨ Classic</option>
+          </select>
         </div>
         <div class="step-card step-result" id="result-card-${idx}" onclick="pickStepFile(${idx},'result')">
           <input type="file" id="result-file-${idx}" accept="image/*" hidden />
@@ -207,6 +215,7 @@ function removeStep(idx) {
     const emojiImgEl = el.querySelector('[id^="emoji-img-"]');
     const resultImgEl = el.querySelector('[id^="result-img-"]');
     const styleSelect = el.querySelector('[id^="step-style-"]');
+    const revealSelect = el.querySelector('[id^="step-reveal-"]');
     const emojiXBtn = emojiPrev?.querySelector('.x-btn');
     const resultXBtn = resultPrev?.querySelector('.x-btn');
 
@@ -229,9 +238,12 @@ function removeStep(idx) {
     if (styleSelect) {
       styleSelect.id = `step-style-${i}`;
       styleSelect.setAttribute('onchange', `updateStepStyle(${i}, this.value)`);
-      if (S.steps[i] && S.steps[i].style) {
-        styleSelect.value = S.steps[i].style;
-      }
+      if (S.steps[i]?.style) styleSelect.value = S.steps[i].style;
+    }
+    if (revealSelect) {
+      revealSelect.id = `step-reveal-${i}`;
+      revealSelect.setAttribute('onchange', `updateStepReveal(${i}, this.value)`);
+      if (S.steps[i]?.revealStyle) revealSelect.value = S.steps[i].revealStyle;
     }
     if (emojiXBtn) emojiXBtn.setAttribute('onclick', `clearStepSlot(event,${i},'emoji')`);
     if (resultXBtn) resultXBtn.setAttribute('onclick', `clearStepSlot(event,${i},'result')`);
@@ -909,13 +921,33 @@ function phase4() {
   fly1.style.opacity = '0';
   fly2.style.opacity = '0';
 
-  const revealStyle = document.getElementById('reveal-style-select')?.value || 'eraser';
+  // Read revealStyle from current step object
+  const currentStep = S._pendingSteps?.[S._pendingIdx];
+  const revealStyle = currentStep?.revealStyle || 'eraser';
+
+  const _doEraserReveal = (eraserFn) => {
+    resultWrap.classList.remove('reveal-classic');
+    resultWrap.classList.add('reveal-eraser');
+    resultImg.src = S._currentResultImg.src;
+    resultWrap.classList.add('show');
+    S.chainPrev = S._currentResultImg;
+    S.lastResultImg = S._currentResultImg;
+    setTimeout(() => {
+      playSfxReveal();
+      eraserFn(() => {
+        canvas.classList.remove('visible');
+        canvas.style.transition = '';
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        canvas.style.opacity = '';
+        _scheduleNextAfterReveal(4000);
+      });
+    }, 200);
+  };
 
   if (revealStyle === 'classic') {
     // ── Classic: fade canvas out → morphReveal + shockwave ──
     canvas.style.transition = 'opacity .5s ease';
     canvas.style.opacity = '0';
-
     setTimeout(() => {
       resultWrap.classList.remove('reveal-eraser');
       resultWrap.classList.add('reveal-classic');
@@ -925,35 +957,21 @@ function phase4() {
       canvas.style.transition = '';
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       canvas.style.opacity = '';
-
       playSfxReveal();
-
       S.chainPrev = S._currentResultImg;
       S.lastResultImg = S._currentResultImg;
-
       _scheduleNextAfterReveal(4000);
     }, 550);
 
+  } else if (revealStyle === 'eraser-up') {
+    _doEraserReveal(startEraserRevealUp);
+
+  } else if (revealStyle === 'eraser-stroke-up') {
+    _doEraserReveal(startEraserStrokeUp);
+
   } else {
-    // ── Eraser: freeze canvas → erase gradually to reveal result below ──
-    resultWrap.classList.remove('reveal-classic');
-    resultWrap.classList.add('reveal-eraser');
-    resultImg.src = S._currentResultImg.src;
-    resultWrap.classList.add('show');
-
-    S.chainPrev = S._currentResultImg;
-    S.lastResultImg = S._currentResultImg;
-
-    setTimeout(() => {
-      playSfxReveal();
-      startEraserReveal(() => {
-        canvas.classList.remove('visible');
-        canvas.style.transition = '';
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        canvas.style.opacity = '';
-        _scheduleNextAfterReveal(4000);
-      });
-    }, 200);
+    // default: eraser (radial from center)
+    _doEraserReveal(startEraserReveal);
   }
 }
 
@@ -1088,6 +1106,189 @@ function startEraserReveal(onDone) {
       requestAnimationFrame(erase);
     } else {
       // Final clean — erase entire canvas
+      ctx.clearRect(0, 0, W, H);
+      onDone();
+    }
+  }
+
+  requestAnimationFrame(erase);
+}
+
+/* ─────────────────────── ERASER REVEAL — BOTTOM TO TOP ─────────────────────── */
+function startEraserRevealUp(onDone) {
+  const W = canvas.width;
+  const H = canvas.height;
+  const totalDur = 1600; // ms
+  const startTime = performance.now();
+
+  // Each "row band" of the canvas gets erased sequentially from bottom → top.
+  // We simulate a brushy eraser by drawing many overlapping soft circles
+  // along a horizontal sweep line that rises over time.
+
+  // Pre-generate per-column brush offsets so the edge looks jagged/brushy
+  const cols = 40;
+  const colOffsets = Array.from({ length: cols }, () => (Math.random() - 0.5) * H * 0.06);
+  const colRadii   = Array.from({ length: cols }, () => 28 + Math.random() * 36);
+  const colWobble  = Array.from({ length: cols }, () => Math.random() * Math.PI * 2);
+  const colWobbleSpd = Array.from({ length: cols }, () => 1.5 + Math.random() * 3);
+
+  // Extra leading "drip" points that race ahead of the main sweep
+  const drips = Array.from({ length: 8 }, (_, i) => ({
+    xFrac: 0.05 + (i / 8) * 0.9,
+    lead: 0.06 + Math.random() * 0.12,  // how far ahead they go
+    r: 18 + Math.random() * 22,
+  }));
+
+  function erase(now) {
+    if (!S.running) return;
+    const elapsed = now - startTime;
+    const t = Math.min(1, elapsed / totalDur); // 0→1, linear
+
+    // sweepY goes from H (bottom) up to -overshot
+    const easeT = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2; // easeInOutQuad
+    const sweepY = H - easeT * (H + 60); // main sweep line y position
+
+    ctx.globalCompositeOperation = 'destination-out';
+
+    // ── Main brush band: many soft circles along the sweep line ──
+    for (let ci = 0; ci < cols; ci++) {
+      const x = (ci / (cols - 1)) * W;
+      const wobble = Math.sin(colWobble[ci] + elapsed * 0.001 * colWobbleSpd[ci]) * 14;
+      const y = sweepY + colOffsets[ci] + wobble;
+      const r = colRadii[ci];
+
+      const grad = ctx.createRadialGradient(x, y, 0, x, y, r);
+      grad.addColorStop(0,   'rgba(0,0,0,1)');
+      grad.addColorStop(0.55,'rgba(0,0,0,0.95)');
+      grad.addColorStop(0.85,'rgba(0,0,0,0.6)');
+      grad.addColorStop(1,   'rgba(0,0,0,0)');
+
+      ctx.beginPath();
+      ctx.arc(x, y, r, 0, Math.PI * 2);
+      ctx.fillStyle = grad;
+      ctx.fill();
+    }
+
+    // ── Fill everything BELOW the sweep line (already erased zone) ──
+    // Use a single tall rectangle below sweepY to ensure no leftover pixels
+    if (sweepY < H) {
+      const fillY = Math.min(H, sweepY + 50);
+      ctx.fillStyle = 'rgba(0,0,0,1)';
+      ctx.fillRect(0, fillY, W, H - fillY);
+    }
+
+    // ── Drip points that race ahead of the main sweep ──
+    drips.forEach(d => {
+      const dipY = sweepY - d.lead * H;
+      const x = d.xFrac * W;
+      const grad = ctx.createRadialGradient(x, dipY, 0, x, dipY, d.r);
+      grad.addColorStop(0,   'rgba(0,0,0,0.9)');
+      grad.addColorStop(0.6, 'rgba(0,0,0,0.5)');
+      grad.addColorStop(1,   'rgba(0,0,0,0)');
+      ctx.beginPath();
+      ctx.arc(x, dipY, d.r, 0, Math.PI * 2);
+      ctx.fillStyle = grad;
+      ctx.fill();
+    });
+
+    ctx.globalCompositeOperation = 'source-over';
+
+    if (t < 1) {
+      requestAnimationFrame(erase);
+    } else {
+      ctx.clearRect(0, 0, W, H);
+      onDone();
+    }
+  }
+
+  requestAnimationFrame(erase);
+}
+
+/* ─────────────────────── ERASER REVEAL — STROKE SWEEP UP ─────────────────────── */
+function startEraserStrokeUp(onDone) {
+  const W = canvas.width;
+  const H = canvas.height;
+  const totalDur = 1800; // ms
+  const startTime = performance.now();
+
+  // Divide canvas into horizontal bands. Each band is wiped by a stroke
+  // moving left→right (even bands) or right→left (odd bands).
+  // Bands are revealed from bottom to top progressively.
+  const bandCount = 14; // number of horizontal bands
+  const bandH = H / bandCount;
+  const brushRadius = bandH * 0.85; // brush covers slightly more than one band
+
+  // For each band: pre-generate a "progress offset" so they stagger nicely
+  // Bottom band starts first, each band above starts slightly later
+  const bandDelay = 0.055; // fraction of totalDur each band starts later
+
+  // Brush stroke x-offsets along the band (for irregular/jagged paint feel)
+  const jitterPerBand = Array.from({ length: bandCount }, () =>
+    Array.from({ length: 20 }, () => (Math.random() - 0.5) * bandH * 0.5)
+  );
+
+  function erase(now) {
+    if (!S.running) return;
+    const elapsed = now - startTime;
+    const t = Math.min(1, elapsed / totalDur);
+
+    ctx.globalCompositeOperation = 'destination-out';
+
+    for (let b = 0; b < bandCount; b++) {
+      // bandIndex 0 = bottom band, bandIndex bandCount-1 = top band
+      const bandFromBottom = b; // 0 = bottom
+      const delay = bandFromBottom * bandDelay;
+      const localT = Math.max(0, Math.min(1, (t - delay) / (1 - delay)));
+      if (localT <= 0) continue;
+
+      // Center Y of this band (from bottom)
+      const bandY = H - (bandFromBottom + 0.5) * bandH;
+
+      // Stroke sweeps across X: even=L→R, odd=R→L
+      const goRight = (bandFromBottom % 2 === 0);
+      const strokeX = goRight
+        ? localT * (W + brushRadius * 2) - brushRadius
+        : (1 - localT) * (W + brushRadius * 2) - brushRadius;
+
+      // Draw multiple overlapping circles along the stroke path so far
+      // (paint all positions from start to current strokeX)
+      const steps = Math.ceil(localT * 24) + 1;
+      for (let s = 0; s <= steps; s++) {
+        const frac = s / steps;
+        const sx = goRight
+          ? frac * (W + brushRadius * 2) - brushRadius
+          : (1 - frac) * (W + brushRadius * 2) - brushRadius;
+        if (goRight && sx > strokeX) break;
+        if (!goRight && sx < strokeX) break;
+
+        const jitter = jitterPerBand[b][s % 20];
+        const sy = bandY + jitter;
+        const r = brushRadius * (0.75 + Math.random() * 0.35);
+
+        const grad = ctx.createRadialGradient(sx, sy, 0, sx, sy, r);
+        grad.addColorStop(0,    'rgba(0,0,0,1)');
+        grad.addColorStop(0.5,  'rgba(0,0,0,0.95)');
+        grad.addColorStop(0.85, 'rgba(0,0,0,0.7)');
+        grad.addColorStop(1,    'rgba(0,0,0,0)');
+
+        ctx.beginPath();
+        ctx.arc(sx, sy, r, 0, Math.PI * 2);
+        ctx.fillStyle = grad;
+        ctx.fill();
+      }
+
+      // Also fill solid below the fully erased zone (no leftover pixels)
+      if (localT >= 1) {
+        ctx.fillStyle = 'rgba(0,0,0,1)';
+        ctx.fillRect(0, bandY - bandH * 0.5, W, bandH * 1.1);
+      }
+    }
+
+    ctx.globalCompositeOperation = 'source-over';
+
+    if (t < 1) {
+      requestAnimationFrame(erase);
+    } else {
       ctx.clearRect(0, 0, W, H);
       onDone();
     }
