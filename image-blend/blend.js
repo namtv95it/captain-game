@@ -355,6 +355,31 @@ function getHeaderBadgeHTML(idx) {
   }
 }
 
+function getResultBadgeHTML(idx) {
+  const badgeTypeSelect = document.getElementById('badge-type-select');
+  const badgeType = badgeTypeSelect?.value || 'actions';
+  if (badgeType === 'actions') {
+    const actions = [
+      { icon: '<i class="fa-solid fa-thumbs-up"></i>', label: 'LIKE' },
+      { icon: '<i class="fa-solid fa-comment"></i>', label: 'COMMENT' },
+      { icon: '<i class="fa-solid fa-share"></i>', label: 'SHARE' },
+      { icon: '<i class="fa-solid fa-bell"></i>', label: 'SUBSCRIBE' }
+    ];
+    const act = actions[idx % actions.length];
+    return `${act.icon} <span>${act.label}</span>`;
+  } else if (badgeType === 'hearts') {
+    const hearts = [
+      '<i class="fa-solid fa-heart"></i>',
+      '<i class="fa-solid fa-heart-pulse"></i>',
+      '<i class="fa-solid fa-heart-circle-bolt"></i>',
+      '<i class="fa-solid fa-heart-circle-check"></i>'
+    ];
+    return `${hearts[idx % hearts.length]} <span>#${idx + 1}</span>`;
+  } else {
+    return `<i class="fa-solid fa-star"></i> <span>#${idx + 1}</span>`;
+  }
+}
+
 function refreshEmojiHeader() {
   // Collect all emoji images that have been uploaded
   const uploaded = S.steps
@@ -473,6 +498,8 @@ function resetAll() {
   canvas.style.transition = '';
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   resultWrap.classList.remove('show');
+  const resBadge = document.getElementById('result-badge');
+  if (resBadge) resBadge.classList.remove('show');
 
   bgCharWrap.classList.remove('show');
   if (S.charImg) {
@@ -924,6 +951,13 @@ function phase4() {
   fly1.style.opacity = '0';
   fly2.style.opacity = '0';
 
+  // Prepare Result Badge (do not show yet, wait for reveal to finish)
+  const resultBadge = document.getElementById('result-badge');
+  if (resultBadge) {
+    resultBadge.innerHTML = getResultBadgeHTML(S._pendingIdx);
+    resultBadge.classList.remove('show');
+  }
+
   // Read revealStyle from current step object
   const currentStep = S._pendingSteps?.[S._pendingIdx];
   const revealStyle = currentStep?.revealStyle || 'eraser';
@@ -942,6 +976,11 @@ function phase4() {
         canvas.style.transition = '';
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         canvas.style.opacity = '';
+        // Reveal finished: Now show the badge with spring animation!
+        if (resultBadge) {
+          void resultBadge.offsetWidth;
+          resultBadge.classList.add('show');
+        }
         _scheduleNextAfterReveal(2500);
       });
     }, 200);
@@ -963,6 +1002,13 @@ function phase4() {
       playSfxReveal();
       S.chainPrev = S._currentResultImg;
       S.lastResultImg = S._currentResultImg;
+      // Show badge after classic morph finishes
+      setTimeout(() => {
+        if (resultBadge) {
+          void resultBadge.offsetWidth;
+          resultBadge.classList.add('show');
+        }
+      }, 700);
       _scheduleNextAfterReveal(2500);
     }, 550);
 
@@ -994,6 +1040,8 @@ function _scheduleNextAfterReveal(pauseMs) {
   if (currentIdx + 1 < allSteps.length) {
     setTimeout(() => {
       if (!S.running) return;
+      const resBadge = document.getElementById('result-badge');
+      if (resBadge) resBadge.classList.remove('show');
       bgCharImg.src = S._currentResultImg.src;
       bgCharWrap.classList.add('show');
       resultWrap.classList.remove('show');
@@ -1001,6 +1049,8 @@ function _scheduleNextAfterReveal(pauseMs) {
     }, pauseMs);
   } else {
     setTimeout(() => {
+      const resBadge = document.getElementById('result-badge');
+      if (resBadge) resBadge.classList.remove('show');
       finishAllSteps();
     }, pauseMs);
   }
