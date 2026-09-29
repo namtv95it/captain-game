@@ -34,17 +34,17 @@
 
       <!-- ── Character Upload ── -->
       <div class="section-label"><i class="fa-solid fa-user-astronaut"></i> Ảnh nhân vật gốc</div>
-      <div class="upload-card card-1" id="card-1">
+      <div class="upload-card card-1" id="card-1" onclick="pickFile(1)" style="cursor:pointer">
         <input type="file" id="file-1" accept="image/*" hidden />
         <div class="card-tag tag-1"><i class="fa-solid fa-user"></i> Nhân vật</div>
         <div class="card-empty" id="body-1">
           <div class="empty-icon"><i class="fa-regular fa-image"></i></div>
-          <div class="empty-hint">Ảnh nhân vật gốc</div>
-          <button class="pick-btn btn-1" onclick="pickFile(1)">Chọn</button>
+          <div class="empty-hint">Click hoặc kéo thả ảnh vào đây</div>
+          <button class="pick-btn btn-1" onclick="event.stopPropagation();pickFile(1)">Chọn</button>
         </div>
         <div class="card-preview" id="prev-1" style="display:none">
           <img id="pimg-1" alt="img1" />
-          <button class="x-btn" onclick="clearSlot(1)"><i class="fa-solid fa-xmark"></i></button>
+          <button class="x-btn" onclick="event.stopPropagation();clearSlot(1)"><i class="fa-solid fa-xmark"></i></button>
         </div>
       </div>
 
@@ -344,8 +344,25 @@
         <div class="ctrl-item">
           <label class="ctrl-lbl"><i class="fa-solid fa-circle-question"></i> Question / Câu hỏi <span
               class="hint-sub">(Tiếng Anh)</span></label>
-          <input type="text" class="ctrl-input" id="final-question-input" value="WHICH VERSION DO YOU LIKE MOST?"
-            placeholder="WHICH VERSION DO YOU LIKE MOST?" />
+          <div class="question-input-wrap">
+            <input type="text" class="ctrl-input" id="final-question-input"
+              value="WHICH VERSION DO YOU LIKE MOST?"
+              placeholder="WHICH VERSION DO YOU LIKE MOST?"
+              list="question-suggestions" autocomplete="off" />
+            <button class="question-suggest-btn" id="question-suggest-btn" title="Gợi ý câu hỏi">
+              <i class="fa-solid fa-lightbulb"></i>
+            </button>
+          </div>
+          <div class="question-chips" id="question-chips">
+            <button class="q-chip" onclick="applyQuestion(this)">Which version do you like most?</button>
+            <button class="q-chip" onclick="applyQuestion(this)">Please help me choose a character!</button>
+            <button class="q-chip" onclick="applyQuestion(this)">Which hero would you pick?</button>
+            <button class="q-chip" onclick="applyQuestion(this)">Vote for your favorite version!</button>
+            <button class="q-chip" onclick="applyQuestion(this)">Who should be the final boss?</button>
+            <button class="q-chip" onclick="applyQuestion(this)">Which outfit suits them best?</button>
+            <button class="q-chip" onclick="applyQuestion(this)">Comment your choice below!</button>
+            <button class="q-chip" onclick="applyQuestion(this)">Which power-up is the strongest?</button>
+          </div>
         </div>
         <div class="ctrl-item">
           <label class="ctrl-lbl"><i class="fa-solid fa-tags"></i> Badge Type / Loại nhãn</label>

@@ -276,24 +276,58 @@ function removeStep(idx) {
 
 function attachStepFileListeners(idx) {
   // Use a data attribute trick to avoid duplicate listeners
-  const emojiInput = document.getElementById(`emoji-file-${idx}`);
+  const emojiInput  = document.getElementById(`emoji-file-${idx}`);
   const resultInput = document.getElementById(`result-file-${idx}`);
+  const emojiCard   = document.getElementById(`emoji-card-${idx}`);
+  const resultCard  = document.getElementById(`result-card-${idx}`);
+
+  // ── File input change ──
   if (emojiInput) {
-    const newEmojiInput = emojiInput.cloneNode(true);
-    emojiInput.replaceWith(newEmojiInput);
-    newEmojiInput.addEventListener('change', e => {
+    const newEl = emojiInput.cloneNode(true);
+    emojiInput.replaceWith(newEl);
+    newEl.addEventListener('change', e => {
       const f = e.target.files[0];
       if (f) loadStepSlot(idx, 'emoji', f);
     });
   }
   if (resultInput) {
-    const newResultInput = resultInput.cloneNode(true);
-    resultInput.replaceWith(newResultInput);
-    newResultInput.addEventListener('change', e => {
+    const newEl = resultInput.cloneNode(true);
+    resultInput.replaceWith(newEl);
+    newEl.addEventListener('change', e => {
       const f = e.target.files[0];
       if (f) loadStepSlot(idx, 'result', f);
     });
   }
+
+  // ── Drag & Drop helper ──
+  const addDnd = (card, type) => {
+    if (!card) return;
+    card.addEventListener('dragover', e => {
+      e.preventDefault();
+      card.classList.add('drag-over');
+    });
+    card.addEventListener('dragleave', () => card.classList.remove('drag-over'));
+    card.addEventListener('drop', e => {
+      e.preventDefault();
+      card.classList.remove('drag-over');
+      const f = e.dataTransfer.files[0];
+      if (f?.type.startsWith('image/')) loadStepSlot(idx, type, f);
+    });
+  };
+
+  addDnd(emojiCard,  'emoji');
+  addDnd(resultCard, 'result');
+}
+
+/* ─────────────────────── QUESTION CHIPS ─────────────────────── */
+function applyQuestion(btn) {
+  const input = document.getElementById('final-question-input');
+  if (!input) return;
+  input.value = btn.textContent.trim().toUpperCase();
+  // Highlight active chip
+  document.querySelectorAll('.q-chip').forEach(c => c.classList.remove('q-chip-active'));
+  btn.classList.add('q-chip-active');
+  saveSettings();
 }
 
 function pickStepFile(idx, type) {
