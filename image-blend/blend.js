@@ -103,9 +103,9 @@ function clearSlot(n) {
 // S.steps[i] = { emojiImg, resultImg, style, revealStyle }
 // Initialize 4 steps by default with varied preset styles
 S.steps = [
-  { emojiImg: null, resultImg: null, style: 'swirl',  revealStyle: 'eraser' },
+  { emojiImg: null, resultImg: null, style: 'swirl', revealStyle: 'eraser' },
   { emojiImg: null, resultImg: null, style: 'marble', revealStyle: 'eraser-stroke-up' },
-  { emojiImg: null, resultImg: null, style: 'swirl',  revealStyle: 'eraser' },
+  { emojiImg: null, resultImg: null, style: 'swirl', revealStyle: 'eraser' },
   { emojiImg: null, resultImg: null, style: 'marble', revealStyle: 'classic' }
 ];
 S.stepCount = 4;
@@ -939,7 +939,7 @@ function phase4() {
         canvas.style.transition = '';
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         canvas.style.opacity = '';
-        _scheduleNextAfterReveal(4000);
+        _scheduleNextAfterReveal(2500);
       });
     }, 200);
   };
@@ -960,7 +960,7 @@ function phase4() {
       playSfxReveal();
       S.chainPrev = S._currentResultImg;
       S.lastResultImg = S._currentResultImg;
-      _scheduleNextAfterReveal(4000);
+      _scheduleNextAfterReveal(2500);
     }, 550);
 
   } else if (revealStyle === 'eraser-up') {
@@ -1128,8 +1128,8 @@ function startEraserRevealUp(onDone) {
   // Pre-generate per-column brush offsets so the edge looks jagged/brushy
   const cols = 40;
   const colOffsets = Array.from({ length: cols }, () => (Math.random() - 0.5) * H * 0.06);
-  const colRadii   = Array.from({ length: cols }, () => 28 + Math.random() * 36);
-  const colWobble  = Array.from({ length: cols }, () => Math.random() * Math.PI * 2);
+  const colRadii = Array.from({ length: cols }, () => 28 + Math.random() * 36);
+  const colWobble = Array.from({ length: cols }, () => Math.random() * Math.PI * 2);
   const colWobbleSpd = Array.from({ length: cols }, () => 1.5 + Math.random() * 3);
 
   // Extra leading "drip" points that race ahead of the main sweep
@@ -1158,10 +1158,10 @@ function startEraserRevealUp(onDone) {
       const r = colRadii[ci];
 
       const grad = ctx.createRadialGradient(x, y, 0, x, y, r);
-      grad.addColorStop(0,   'rgba(0,0,0,1)');
-      grad.addColorStop(0.55,'rgba(0,0,0,0.95)');
-      grad.addColorStop(0.85,'rgba(0,0,0,0.6)');
-      grad.addColorStop(1,   'rgba(0,0,0,0)');
+      grad.addColorStop(0, 'rgba(0,0,0,1)');
+      grad.addColorStop(0.55, 'rgba(0,0,0,0.95)');
+      grad.addColorStop(0.85, 'rgba(0,0,0,0.6)');
+      grad.addColorStop(1, 'rgba(0,0,0,0)');
 
       ctx.beginPath();
       ctx.arc(x, y, r, 0, Math.PI * 2);
@@ -1182,9 +1182,9 @@ function startEraserRevealUp(onDone) {
       const dipY = sweepY - d.lead * H;
       const x = d.xFrac * W;
       const grad = ctx.createRadialGradient(x, dipY, 0, x, dipY, d.r);
-      grad.addColorStop(0,   'rgba(0,0,0,0.9)');
+      grad.addColorStop(0, 'rgba(0,0,0,0.9)');
       grad.addColorStop(0.6, 'rgba(0,0,0,0.5)');
-      grad.addColorStop(1,   'rgba(0,0,0,0)');
+      grad.addColorStop(1, 'rgba(0,0,0,0)');
       ctx.beginPath();
       ctx.arc(x, dipY, d.r, 0, Math.PI * 2);
       ctx.fillStyle = grad;
@@ -1266,10 +1266,10 @@ function startEraserStrokeUp(onDone) {
         const r = brushRadius * (0.75 + Math.random() * 0.35);
 
         const grad = ctx.createRadialGradient(sx, sy, 0, sx, sy, r);
-        grad.addColorStop(0,    'rgba(0,0,0,1)');
-        grad.addColorStop(0.5,  'rgba(0,0,0,0.95)');
+        grad.addColorStop(0, 'rgba(0,0,0,1)');
+        grad.addColorStop(0.5, 'rgba(0,0,0,0.95)');
         grad.addColorStop(0.85, 'rgba(0,0,0,0.7)');
-        grad.addColorStop(1,    'rgba(0,0,0,0)');
+        grad.addColorStop(1, 'rgba(0,0,0,0)');
 
         ctx.beginPath();
         ctx.arc(sx, sy, r, 0, Math.PI * 2);

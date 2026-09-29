@@ -89,6 +89,28 @@ body::before {
 .left-panel::-webkit-scrollbar { width: 4px; }
 .left-panel::-webkit-scrollbar-thumb { background: rgba(124,58,237,.25); border-radius: 4px; }
 
+/* ============================
+   RIGHT SIDEBAR – Controls & Settings
+   ============================ */
+.right-sidebar {
+  width: 360px;
+  flex-shrink: 0;
+  height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 18px 16px 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: var(--bg);
+  border-left: 1px solid var(--border);
+  scrollbar-width: thin;
+  scrollbar-color: rgba(124,58,237,.2) transparent;
+}
+.right-sidebar::-webkit-scrollbar { width: 4px; }
+.right-sidebar::-webkit-scrollbar-thumb { background: rgba(124,58,237,.25); border-radius: 4px; }
+
+
 /* Panel header */
 .panel-header { text-align: center; padding: 4px 0 6px; }
 
