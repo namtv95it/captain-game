@@ -1848,8 +1848,8 @@ function startEraserSplitCurtain(onDone) {
 function renderFrame(progress) {
   const W = canvas.width, H = canvas.height;
 
-  const offA = drawToOff(S._currentCharImg, W, H);
-  const offB = drawToOff(S._currentEmojiImg, W, H);
+  const offA = drawToOff(S._currentCharImg,   W, H);
+  const offB = drawToOff(S._currentResultImg, W, H); // Blend char → result (new character)
   const pxA = offA.getImageData(0, 0, W, H).data;
   const pxB = offB.getImageData(0, 0, W, H).data;
   const out = ctx.createImageData(W, H);
@@ -1857,11 +1857,11 @@ function renderFrame(progress) {
   const swirl = parseFloat(document.getElementById('sl-swirl').value) / 100;
   const t = S.time;
 
-  const currentStyle = S._currentStepStyle || 'swirl';
+  const currentStyle = S._currentStepStyle || 'fusion';
   switch (currentStyle) {
-    case 'marble': fxMarble(pxA, pxB, out.data, W, H, t, progress, swirl); break;
-    case 'swirl':
-    default: fxSwirl(pxA, pxB, out.data, W, H, t, progress, swirl); break;
+    case 'ripple':  fxRippleMorph(pxA, pxB, out.data, W, H, t, progress, swirl); break;
+    case 'fusion':
+    default: fxFusion(pxA, pxB, out.data, W, H, t, progress, swirl); break;
   }
 
   ctx.putImageData(out, 0, 0);
@@ -1881,6 +1881,99 @@ function drawToOff(img, W, H) {
 }
 
 /* ─────────────────────── EFFECTS ─────────────────────── */
+
+/* ── fxFusion: energy-vortex fusion morph (char → new char) ── */
+function fxFusion(a, b, out, W, H, t, progress, swirl) {
+  const cx = W / 2, cy = H / 2;
+  const maxDist = Math.sqrt(cx * cx + cy * cy);
+
+  for (let y = 0; y < H; y++) {
+    for (let x = 0; x < W; x++) {
+      const i = (y * W + x) * 4;
+      const dx = x - cx, dy = y - cy;
+      const dist  = Math.sqrt(dx * dx + dy * dy) / maxDist; // 0..1
+      const angle = Math.atan2(dy, dx);
+
+      // Energy peaks at progress midpoint, fades at start/end
+      const energy = Math.sin(progress * Math.PI); // 0→1→0
+
+      // ── Spiral vortex displacement ──
+      const spiralFreq  = 4;
+      const spiralPhase = angle * spiralFreq + t * 2.2 + dist * 7;
+      const spiralAmt   = Math.sin(spiralPhase) * swirl * energy;
+      const radialAmt   = Math.cos(t * 2.8 - dist * 5) * swirl * energy * 0.5;
+
+      const offX = (Math.cos(angle + Math.PI / 2) * cx * 0.18 * spiralAmt
+                  + dx * 0.14 * radialAmt) * energy;
+      const offY = (Math.sin(angle + Math.PI / 2) * cy * 0.18 * spiralAmt
+                  + dy * 0.14 * radialAmt) * energy;
+
+      const sx = clamp(Math.round(x + offX), 0, W - 1);
+      const sy = clamp(Math.round(y + offY), 0, H - 1);
+      const si = (sy * W + sx) * 4;
+
+      // ── Organic noise blend mask ──
+      const nx = (x / W) * 2 - 1, ny = (y / H) * 2 - 1;
+      const waveNoise   = Math.sin(nx * 12 + t * 1.6) * Math.cos(ny * 12 - t * 1.3) * 0.22;
+      const spiralNoise = Math.sin(angle * 6 + dist * 10 - t * 2.4) * 0.18;
+
+      const rawBlend = clamp(progress + waveNoise + spiralNoise, 0, 1);
+      // Smoothstep for crisp-but-soft transition
+      const blend = rawBlend * rawBlend * (3 - 2 * rawBlend);
+
+      // ── Chromatic glow at the blend edge ──
+      const edgeProximity = Math.max(0, 0.28 - Math.abs(rawBlend - 0.5)) / 0.28;
+      const glow = edgeProximity * energy * 55;
+
+      out[i]     = clamp(lerp(a[si],     b[si],     blend) + glow * 1.15, 0, 255) | 0;
+      out[i + 1] = clamp(lerp(a[si + 1], b[si + 1], blend) + glow * 0.80, 0, 255) | 0;
+      out[i + 2] = clamp(lerp(a[si + 2], b[si + 2], blend) + glow * 1.35, 0, 255) | 0;
+      out[i + 3] = 255;
+    }
+  }
+}
+
+/* ── fxRippleMorph: expanding circular ripple reveals the new character ── */
+function fxRippleMorph(a, b, out, W, H, t, progress, swirl) {
+  const cx = W / 2, cy = H / 2;
+  const maxDist = Math.sqrt(cx * cx + cy * cy);
+
+  for (let y = 0; y < H; y++) {
+    for (let x = 0; x < W; x++) {
+      const i = (y * W + x) * 4;
+      const dx = x - cx, dy = y - cy;
+      const dist  = Math.sqrt(dx * dx + dy * dy) / maxDist;
+      const angle = Math.atan2(dy, dx);
+
+      // Ripple wave front expands from center
+      const rippleWarp = Math.sin(dist * 14 - t * 3) * swirl * 0.05;
+      const frontPos   = progress + rippleWarp;
+
+      // Behind front → fully revealed; ahead → source char
+      const blendBase  = clamp((frontPos - dist) / 0.35, 0, 1);
+      const blend      = blendBase * blendBase * (3 - 2 * blendBase);
+
+      // Displacement: radial push at wave front
+      const frontIntensity = Math.exp(-Math.pow(dist - progress, 2) * 28);
+      const warpX = Math.cos(angle) * frontIntensity * cx * 0.06 * swirl;
+      const warpY = Math.sin(angle) * frontIntensity * cy * 0.06 * swirl;
+
+      const sx = clamp(Math.round(x + warpX), 0, W - 1);
+      const sy = clamp(Math.round(y + warpY), 0, H - 1);
+      const si = (sy * W + sx) * 4;
+
+      // Glowing rim at wave front
+      const rim  = frontIntensity * 60;
+
+      out[i]     = clamp(lerp(a[si],     b[si],     blend) + rim * 0.9,  0, 255) | 0;
+      out[i + 1] = clamp(lerp(a[si + 1], b[si + 1], blend) + rim * 0.75, 0, 255) | 0;
+      out[i + 2] = clamp(lerp(a[si + 2], b[si + 2], blend) + rim * 1.4,  0, 255) | 0;
+      out[i + 3] = 255;
+    }
+  }
+}
+
+/* ── Legacy effects (kept for reference) ── */
 function fxMarble(a, b, out, W, H, t, p, swirl) {
   const cx = W / 2, cy = H / 2;
   const maxR = Math.sqrt(cx * cx + cy * cy);
