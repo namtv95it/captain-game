@@ -103,10 +103,10 @@ function clearSlot(n) {
 // S.steps[i] = { emojiImg, resultImg, style, revealStyle }
 // Initialize 4 steps by default with varied preset styles
 S.steps = [
-  { emojiImg: null, resultImg: null, style: 'swirl', revealStyle: 'eraser' },
+  { emojiImg: null, resultImg: null, style: 'swirl',  revealStyle: 'eraser' },
   { emojiImg: null, resultImg: null, style: 'marble', revealStyle: 'eraser-stroke-up' },
-  { emojiImg: null, resultImg: null, style: 'swirl', revealStyle: 'eraser' },
-  { emojiImg: null, resultImg: null, style: 'marble', revealStyle: 'classic' }
+  { emojiImg: null, resultImg: null, style: 'swirl',  revealStyle: 'vortex-spiral' },
+  { emojiImg: null, resultImg: null, style: 'marble', revealStyle: 'diamond-grid' }
 ];
 S.stepCount = 4;
 
@@ -155,6 +155,9 @@ function addStep() {
             <option value="eraser" selected>🧹 Tẩy tâm</option>
             <option value="eraser-stroke-up">🪄 Tẩy ngang lên</option>
             <option value="eraser-up">⬆️ Tẩy thẳng</option>
+            <option value="vortex-spiral">🌀 Xoáy ốc</option>
+            <option value="diamond-grid">🧱 Mảnh ghép</option>
+            <option value="split-curtain">🚪 Bóc rèm</option>
             <option value="classic">✨ Classic</option>
           </select>
         </div>
@@ -969,6 +972,15 @@ function phase4() {
   } else if (revealStyle === 'eraser-stroke-up') {
     _doEraserReveal(startEraserStrokeUp);
 
+  } else if (revealStyle === 'vortex-spiral') {
+    _doEraserReveal(startEraserVortexSpiral);
+
+  } else if (revealStyle === 'diamond-grid') {
+    _doEraserReveal(startEraserDiamondGrid);
+
+  } else if (revealStyle === 'split-curtain') {
+    _doEraserReveal(startEraserSplitCurtain);
+
   } else {
     // default: eraser (radial from center)
     _doEraserReveal(startEraserReveal);
@@ -1282,6 +1294,214 @@ function startEraserStrokeUp(onDone) {
         ctx.fillStyle = 'rgba(0,0,0,1)';
         ctx.fillRect(0, bandY - bandH * 0.5, W, bandH * 1.1);
       }
+    }
+
+    ctx.globalCompositeOperation = 'source-over';
+
+    if (t < 1) {
+      requestAnimationFrame(erase);
+    } else {
+      ctx.clearRect(0, 0, W, H);
+      onDone();
+    }
+  }
+
+  requestAnimationFrame(erase);
+}
+
+/* ─────────────────────── ERASER REVEAL — VORTEX SPIRAL ─────────────────────── */
+function startEraserVortexSpiral(onDone) {
+  const W = canvas.width;
+  const H = canvas.height;
+  const totalDur = 1800;
+  const startTime = performance.now();
+  const centerX = W / 2;
+  const centerY = H / 2;
+  const maxR = Math.hypot(W, H) * 0.7;
+
+  // 6 spiral arms
+  const armCount = 6;
+
+  function erase(now) {
+    if (!S.running) return;
+    const elapsed = now - startTime;
+    const t = Math.min(1, elapsed / totalDur);
+
+    ctx.globalCompositeOperation = 'destination-out';
+
+    const currentMaxR = t * maxR;
+    const rot = t * Math.PI * 4; // 2 full rotations as it expands
+
+    for (let a = 0; a < armCount; a++) {
+      const armAngleOffset = (a / armCount) * Math.PI * 2;
+      const stepCount = Math.ceil(currentMaxR / 6) + 5;
+
+      for (let s = 0; s < stepCount; s++) {
+        const rFrac = s / stepCount;
+        const r = rFrac * currentMaxR;
+        const angle = armAngleOffset + rot + rFrac * 3.5;
+
+        const x = centerX + Math.cos(angle) * r;
+        const y = centerY + Math.sin(angle) * r;
+        const dotRadius = Math.max(12, 18 + rFrac * 38);
+
+        const grad = ctx.createRadialGradient(x, y, 0, x, y, dotRadius);
+        grad.addColorStop(0, 'rgba(0,0,0,1)');
+        grad.addColorStop(0.6, 'rgba(0,0,0,0.85)');
+        grad.addColorStop(1, 'rgba(0,0,0,0)');
+
+        ctx.beginPath();
+        ctx.arc(x, y, dotRadius, 0, Math.PI * 2);
+        ctx.fillStyle = grad;
+        ctx.fill();
+      }
+    }
+
+    ctx.globalCompositeOperation = 'source-over';
+
+    if (t < 1) {
+      requestAnimationFrame(erase);
+    } else {
+      ctx.clearRect(0, 0, W, H);
+      onDone();
+    }
+  }
+
+  requestAnimationFrame(erase);
+}
+
+/* ─────────────────────── ERASER REVEAL — DIAMOND GRID DISSOLVE ─────────────────────── */
+function startEraserDiamondGrid(onDone) {
+  const W = canvas.width;
+  const H = canvas.height;
+  const totalDur = 1800;
+  const startTime = performance.now();
+
+  const cols = 8;
+  const rows = 14;
+  const tileW = W / cols;
+  const tileH = H / rows;
+
+  const centerX = W / 2;
+  const centerY = H / 2;
+  const maxDist = Math.hypot(centerX, centerY);
+
+  // Pre-calculate stagger delay based on distance from center + random noise
+  const tiles = [];
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const tx = (c + 0.5) * tileW;
+      const ty = (r + 0.5) * tileH;
+      const dist = Math.hypot(tx - centerX, ty - centerY);
+      const distRatio = dist / maxDist; // 0 at center, ~1 at corners
+      const delay = distRatio * 0.45 + Math.random() * 0.15;
+      tiles.push({ c, r, tx, ty, delay });
+    }
+  }
+
+  function erase(now) {
+    if (!S.running) return;
+    const elapsed = now - startTime;
+    const t = Math.min(1, elapsed / totalDur);
+
+    ctx.globalCompositeOperation = 'destination-out';
+
+    for (let i = 0; i < tiles.length; i++) {
+      const tile = tiles[i];
+      const localT = Math.max(0, Math.min(1, (t - tile.delay) / (1 - tile.delay)));
+      if (localT <= 0) continue;
+
+      if (localT >= 1) {
+        ctx.fillStyle = 'rgba(0,0,0,1)';
+        ctx.fillRect(tile.c * tileW - 1, tile.r * tileH - 1, tileW + 2, tileH + 2);
+      } else {
+        const radius = localT * Math.hypot(tileW, tileH) * 0.85;
+        const grad = ctx.createRadialGradient(tile.tx, tile.ty, 0, tile.tx, tile.ty, radius);
+        grad.addColorStop(0, 'rgba(0,0,0,1)');
+        grad.addColorStop(0.7, 'rgba(0,0,0,0.9)');
+        grad.addColorStop(1, 'rgba(0,0,0,0)');
+
+        ctx.beginPath();
+        ctx.arc(tile.tx, tile.ty, radius, 0, Math.PI * 2);
+        ctx.fillStyle = grad;
+        ctx.fill();
+      }
+    }
+
+    ctx.globalCompositeOperation = 'source-over';
+
+    if (t < 1) {
+      requestAnimationFrame(erase);
+    } else {
+      ctx.clearRect(0, 0, W, H);
+      onDone();
+    }
+  }
+
+  requestAnimationFrame(erase);
+}
+
+/* ─────────────────────── ERASER REVEAL — SPLIT CURTAIN ─────────────────────── */
+function startEraserSplitCurtain(onDone) {
+  const W = canvas.width;
+  const H = canvas.height;
+  const totalDur = 1700;
+  const startTime = performance.now();
+  const centerX = W / 2;
+
+  // Jitter for brushy curtain opening edges
+  const edgePoints = 30;
+  const pointH = H / edgePoints;
+  const jittersL = Array.from({ length: edgePoints + 1 }, () => (Math.random() - 0.5) * 25);
+  const jittersR = Array.from({ length: edgePoints + 1 }, () => (Math.random() - 0.5) * 25);
+
+  function erase(now) {
+    if (!S.running) return;
+    const elapsed = now - startTime;
+    const t = Math.min(1, elapsed / totalDur);
+
+    ctx.globalCompositeOperation = 'destination-out';
+
+    const sweepDist = t * (W / 2 + 40);
+
+    // Left curtain sweep (opening from center towards x = 0)
+    const leftX = centerX - sweepDist;
+    // Right curtain sweep (opening from center towards x = W)
+    const rightX = centerX + sweepDist;
+
+    ctx.fillStyle = 'rgba(0,0,0,1)';
+
+    // Main center opening rectangle
+    if (leftX < rightX) {
+      ctx.fillRect(leftX + 15, 0, Math.max(0, rightX - leftX - 30), H);
+    }
+
+    // Brushy edges along left and right opening borders
+    for (let i = 0; i <= edgePoints; i++) {
+      const y = i * pointH;
+      const lx = leftX + jittersL[i];
+      const rx = rightX + jittersR[i];
+      const r = 24 + Math.random() * 12;
+
+      // Left edge brush
+      const gradL = ctx.createRadialGradient(lx, y, 0, lx, y, r);
+      gradL.addColorStop(0, 'rgba(0,0,0,1)');
+      gradL.addColorStop(0.7, 'rgba(0,0,0,0.8)');
+      gradL.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.beginPath();
+      ctx.arc(lx, y, r, 0, Math.PI * 2);
+      ctx.fillStyle = gradL;
+      ctx.fill();
+
+      // Right edge brush
+      const gradR = ctx.createRadialGradient(rx, y, 0, rx, y, r);
+      gradR.addColorStop(0, 'rgba(0,0,0,1)');
+      gradR.addColorStop(0.7, 'rgba(0,0,0,0.8)');
+      gradR.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.beginPath();
+      ctx.arc(rx, y, r, 0, Math.PI * 2);
+      ctx.fillStyle = gradR;
+      ctx.fill();
     }
 
     ctx.globalCompositeOperation = 'source-over';
