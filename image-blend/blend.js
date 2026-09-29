@@ -926,8 +926,8 @@ function phase4() {
     const currentIdx = S._pendingIdx;
     const allSteps = S._pendingSteps;
 
-    // After showing result, pause 2-3 seconds then continue
-    const pauseMs = 2000 + Math.random() * 1000; // 2-3 seconds
+    // After showing result, pause 4 seconds then continue
+    const pauseMs = 4000; // 4 seconds
 
     if (currentIdx + 1 < allSteps.length) {
       setTimeout(() => {
