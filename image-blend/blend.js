@@ -908,43 +908,192 @@ function startSwirlLoop() {
 function phase4() {
   fly1.style.opacity = '0';
   fly2.style.opacity = '0';
-  canvas.style.transition = 'opacity .5s ease';
-  canvas.style.opacity = '0';
 
-  setTimeout(() => {
+  const revealStyle = document.getElementById('reveal-style-select')?.value || 'eraser';
+
+  if (revealStyle === 'classic') {
+    // ── Classic: fade canvas out → morphReveal + shockwave ──
+    canvas.style.transition = 'opacity .5s ease';
+    canvas.style.opacity = '0';
+
+    setTimeout(() => {
+      resultWrap.classList.remove('reveal-eraser');
+      resultWrap.classList.add('reveal-classic');
+      resultImg.src = S._currentResultImg.src;
+      resultWrap.classList.add('show');
+      canvas.classList.remove('visible');
+      canvas.style.transition = '';
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      canvas.style.opacity = '';
+
+      playSfxReveal();
+
+      S.chainPrev = S._currentResultImg;
+      S.lastResultImg = S._currentResultImg;
+
+      _scheduleNextAfterReveal(4000);
+    }, 550);
+
+  } else {
+    // ── Eraser: freeze canvas → erase gradually to reveal result below ──
+    resultWrap.classList.remove('reveal-classic');
+    resultWrap.classList.add('reveal-eraser');
     resultImg.src = S._currentResultImg.src;
     resultWrap.classList.add('show');
-    canvas.classList.remove('visible');
-    canvas.style.transition = '';
 
-    playSfxReveal();
-
-    // Update chain prev to current result
     S.chainPrev = S._currentResultImg;
     S.lastResultImg = S._currentResultImg;
 
-    const currentIdx = S._pendingIdx;
-    const allSteps = S._pendingSteps;
+    setTimeout(() => {
+      playSfxReveal();
+      startEraserReveal(() => {
+        canvas.classList.remove('visible');
+        canvas.style.transition = '';
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        canvas.style.opacity = '';
+        _scheduleNextAfterReveal(4000);
+      });
+    }, 200);
+  }
+}
 
-    // After showing result, pause 4 seconds then continue
-    const pauseMs = 4000; // 4 seconds
+function _scheduleNextAfterReveal(pauseMs) {
+  const currentIdx = S._pendingIdx;
+  const allSteps = S._pendingSteps;
 
-    if (currentIdx + 1 < allSteps.length) {
-      setTimeout(() => {
-        if (!S.running) return;
-        // Set resultImg as background charImg so it stays visible seamlessly
-        bgCharImg.src = S._currentResultImg.src;
-        bgCharWrap.classList.add('show');
-        resultWrap.classList.remove('show');
-        runChainStep(allSteps, currentIdx + 1);
-      }, pauseMs);
+  if (currentIdx + 1 < allSteps.length) {
+    setTimeout(() => {
+      if (!S.running) return;
+      bgCharImg.src = S._currentResultImg.src;
+      bgCharWrap.classList.add('show');
+      resultWrap.classList.remove('show');
+      runChainStep(allSteps, currentIdx + 1);
+    }, pauseMs);
+  } else {
+    setTimeout(() => {
+      finishAllSteps();
+    }, pauseMs);
+  }
+}
+
+/* ─────────────────────── ERASER REVEAL ─────────────────────── */
+function startEraserReveal(onDone) {
+  const W = canvas.width;
+  const H = canvas.height;
+
+  // We'll draw eraser strokes using destination-out to cut holes in the canvas
+  // revealing the result image underneath
+
+  const centerX = W / 2;
+  const centerY = H / 2;
+  const totalDur = 1800; // ms total to erase
+  const startTime = performance.now();
+
+  // Pre-generate a list of stroke "seeds" — random paths that expand outward
+  const strokes = [];
+  const strokeCount = 28;
+  for (let i = 0; i < strokeCount; i++) {
+    const angle = (i / strokeCount) * Math.PI * 2 + (Math.random() - 0.5) * 0.4;
+    const dist = 0.12 + Math.random() * 0.08; // normalized radius of full sweep
+    strokes.push({
+      angle,
+      speed: 0.6 + Math.random() * 0.7,
+      radius: 22 + Math.random() * 40,
+      wobble: Math.random() * Math.PI * 2,
+      wobbleSpeed: 2 + Math.random() * 3,
+      startDelay: Math.random() * 0.3, // fraction of totalDur before this stroke starts
+    });
+  }
+
+  // Extra sweeping "big eraser" passes
+  const bigPasses = [];
+  const bigCount = 5;
+  for (let i = 0; i < bigCount; i++) {
+    bigPasses.push({
+      angle: (i / bigCount) * Math.PI * 2,
+      radius: 60 + Math.random() * 60,
+      startDelay: 0.3 + (i / bigCount) * 0.55,
+      speed: 0.8 + Math.random() * 0.5,
+    });
+  }
+
+  function erase(now) {
+    if (!S.running) return;
+    const elapsed = now - startTime;
+    const t = Math.min(1, elapsed / totalDur); // 0→1
+
+    ctx.globalCompositeOperation = 'destination-out';
+
+    // Draw individual strokes expanding outward from center
+    strokes.forEach(s => {
+      const localT = Math.max(0, (t - s.startDelay) / (1 - s.startDelay));
+      if (localT <= 0) return;
+
+      const maxReach = Math.max(W, H) * 0.85 * s.speed;
+      const reach = localT * maxReach;
+
+      const wobble = Math.sin(s.wobble + elapsed * 0.001 * s.wobbleSpeed) * 18;
+      const x = centerX + Math.cos(s.angle) * reach + Math.cos(s.angle + Math.PI / 2) * wobble;
+      const y = centerY + Math.sin(s.angle) * reach + Math.sin(s.angle + Math.PI / 2) * wobble;
+
+      const r = s.radius * (0.6 + localT * 0.8);
+      const grad = ctx.createRadialGradient(x, y, 0, x, y, r);
+      grad.addColorStop(0, 'rgba(0,0,0,1)');
+      grad.addColorStop(0.6, 'rgba(0,0,0,0.85)');
+      grad.addColorStop(1, 'rgba(0,0,0,0)');
+
+      ctx.beginPath();
+      ctx.arc(x, y, r, 0, Math.PI * 2);
+      ctx.fillStyle = grad;
+      ctx.fill();
+    });
+
+    // Big sweeping passes
+    bigPasses.forEach(s => {
+      const localT = Math.max(0, (t - s.startDelay) / (1 - s.startDelay));
+      if (localT <= 0) return;
+
+      const maxReach = Math.max(W, H) * s.speed;
+      const reach = localT * maxReach;
+
+      const x = centerX + Math.cos(s.angle) * reach;
+      const y = centerY + Math.sin(s.angle) * reach;
+      const r = s.radius * (0.8 + localT * 0.6);
+
+      const grad = ctx.createRadialGradient(x, y, 0, x, y, r);
+      grad.addColorStop(0, 'rgba(0,0,0,1)');
+      grad.addColorStop(0.5, 'rgba(0,0,0,0.9)');
+      grad.addColorStop(1, 'rgba(0,0,0,0)');
+
+      ctx.beginPath();
+      ctx.arc(x, y, r, 0, Math.PI * 2);
+      ctx.fillStyle = grad;
+      ctx.fill();
+    });
+
+    // Center "heart" erasure that starts first
+    const centerR = (80 + t * 180) * Math.min(1, t * 3);
+    const cGrad = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, centerR);
+    cGrad.addColorStop(0, 'rgba(0,0,0,1)');
+    cGrad.addColorStop(0.7, 'rgba(0,0,0,0.9)');
+    cGrad.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, centerR, 0, Math.PI * 2);
+    ctx.fillStyle = cGrad;
+    ctx.fill();
+
+    ctx.globalCompositeOperation = 'source-over'; // restore
+
+    if (t < 1) {
+      requestAnimationFrame(erase);
     } else {
-      // All done
-      setTimeout(() => {
-        finishAllSteps();
-      }, pauseMs);
+      // Final clean — erase entire canvas
+      ctx.clearRect(0, 0, W, H);
+      onDone();
     }
-  }, 550);
+  }
+
+  requestAnimationFrame(erase);
 }
 
 /* ─────────────────────── RENDER ─────────────────────── */
