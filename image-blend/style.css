@@ -1670,31 +1670,42 @@ body::before {
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
-  background: rgba(0, 0, 0, 0.82);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  background: linear-gradient(135deg, rgba(18, 12, 40, 0.94), rgba(38, 18, 70, 0.96));
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   color: #ffffff;
   padding: 8px 18px;
-  border-radius: 24px;
+  border-radius: 28px;
   font-size: .95rem;
-  font-weight: 800;
+  font-weight: 900;
   white-space: nowrap;
-  border: 1.5px solid rgba(255, 255, 255, 0.35);
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.6);
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  box-shadow:
+    0 6px 20px rgba(0, 0, 0, 0.65),
+    0 0 18px rgba(124, 58, 237, 0.65),
+    0 0 0 1px rgba(255, 255, 255, 0.2);
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   z-index: 5;
+  letter-spacing: 0.04em;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
+}
+
+.final-item-badge i {
+  font-size: 1.15rem;
+  color: #fbbf24; /* Ánh vàng kim rực rỡ */
+  filter: drop-shadow(0 2px 6px rgba(245, 158, 11, 0.8));
 }
 
 /* Badge at bottom for top 2 images */
 .final-item-badge.badge-bottom {
-  bottom: 10px;
+  bottom: 12px;
   top: auto;
 }
 
 /* Badge at top for bottom 2 images */
 .final-item-badge.badge-top {
-  top: 10px;
+  top: 12px;
   bottom: auto;
 }
