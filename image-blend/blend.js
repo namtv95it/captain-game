@@ -126,10 +126,12 @@ S.stepCount = 4;
 
 function updateStepStyle(idx, styleVal) {
   if (S.steps[idx]) S.steps[idx].style = styleVal;
+  saveSettings();
 }
 
 function updateStepReveal(idx, revealVal) {
   if (S.steps[idx]) S.steps[idx].revealStyle = revealVal;
+  saveSettings();
 }
 
 function addStep() {
@@ -138,7 +140,7 @@ function addStep() {
     return;
   }
   const idx = S.stepCount;
-  S.steps.push({ emojiImg: null, resultImg: null, style: 'swirl', revealStyle: 'eraser-stroke-up' });
+  S.steps.push({ emojiImg: null, resultImg: null, style: 'fusion', revealStyle: 'eraser-stroke-up' });
   S.stepCount++;
 
   const html = `
@@ -449,7 +451,84 @@ function updateEmojiHeaderState(activeIdx) {
 function syncVal(key) {
   document.getElementById(`val-${key}`).textContent =
     document.getElementById(`sl-${key}`).value;
+  saveSettings();
 }
+
+/* ─────────────────────── LOCALSTORAGE SETTINGS ─────────────────────── */
+const LS_KEY = 'blend_settings_v1';
+
+function saveSettings() {
+  const stepsData = S.steps.map(s => ({
+    style:       s.style       || 'fusion',
+    revealStyle: s.revealStyle || 'eraser-stroke-up',
+  }));
+
+  const data = {
+    steps:     stepsData,
+    question:  document.getElementById('final-question-input')?.value  || '',
+    badgeType: document.getElementById('badge-type-select')?.value      || 'actions',
+    swirl:     document.getElementById('sl-swirl')?.value               || '100',
+    speed:     document.getElementById('sl-speed')?.value               || '7',
+  };
+
+  try { localStorage.setItem(LS_KEY, JSON.stringify(data)); } catch(e) {}
+}
+
+function loadSettings() {
+  let data;
+  try { data = JSON.parse(localStorage.getItem(LS_KEY)); } catch(e) {}
+  if (!data) return;
+
+  // Restore per-step style & reveal selects
+  if (Array.isArray(data.steps)) {
+    data.steps.forEach((sd, i) => {
+      if (!S.steps[i]) return;
+      if (sd.style) {
+        S.steps[i].style = sd.style;
+        const sel = document.getElementById(`step-style-${i}`);
+        if (sel) sel.value = sd.style;
+      }
+      if (sd.revealStyle) {
+        S.steps[i].revealStyle = sd.revealStyle;
+        const sel = document.getElementById(`step-reveal-${i}`);
+        if (sel) sel.value = sd.revealStyle;
+      }
+    });
+  }
+
+  // Restore final question
+  if (data.question !== undefined) {
+    const q = document.getElementById('final-question-input');
+    if (q) q.value = data.question;
+  }
+
+  // Restore badge type
+  if (data.badgeType) {
+    const b = document.getElementById('badge-type-select');
+    if (b) { b.value = data.badgeType; refreshEmojiHeader(); }
+  }
+
+  // Restore sliders
+  if (data.swirl) {
+    const sl = document.getElementById('sl-swirl');
+    if (sl) { sl.value = data.swirl; syncVal('swirl'); }
+  }
+  if (data.speed) {
+    const sl = document.getElementById('sl-speed');
+    if (sl) { sl.value = data.speed; syncVal('speed'); }
+  }
+}
+
+// Auto-save when question or badge type changes — script runs after DOM so safe to hook directly
+(function initSettings() {
+  loadSettings();
+
+  const q = document.getElementById('final-question-input');
+  if (q) q.addEventListener('input', saveSettings);
+
+  const b = document.getElementById('badge-type-select');
+  if (b) b.addEventListener('change', saveSettings);
+})();
 
 function setStyle(s) {
   S.style = s;
@@ -1191,16 +1270,38 @@ function doCollisionFlash() {
 
   theater.appendChild(flash);
 
-  fly2.style.transition = 'opacity .2s';
-  fly2.style.opacity = '0';
+  // Show canvas and start blend immediately — runs behind the flash overlay
   bgCharWrap.classList.remove('show');
   canvas.classList.add('visible');
+  startSwirlLoop(); // ← blend starts right away
 
+  // Inject fusion absorb keyframe once
+  if (!document.getElementById('fusion-absorb-kf')) {
+    const st = document.createElement('style');
+    st.id = 'fusion-absorb-kf';
+    st.textContent = `
+      @keyframes fusionAbsorb {
+        0%   { opacity: 1;   transform: translate(-50%,-50%) scale(1)    rotate(0deg);   filter: blur(0px);  }
+        30%  { opacity: 0.9; transform: translate(-50%,-50%) scale(1.08) rotate(15deg);  filter: blur(0px);  }
+        100% { opacity: 0;   transform: translate(-50%,-50%) scale(0.05) rotate(120deg); filter: blur(8px);  }
+      }
+    `;
+    document.head.appendChild(st);
+  }
+
+  // Emoji "merges into" the character — shrinks, rotates, blurs out
+  fly2.style.transition = 'none';
+  fly2.style.animation  = 'fusionAbsorb 0.65s cubic-bezier(.4,0,.2,1) forwards';
+
+  // Clean up after animation completes
   setTimeout(() => {
-    flash.remove();
+    fly2.style.animation  = '';
+    fly2.style.opacity    = '0';
     fly2.style.transition = '';
-    startSwirlLoop();
-  }, 300);
+  }, 660);
+
+  // Remove flash overlay after it fades
+  setTimeout(() => flash.remove(), 580);
 }
 
 function startSwirlLoop() {
