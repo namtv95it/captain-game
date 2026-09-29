@@ -100,15 +100,21 @@ function clearSlot(n) {
 /* ─────────────────────── MULTI-STEP UI ─────────────────────── */
 
 // Steps data store: indexed by step index (0-based)
-// S.steps[i] = { emojiImg: Image|null, resultImg: Image|null }
-// Initialize 4 steps by default
+// S.steps[i] = { emojiImg: Image|null, resultImg: Image|null, style: string }
+// Initialize 4 steps by default with varied preset styles
 S.steps = [
-  { emojiImg: null, resultImg: null },
-  { emojiImg: null, resultImg: null },
-  { emojiImg: null, resultImg: null },
-  { emojiImg: null, resultImg: null }
+  { emojiImg: null, resultImg: null, style: 'swirl' },
+  { emojiImg: null, resultImg: null, style: 'marble' },
+  { emojiImg: null, resultImg: null, style: 'swirl' },
+  { emojiImg: null, resultImg: null, style: 'marble' }
 ];
 S.stepCount = 4;
+
+function updateStepStyle(idx, styleVal) {
+  if (S.steps[idx]) {
+    S.steps[idx].style = styleVal;
+  }
+}
 
 function addStep() {
   if (S.stepCount >= 4) {
@@ -116,37 +122,43 @@ function addStep() {
     return;
   }
   const idx = S.stepCount;
-  S.steps.push({ emojiImg: null, resultImg: null });
+  S.steps.push({ emojiImg: null, resultImg: null, style: 'swirl' });
   S.stepCount++;
 
   const html = `
     <div class="blend-step" id="step-${idx}" data-index="${idx}">
       <div class="step-header">
         <span class="step-badge">Bước ${idx + 1}</span>
-        <button class="step-remove-btn" onclick="removeStep(${idx})" title="Xóa bước">✕</button>
+        <button class="step-remove-btn" onclick="removeStep(${idx})" title="Xóa bước"><i class="fa-solid fa-xmark"></i></button>
       </div>
       <div class="step-row">
         <div class="step-card step-emoji" id="emoji-card-${idx}" onclick="pickStepFile(${idx},'emoji')">
           <input type="file" id="emoji-file-${idx}" accept="image/*" hidden />
           <div class="step-empty" id="emoji-body-${idx}">
-            <div class="step-empty-icon">🌟</div>
+            <div class="step-empty-icon"><i class="fa-solid fa-face-smile"></i></div>
             <div class="step-empty-hint">Emoji</div>
           </div>
           <div class="step-preview" id="emoji-prev-${idx}" style="display:none">
             <img id="emoji-img-${idx}" alt="emoji" />
-            <button class="x-btn x-btn-sm" onclick="clearStepSlot(event,${idx},'emoji')">✕</button>
+            <button class="x-btn x-btn-sm" onclick="clearStepSlot(event,${idx},'emoji')"><i class="fa-solid fa-xmark"></i></button>
           </div>
         </div>
-        <div class="step-arrow">→</div>
+        <div class="step-center-col">
+          <select class="step-style-select" id="step-style-${idx}" onchange="updateStepStyle(${idx}, this.value)" title="Kiểu blend bước này">
+            <option value="swirl" selected>🌀 Swirl</option>
+            <option value="marble">🔮 Marble</option>
+          </select>
+          <div class="step-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+        </div>
         <div class="step-card step-result" id="result-card-${idx}" onclick="pickStepFile(${idx},'result')">
           <input type="file" id="result-file-${idx}" accept="image/*" hidden />
           <div class="step-empty" id="result-body-${idx}">
-            <div class="step-empty-icon">🎁</div>
+            <div class="step-empty-icon"><i class="fa-solid fa-gift"></i></div>
             <div class="step-empty-hint">Kết quả</div>
           </div>
           <div class="step-preview" id="result-prev-${idx}" style="display:none">
             <img id="result-img-${idx}" alt="result" />
-            <button class="x-btn x-btn-sm" onclick="clearStepSlot(event,${idx},'result')">✕</button>
+            <button class="x-btn x-btn-sm" onclick="clearStepSlot(event,${idx},'result')"><i class="fa-solid fa-xmark"></i></button>
           </div>
         </div>
       </div>
@@ -194,6 +206,7 @@ function removeStep(idx) {
     const resultPrev = el.querySelector('[id^="result-prev-"]');
     const emojiImgEl = el.querySelector('[id^="emoji-img-"]');
     const resultImgEl = el.querySelector('[id^="result-img-"]');
+    const styleSelect = el.querySelector('[id^="step-style-"]');
     const emojiXBtn = emojiPrev?.querySelector('.x-btn');
     const resultXBtn = resultPrev?.querySelector('.x-btn');
 
@@ -213,6 +226,13 @@ function removeStep(idx) {
     if (resultPrev) resultPrev.id = `result-prev-${i}`;
     if (emojiImgEl) emojiImgEl.id = `emoji-img-${i}`;
     if (resultImgEl) resultImgEl.id = `result-img-${i}`;
+    if (styleSelect) {
+      styleSelect.id = `step-style-${i}`;
+      styleSelect.setAttribute('onchange', `updateStepStyle(${i}, this.value)`);
+      if (S.steps[i] && S.steps[i].style) {
+        styleSelect.value = S.steps[i].style;
+      }
+    }
     if (emojiXBtn) emojiXBtn.setAttribute('onclick', `clearStepSlot(event,${i},'emoji')`);
     if (resultXBtn) resultXBtn.setAttribute('onclick', `clearStepSlot(event,${i},'result')`);
 
@@ -296,6 +316,30 @@ function clearStepSlot(event, idx, type) {
 }
 
 /* ─────────────────────── EMOJI HEADER BAR ─────────────────────── */
+function getHeaderBadgeHTML(idx) {
+  const badgeTypeSelect = document.getElementById('badge-type-select');
+  const badgeType = badgeTypeSelect?.value || 'actions';
+  if (badgeType === 'actions') {
+    const icons = [
+      '<i class="fa-solid fa-thumbs-up"></i>',
+      '<i class="fa-solid fa-comment"></i>',
+      '<i class="fa-solid fa-share"></i>',
+      '<i class="fa-solid fa-bell"></i>'
+    ];
+    return icons[idx % icons.length];
+  } else if (badgeType === 'hearts') {
+    const hearts = [
+      '<i class="fa-solid fa-heart"></i>',
+      '<i class="fa-solid fa-heart-pulse"></i>',
+      '<i class="fa-solid fa-heart-circle-bolt"></i>',
+      '<i class="fa-solid fa-heart-circle-check"></i>'
+    ];
+    return hearts[idx % hearts.length];
+  } else {
+    return idx + 1;
+  }
+}
+
 function refreshEmojiHeader() {
   // Collect all emoji images that have been uploaded
   const uploaded = S.steps
@@ -320,7 +364,7 @@ function refreshEmojiHeader() {
 
     const badge = document.createElement('span');
     badge.className = 'step-num-badge';
-    badge.textContent = idx + 1;
+    badge.innerHTML = getHeaderBadgeHTML(idx);
 
     const imgEl = document.createElement('img');
     imgEl.src = img.src;
@@ -429,7 +473,7 @@ function resetAll() {
   const emojiHeaderBar = document.getElementById('emoji-header-bar');
   if (emojiHeaderBar) emojiHeaderBar.classList.remove('hidden');
 
-  document.getElementById('btn-blend').textContent = '🌀 Bắt đầu Blend';
+  document.getElementById('btn-blend').innerHTML = '<i class="fa-solid fa-wand-magic-sparkles"></i> Bắt đầu Blend';
   document.getElementById('btn-dl').style.display = 'none';
 
   // Reset step highlight states
@@ -472,7 +516,7 @@ function runBlend() {
   const emojiHeaderBar = document.getElementById('emoji-header-bar');
   if (emojiHeaderBar) emojiHeaderBar.classList.remove('hidden');
 
-  document.getElementById('btn-blend').textContent = '⏹ Dừng';
+  document.getElementById('btn-blend').innerHTML = '<i class="fa-solid fa-square"></i> Dừng';
   document.getElementById('btn-dl').style.display = 'none';
 
   buildPhaseBar(effectiveSteps.length);
@@ -491,6 +535,7 @@ function runChainStep(steps, idx) {
 
   const step = steps[idx];
   S.chainIdx = idx;
+  S._currentStepStyle = step.style || 'swirl';
 
   // Highlight current step in left panel
   document.querySelectorAll('.blend-step').forEach((el, i) => {
@@ -577,11 +622,26 @@ function showFinalGridScreen() {
   const badgeType = badgeTypeSelect?.value || 'actions';
   let badgeLabels = [];
   if (badgeType === 'actions') {
-    badgeLabels = ['👍 Like', '💬 Comment', '🔄 Share', '🔔 Subscribe'];
+    badgeLabels = [
+      '<i class="fa-solid fa-thumbs-up"></i> Like',
+      '<i class="fa-solid fa-comment"></i> Comment',
+      '<i class="fa-solid fa-share"></i> Share',
+      '<i class="fa-solid fa-bell"></i> Subscribe'
+    ];
   } else if (badgeType === 'hearts') {
-    badgeLabels = ['❤️ #1', '💖 #2', '💗 #3', '💓 #4'];
+    badgeLabels = [
+      '<i class="fa-solid fa-heart"></i> #1',
+      '<i class="fa-solid fa-heart-pulse"></i> #2',
+      '<i class="fa-solid fa-heart-circle-bolt"></i> #3',
+      '<i class="fa-solid fa-heart-circle-check"></i> #4'
+    ];
   } else {
-    badgeLabels = ['1️⃣ Option 1', '2️⃣ Option 2', '3️⃣ Option 3', '4️⃣ Option 4'];
+    badgeLabels = [
+      '<i class="fa-solid fa-1"></i> Option 1',
+      '<i class="fa-solid fa-2"></i> Option 2',
+      '<i class="fa-solid fa-3"></i> Option 3',
+      '<i class="fa-solid fa-4"></i> Option 4'
+    ];
   }
 
   // Clear containers
@@ -604,7 +664,7 @@ function showFinalGridScreen() {
     // Bottom 2 images (idx 2, 3): badge pushed to top
     const badgePosClass = idx < 2 ? 'badge-bottom' : 'badge-top';
     badge.className = `final-item-badge ${badgePosClass}`;
-    badge.textContent = badgeLabels[idx] || `Option ${idx + 1}`;
+    badge.innerHTML = badgeLabels[idx] || `Option ${idx + 1}`;
 
     item.appendChild(img);
     item.appendChild(badge);
@@ -900,11 +960,11 @@ function renderFrame(progress) {
   const swirl = parseFloat(document.getElementById('sl-swirl').value) / 100;
   const t = S.time;
 
-  switch (S.style) {
+  const currentStyle = S._currentStepStyle || 'swirl';
+  switch (currentStyle) {
     case 'marble': fxMarble(pxA, pxB, out.data, W, H, t, progress, swirl); break;
-    case 'swirl': fxSwirl(pxA, pxB, out.data, W, H, t, progress, swirl); break;
-    case 'wave': fxWave(pxA, pxB, out.data, W, H, t, progress, swirl); break;
-    case 'dissolve': fxDissolve(pxA, pxB, out.data, W, H, t, progress); break;
+    case 'swirl':
+    default: fxSwirl(pxA, pxB, out.data, W, H, t, progress, swirl); break;
   }
 
   ctx.putImageData(out, 0, 0);
@@ -984,54 +1044,7 @@ function fxSwirl(a, b, out, W, H, t, p, swirl) {
   }
 }
 
-function fxWave(a, b, out, W, H, t, p, swirl) {
-  const cx = W / 2, cy = H / 2;
-  for (let y = 0; y < H; y++) {
-    for (let x = 0; x < W; x++) {
-      const i = (y * W + x) * 4;
-      const nx = x / W, ny = y / H;
-      const dx = (x - cx) / W, dy = (y - cy) / H;
-      const r = Math.sqrt(dx * dx + dy * dy);
-      const ripple = Math.sin(r * Math.PI * 10 - t * 2) * swirl * 40 * p;
-      const wx = Math.sin(ny * Math.PI * 10 + t * 1.3) * swirl * 40 + Math.cos(r * 8 - t) * ripple;
-      const wy = Math.cos(nx * Math.PI * 10 + t * 0.9) * swirl * 35 + Math.sin(r * 8 - t) * ripple;
-      const sx = clamp(Math.round(x + wx), 0, W - 1);
-      const sy = clamp(Math.round(y + wy), 0, H - 1);
-      const si = (sy * W + sx) * 4;
-      const waveFront = clamp(1 - Math.abs(r - p * 0.9) / 0.35, 0, 1);
-      const base = smoothstep(0, 0.6, p);
-      const alpha = clamp(base * 0.5 + waveFront * 0.8, 0, 1);
-      let r_ = lerp(a[si], b[si], alpha);
-      let g_ = lerp(a[si + 1], b[si + 1], alpha);
-      let b_ = lerp(a[si + 2], b[si + 2], alpha);
-      const shimmer = waveFront * 25;
-      out[i] = clamp(r_ + shimmer * 0.8, 0, 255) | 0;
-      out[i + 1] = clamp(g_ + shimmer * 0.3, 0, 255) | 0;
-      out[i + 2] = clamp(b_ + shimmer, 0, 255) | 0;
-      out[i + 3] = 255;
-    }
-  }
-}
 
-function fxDissolve(a, b, out, W, H, t, p) {
-  for (let y = 0; y < H; y++) {
-    for (let x = 0; x < W; x++) {
-      const i = (y * W + x) * 4;
-      const nx = x / W, ny = y / H;
-      const n = fbm(nx * 6, ny * 6, t * .18);
-      const thr = p * 1.5 - 0.25;
-      const alpha = smoothstep(thr - 0.08, thr + 0.08, n);
-      const edge = smoothstep(thr - 0.12, thr, n) * smoothstep(thr + 0.12, thr, n);
-      let r_ = lerp(a[i], b[i], alpha);
-      let g_ = lerp(a[i + 1], b[i + 1], alpha);
-      let b_ = lerp(a[i + 2], b[i + 2], alpha);
-      out[i] = clamp(r_ + edge * 80, 0, 255) | 0;
-      out[i + 1] = clamp(g_ + edge * 20, 0, 255) | 0;
-      out[i + 2] = clamp(b_ + edge * 120, 0, 255) | 0;
-      out[i + 3] = 255;
-    }
-  }
-}
 
 /* ─────────────────────── FLY ANIMATIONS ─────────────────────── */
 function setFlyStyle(el, styles) {

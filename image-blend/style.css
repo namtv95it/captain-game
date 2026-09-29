@@ -549,16 +549,18 @@ body::before {
 }
 .emoji-header-item .step-num-badge {
   position: absolute;
-  top: -6px; right: -6px;
-  width: 20px; height: 20px;
+  top: -7px; right: -7px;
+  min-width: 22px; height: 22px;
   border-radius: 50%;
   background: var(--grad-v);
   color: #fff;
-  font-size: .65rem;
+  font-size: .75rem;
   font-weight: 800;
   display: flex; align-items: center; justify-content: center;
-  box-shadow: 0 1px 4px rgba(0,0,0,.2);
+  box-shadow: 0 1px 4px rgba(0,0,0,.25);
   border: 1.5px solid #fff;
+  line-height: 1;
+  padding: 0 1px;
 }
 
 /* 9:16 box – height fills panel, width = height * 9/16 */
@@ -918,8 +920,40 @@ body::before {
   object-fit: cover; display: block;
 }
 
+.step-center-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  flex-shrink: 0;
+  width: 78px;
+}
+
+.step-style-select {
+  width: 100%;
+  padding: 3px 4px;
+  border-radius: 8px;
+  border: 1.5px solid var(--border);
+  background: #ffffff;
+  color: var(--p1);
+  font-family: inherit;
+  font-size: .68rem;
+  font-weight: 700;
+  outline: none;
+  cursor: pointer;
+  text-align: center;
+  transition: border-color .18s, box-shadow .18s;
+  box-shadow: 0 1px 3px rgba(124,58,237,.1);
+}
+.step-style-select:hover,
+.step-style-select:focus {
+  border-color: var(--p1);
+  box-shadow: 0 0 8px rgba(124,58,237,.25);
+}
+
 .step-arrow {
-  font-size: 1.1rem;
+  font-size: 0.95rem;
   color: var(--p1);
   font-weight: 700;
   flex-shrink: 0;
