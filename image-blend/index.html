@@ -10,6 +10,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
     rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="style.css" />
 </head>
 
@@ -27,7 +28,8 @@
           <span class="logo-icon"><i class="fa-solid fa-hurricane"></i></span>
           <span class="logo-text">Marble<span class="logo-accent">Blend</span></span>
         </div>
-        <p class="header-sub">Chọn nhân vật · Thêm 1-4 emoji · Nhấn Blend <i class="fa-solid fa-wand-magic-sparkles"></i></p>
+        <p class="header-sub">Chọn nhân vật · Thêm 1-4 emoji · Nhấn Blend <i
+            class="fa-solid fa-wand-magic-sparkles"></i></p>
       </div>
 
       <!-- ── Character Upload ── -->
@@ -47,14 +49,16 @@
       </div>
 
       <!-- ── Emoji + Result Steps ── -->
-      <div class="section-label" style="margin-top:6px;"><i class="fa-solid fa-layer-group"></i> Các bước blend (1–4 emoji)</div>
+      <div class="section-label" style="margin-top:6px;"><i class="fa-solid fa-layer-group"></i> Các bước blend (1–4
+        emoji)</div>
 
       <div class="steps-list" id="steps-list">
         <!-- Step 1 -->
         <div class="blend-step" id="step-0" data-index="0">
           <div class="step-header">
             <span class="step-badge">Bước 1</span>
-            <button class="step-remove-btn" onclick="removeStep(0)" title="Xóa bước"><i class="fa-solid fa-xmark"></i></button>
+            <button class="step-remove-btn" onclick="removeStep(0)" title="Xóa bước"><i
+                class="fa-solid fa-xmark"></i></button>
           </div>
           <div class="step-row">
             <div class="step-card step-emoji" id="emoji-card-0" onclick="pickStepFile(0,'emoji')">
@@ -65,16 +69,19 @@
               </div>
               <div class="step-preview" id="emoji-prev-0" style="display:none">
                 <img id="emoji-img-0" alt="emoji" />
-                <button class="x-btn x-btn-sm" onclick="clearStepSlot(event,0,'emoji')"><i class="fa-solid fa-xmark"></i></button>
+                <button class="x-btn x-btn-sm" onclick="clearStepSlot(event,0,'emoji')"><i
+                    class="fa-solid fa-xmark"></i></button>
               </div>
             </div>
             <div class="step-center-col">
-              <select class="step-style-select" id="step-style-0" onchange="updateStepStyle(0, this.value)" title="Kiểu blend bước này">
+              <select class="step-style-select" id="step-style-0" onchange="updateStepStyle(0, this.value)"
+                title="Kiểu blend bước này">
                 <option value="swirl" selected>🌀 Swirl</option>
                 <option value="marble">🔮 Marble</option>
               </select>
               <div class="step-arrow"><i class="fa-solid fa-arrow-right"></i></div>
-              <select class="step-reveal-select" id="step-reveal-0" onchange="updateStepReveal(0, this.value)" title="Hiệu ứng xuất hiện kết quả">
+              <select class="step-reveal-select" id="step-reveal-0" onchange="updateStepReveal(0, this.value)"
+                title="Hiệu ứng xuất hiện kết quả">
                 <option value="eraser" selected>🧹 Tẩy tâm</option>
                 <option value="eraser-stroke-up">🪄 Tẩy ngang lên</option>
                 <option value="eraser-up">⬆️ Tẩy thẳng</option>
@@ -92,7 +99,8 @@
               </div>
               <div class="step-preview" id="result-prev-0" style="display:none">
                 <img id="result-img-0" alt="result" />
-                <button class="x-btn x-btn-sm" onclick="clearStepSlot(event,0,'result')"><i class="fa-solid fa-xmark"></i></button>
+                <button class="x-btn x-btn-sm" onclick="clearStepSlot(event,0,'result')"><i
+                    class="fa-solid fa-xmark"></i></button>
               </div>
             </div>
           </div>
@@ -102,7 +110,8 @@
         <div class="blend-step" id="step-1" data-index="1">
           <div class="step-header">
             <span class="step-badge">Bước 2</span>
-            <button class="step-remove-btn" onclick="removeStep(1)" title="Xóa bước"><i class="fa-solid fa-xmark"></i></button>
+            <button class="step-remove-btn" onclick="removeStep(1)" title="Xóa bước"><i
+                class="fa-solid fa-xmark"></i></button>
           </div>
           <div class="step-row">
             <div class="step-card step-emoji" id="emoji-card-1" onclick="pickStepFile(1,'emoji')">
@@ -113,16 +122,19 @@
               </div>
               <div class="step-preview" id="emoji-prev-1" style="display:none">
                 <img id="emoji-img-1" alt="emoji" />
-                <button class="x-btn x-btn-sm" onclick="clearStepSlot(event,1,'emoji')"><i class="fa-solid fa-xmark"></i></button>
+                <button class="x-btn x-btn-sm" onclick="clearStepSlot(event,1,'emoji')"><i
+                    class="fa-solid fa-xmark"></i></button>
               </div>
             </div>
             <div class="step-center-col">
-              <select class="step-style-select" id="step-style-1" onchange="updateStepStyle(1, this.value)" title="Kiểu blend bước này">
+              <select class="step-style-select" id="step-style-1" onchange="updateStepStyle(1, this.value)"
+                title="Kiểu blend bước này">
                 <option value="swirl">🌀 Swirl</option>
                 <option value="marble" selected>🔮 Marble</option>
               </select>
               <div class="step-arrow"><i class="fa-solid fa-arrow-right"></i></div>
-              <select class="step-reveal-select" id="step-reveal-1" onchange="updateStepReveal(1, this.value)" title="Hiệu ứng xuất hiện kết quả">
+              <select class="step-reveal-select" id="step-reveal-1" onchange="updateStepReveal(1, this.value)"
+                title="Hiệu ứng xuất hiện kết quả">
                 <option value="eraser">🧹 Tẩy tâm</option>
                 <option value="eraser-stroke-up" selected>🪄 Tẩy ngang lên</option>
                 <option value="eraser-up">⬆️ Tẩy thẳng</option>
@@ -140,7 +152,8 @@
               </div>
               <div class="step-preview" id="result-prev-1" style="display:none">
                 <img id="result-img-1" alt="result" />
-                <button class="x-btn x-btn-sm" onclick="clearStepSlot(event,1,'result')"><i class="fa-solid fa-xmark"></i></button>
+                <button class="x-btn x-btn-sm" onclick="clearStepSlot(event,1,'result')"><i
+                    class="fa-solid fa-xmark"></i></button>
               </div>
             </div>
           </div>
@@ -150,7 +163,8 @@
         <div class="blend-step" id="step-2" data-index="2">
           <div class="step-header">
             <span class="step-badge">Bước 3</span>
-            <button class="step-remove-btn" onclick="removeStep(2)" title="Xóa bước"><i class="fa-solid fa-xmark"></i></button>
+            <button class="step-remove-btn" onclick="removeStep(2)" title="Xóa bước"><i
+                class="fa-solid fa-xmark"></i></button>
           </div>
           <div class="step-row">
             <div class="step-card step-emoji" id="emoji-card-2" onclick="pickStepFile(2,'emoji')">
@@ -161,16 +175,19 @@
               </div>
               <div class="step-preview" id="emoji-prev-2" style="display:none">
                 <img id="emoji-img-2" alt="emoji" />
-                <button class="x-btn x-btn-sm" onclick="clearStepSlot(event,2,'emoji')"><i class="fa-solid fa-xmark"></i></button>
+                <button class="x-btn x-btn-sm" onclick="clearStepSlot(event,2,'emoji')"><i
+                    class="fa-solid fa-xmark"></i></button>
               </div>
             </div>
             <div class="step-center-col">
-              <select class="step-style-select" id="step-style-2" onchange="updateStepStyle(2, this.value)" title="Kiểu blend bước này">
+              <select class="step-style-select" id="step-style-2" onchange="updateStepStyle(2, this.value)"
+                title="Kiểu blend bước này">
                 <option value="swirl" selected>🌀 Swirl</option>
                 <option value="marble">🔮 Marble</option>
               </select>
               <div class="step-arrow"><i class="fa-solid fa-arrow-right"></i></div>
-              <select class="step-reveal-select" id="step-reveal-2" onchange="updateStepReveal(2, this.value)" title="Hiệu ứng xuất hiện kết quả">
+              <select class="step-reveal-select" id="step-reveal-2" onchange="updateStepReveal(2, this.value)"
+                title="Hiệu ứng xuất hiện kết quả">
                 <option value="eraser">🧹 Tẩy tâm</option>
                 <option value="eraser-stroke-up">🪄 Tẩy ngang lên</option>
                 <option value="eraser-up">⬆️ Tẩy thẳng</option>
@@ -188,7 +205,8 @@
               </div>
               <div class="step-preview" id="result-prev-2" style="display:none">
                 <img id="result-img-2" alt="result" />
-                <button class="x-btn x-btn-sm" onclick="clearStepSlot(event,2,'result')"><i class="fa-solid fa-xmark"></i></button>
+                <button class="x-btn x-btn-sm" onclick="clearStepSlot(event,2,'result')"><i
+                    class="fa-solid fa-xmark"></i></button>
               </div>
             </div>
           </div>
@@ -198,7 +216,8 @@
         <div class="blend-step" id="step-3" data-index="3">
           <div class="step-header">
             <span class="step-badge">Bước 4</span>
-            <button class="step-remove-btn" onclick="removeStep(3)" title="Xóa bước"><i class="fa-solid fa-xmark"></i></button>
+            <button class="step-remove-btn" onclick="removeStep(3)" title="Xóa bước"><i
+                class="fa-solid fa-xmark"></i></button>
           </div>
           <div class="step-row">
             <div class="step-card step-emoji" id="emoji-card-3" onclick="pickStepFile(3,'emoji')">
@@ -209,16 +228,19 @@
               </div>
               <div class="step-preview" id="emoji-prev-3" style="display:none">
                 <img id="emoji-img-3" alt="emoji" />
-                <button class="x-btn x-btn-sm" onclick="clearStepSlot(event,3,'emoji')"><i class="fa-solid fa-xmark"></i></button>
+                <button class="x-btn x-btn-sm" onclick="clearStepSlot(event,3,'emoji')"><i
+                    class="fa-solid fa-xmark"></i></button>
               </div>
             </div>
             <div class="step-center-col">
-              <select class="step-style-select" id="step-style-3" onchange="updateStepStyle(3, this.value)" title="Kiểu blend bước này">
+              <select class="step-style-select" id="step-style-3" onchange="updateStepStyle(3, this.value)"
+                title="Kiểu blend bước này">
                 <option value="swirl">🌀 Swirl</option>
                 <option value="marble" selected>🔮 Marble</option>
               </select>
               <div class="step-arrow"><i class="fa-solid fa-arrow-right"></i></div>
-              <select class="step-reveal-select" id="step-reveal-3" onchange="updateStepReveal(3, this.value)" title="Hiệu ứng xuất hiện kết quả">
+              <select class="step-reveal-select" id="step-reveal-3" onchange="updateStepReveal(3, this.value)"
+                title="Hiệu ứng xuất hiện kết quả">
                 <option value="eraser">🧹 Tẩy tâm</option>
                 <option value="eraser-stroke-up">🪄 Tẩy ngang lên</option>
                 <option value="eraser-up">⬆️ Tẩy thẳng</option>
@@ -236,7 +258,8 @@
               </div>
               <div class="step-preview" id="result-prev-3" style="display:none">
                 <img id="result-img-3" alt="result" />
-                <button class="x-btn x-btn-sm" onclick="clearStepSlot(event,3,'result')"><i class="fa-solid fa-xmark"></i></button>
+                <button class="x-btn x-btn-sm" onclick="clearStepSlot(event,3,'result')"><i
+                    class="fa-solid fa-xmark"></i></button>
               </div>
             </div>
           </div>
@@ -254,7 +277,7 @@
     <!-- ════════════════════════════════
        RIGHT PANEL – 9:16 Theater
   ════════════════════════════════ -->
-    <main class="right-panel">
+    <main class="right-panel" id="right-panel">
       <div class="theater-shell">
 
         <!-- 9:16 box -->
@@ -323,7 +346,8 @@
       <div class="section-label"><i class="fa-solid fa-square-poll-vertical"></i> Final Screen / Màn kết thúc</div>
       <div class="ctrl-card">
         <div class="ctrl-item">
-          <label class="ctrl-lbl"><i class="fa-solid fa-circle-question"></i> Question / Câu hỏi <span class="hint-sub">(Tiếng Anh)</span></label>
+          <label class="ctrl-lbl"><i class="fa-solid fa-circle-question"></i> Question / Câu hỏi <span
+              class="hint-sub">(Tiếng Anh)</span></label>
           <input type="text" class="ctrl-input" id="final-question-input" value="WHICH VERSION DO YOU LIKE MOST?"
             placeholder="WHICH VERSION DO YOU LIKE MOST?" />
         </div>
@@ -338,15 +362,18 @@
       </div>
 
       <!-- ── Effect Controls ── -->
-      <div class="section-label" style="margin-top:6px;"><i class="fa-solid fa-wand-magic-sparkles"></i> Cài đặt hiệu ứng</div>
+      <div class="section-label" style="margin-top:6px;"><i class="fa-solid fa-wand-magic-sparkles"></i> Cài đặt hiệu
+        ứng</div>
       <div class="ctrl-card">
         <div class="ctrl-item">
-          <label class="ctrl-lbl"><i class="fa-solid fa-hurricane"></i> Cường độ xoáy <span class="ctrl-num" id="val-swirl">100</span></label>
+          <label class="ctrl-lbl"><i class="fa-solid fa-hurricane"></i> Cường độ xoáy <span class="ctrl-num"
+              id="val-swirl">100</span></label>
           <input type="range" class="ctrl-range" id="sl-swirl" min="10" max="100" value="100"
             oninput="syncVal('swirl')" />
         </div>
         <div class="ctrl-item">
-          <label class="ctrl-lbl"><i class="fa-solid fa-bolt"></i> Tốc độ blend <span class="ctrl-num" id="val-speed">7</span></label>
+          <label class="ctrl-lbl"><i class="fa-solid fa-bolt"></i> Tốc độ blend <span class="ctrl-num"
+              id="val-speed">7</span></label>
           <input type="range" class="ctrl-range" id="sl-speed" min="1" max="10" value="7" oninput="syncVal('speed')" />
         </div>
       </div>
@@ -354,10 +381,12 @@
       <!-- ── Action Buttons ── -->
       <div class="section-label" style="margin-top:6px;"><i class="fa-solid fa-play"></i> Điều khiển</div>
       <div class="action-col">
-        <button class="act-btn act-blend" id="btn-blend" onclick="runBlend()"><i class="fa-solid fa-wand-magic-sparkles"></i> Bắt đầu Blend</button>
+        <button class="act-btn act-blend" id="btn-blend" onclick="runBlend()"><i
+            class="fa-solid fa-wand-magic-sparkles"></i> Bắt đầu Blend</button>
         <div class="action-row-sm">
           <button class="act-btn act-reset" onclick="resetAll()"><i class="fa-solid fa-rotate-left"></i> Reset</button>
-          <button class="act-btn act-dl" id="btn-dl" style="display:none" onclick="downloadFinal()"><i class="fa-solid fa-download"></i> Tải xuống</button>
+          <button class="act-btn act-dl" id="btn-dl" style="display:none" onclick="downloadFinal()"><i
+              class="fa-solid fa-download"></i> Tải xuống</button>
         </div>
       </div>
 
@@ -369,6 +398,21 @@
     </aside>
 
   </div><!-- .split-layout -->
+
+  <!-- Mobile: Fullscreen Theater Overlay (chi hien thi tren mobile khi blend) -->
+  <div class="mobile-theater-overlay" id="mobile-theater-overlay">
+    <div class="mobile-theater-bar">
+      <button class="mobile-back-btn" onclick="closeMobileTheater()">
+        <i class="fa-solid fa-arrow-left"></i> Quay lại
+      </button>
+      <button class="mobile-stop-btn" onclick="resetAll()">
+        <i class="fa-solid fa-square"></i> Dừng
+      </button>
+    </div>
+    <div class="mobile-theater-content" id="mobile-theater-content">
+      <!-- Theater will be moved here on mobile -->
+    </div>
+  </div>
 
   <!-- Toast -->
   <div class="toast" id="toast"></div>

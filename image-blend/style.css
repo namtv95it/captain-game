@@ -1735,3 +1735,186 @@ body::before {
   top: 12px;
   bottom: auto;
 }
+
+/* ============================
+   RESPONSIVE – Mobile & Tablet (max-width: 1023px)
+   ============================ */
+@media (max-width: 1023px) {
+
+  /* Show left-panel and right-sidebar side by side 50%/50%, hide theater */
+  .split-layout {
+    display: flex !important;
+    flex-direction: row !important;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  .left-panel {
+    flex: 1 1 50% !important;
+    width: 50% !important;
+    max-width: 50% !important;
+    min-width: 0 !important;
+    height: 100vh !important;
+    max-height: 100vh !important;
+    overflow-y: auto !important;
+    border-right: 1px solid var(--border);
+    padding: 12px 10px 24px !important;
+  }
+
+  .right-panel {
+    display: none !important;
+  }
+
+  .right-sidebar {
+    flex: 1 1 50% !important;
+    width: 50% !important;
+    max-width: 50% !important;
+    min-width: 0 !important;
+    height: 100vh !important;
+    max-height: 100vh !important;
+    overflow-y: auto !important;
+    border-left: none !important;
+    padding: 12px 10px 24px !important;
+  }
+
+  /* ── Mobile Theater Overlay ── */
+  .mobile-theater-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: #090614;
+    display: flex;
+    flex-direction: column;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+
+  .mobile-theater-overlay.show {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .mobile-theater-bar {
+    height: 52px;
+    padding: 0 14px;
+    background: rgba(18, 12, 40, 0.97);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+    z-index: 10;
+    transition: opacity 0.4s ease;
+  }
+
+  .mobile-theater-overlay.hide-bar .mobile-theater-bar {
+    display: none !important;
+  }
+
+  .mobile-back-btn {
+    background: rgba(255, 255, 255, 0.12);
+    color: #fff;
+    border: none;
+    padding: 7px 14px;
+    border-radius: 20px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: inherit;
+  }
+
+  .mobile-back-btn:hover {
+    background: rgba(255, 255, 255, 0.22);
+  }
+
+  .mobile-stop-btn {
+    background: rgba(239, 68, 68, 0.2);
+    border: 1px solid rgba(239, 68, 68, 0.45);
+    color: #f87171;
+    padding: 7px 14px;
+    border-radius: 20px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: inherit;
+    flex-shrink: 0;
+    transition: all 0.2s ease;
+  }
+
+  .mobile-stop-btn:hover {
+    background: rgba(239, 68, 68, 0.35);
+    color: #ffffff;
+  }
+
+  .mobile-theater-content {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+    overflow: hidden;
+    min-height: 0;
+    transition: padding 0.3s ease;
+  }
+
+  .mobile-theater-overlay.hide-bar .mobile-theater-content {
+    padding: 0 !important;
+  }
+
+  /* When right-panel is moved into mobile-theater-content */
+  .mobile-theater-content .right-panel {
+    display: flex !important;
+    width: 100%;
+    height: 100%;
+    align-items: center;
+    justify-content: center;
+    padding: 0 !important;
+    background: transparent !important;
+  }
+
+  .mobile-theater-content .theater-shell {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .mobile-theater-content .theater {
+    border-radius: 12px;
+    max-height: 100% !important;
+    max-width: 100% !important;
+    height: 100% !important;
+    width: auto !important;
+    aspect-ratio: 9 / 16;
+    transition: border-radius 0.3s ease;
+  }
+
+  .mobile-theater-overlay.hide-bar .theater {
+    border-radius: 0 !important;
+  }
+}
+
+/* Extra small: stack panels vertically on very narrow screens */
+@media (max-width: 480px) {
+  .split-layout {
+    grid-template-columns: 1fr !important;
+    padding: 8px;
+    gap: 12px;
+  }
+
+  .left-panel,
+  .right-sidebar {
+    max-height: none;
+    overflow-y: visible;
+  }
+}

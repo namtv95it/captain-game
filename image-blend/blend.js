@@ -24,6 +24,7 @@ const S = {
   chainIdx: 0,             // current step index being blended
   chainPrev: null,          // Image used as "character" in current chain step
   lastResultImg: null,      // Last completed result image object
+  headerTimer: null,        // Timer for delayed mobile header reveal
 };
 
 /* ─────────────────────── DOM ─────────────────────── */
@@ -103,9 +104,9 @@ function clearSlot(n) {
 // S.steps[i] = { emojiImg, resultImg, style, revealStyle }
 // Initialize 4 steps by default with varied preset styles
 S.steps = [
-  { emojiImg: null, resultImg: null, style: 'swirl',  revealStyle: 'eraser' },
+  { emojiImg: null, resultImg: null, style: 'swirl', revealStyle: 'eraser' },
   { emojiImg: null, resultImg: null, style: 'marble', revealStyle: 'eraser-stroke-up' },
-  { emojiImg: null, resultImg: null, style: 'swirl',  revealStyle: 'vortex-spiral' },
+  { emojiImg: null, resultImg: null, style: 'swirl', revealStyle: 'vortex-spiral' },
   { emojiImg: null, resultImg: null, style: 'marble', revealStyle: 'diamond-grid' }
 ];
 S.stepCount = 4;
@@ -524,6 +525,30 @@ function resetAll() {
   });
   updateEmojiHeaderState(-1);
   phaseBar.innerHTML = '';
+
+  if (S.headerTimer) {
+    clearTimeout(S.headerTimer);
+    S.headerTimer = null;
+  }
+
+  // Close mobile theater and move right-panel back if open
+  const mobileOverlay = document.getElementById('mobile-theater-overlay');
+  if (mobileOverlay) {
+    mobileOverlay.classList.remove('hide-bar');
+    if (mobileOverlay.classList.contains('show')) {
+      mobileOverlay.classList.remove('show');
+      const splitLayout = document.querySelector('.split-layout');
+      const rightPanel = document.getElementById('right-panel');
+      if (rightPanel && splitLayout) {
+        const rightSidebar = document.querySelector('.right-sidebar');
+        if (rightSidebar) {
+          splitLayout.insertBefore(rightPanel, rightSidebar);
+        } else {
+          splitLayout.appendChild(rightPanel);
+        }
+      }
+    }
+  }
 }
 
 /* ─────────────────────── RUN BLEND ─────────────────────── */
@@ -563,8 +588,98 @@ function runBlend() {
 
   buildPhaseBar(effectiveSteps.length);
 
-  // Start chain
-  runChainStep(effectiveSteps, 0);
+  // Mobile: open fullscreen theater then show character 5s before blend
+  if (window.innerWidth < 1024) {
+    openMobileTheater();
+    showMobileCharPreview(5, () => {
+      if (S.running) runChainStep(effectiveSteps, 0);
+    });
+  } else {
+    runChainStep(effectiveSteps, 0);
+  }
+}
+
+function openMobileTheater() {
+  const overlay = document.getElementById('mobile-theater-overlay');
+  const content = document.getElementById('mobile-theater-content');
+  const rightPanel = document.getElementById('right-panel');
+  if (overlay && content && rightPanel) {
+    content.appendChild(rightPanel);
+    overlay.classList.add('show', 'hide-bar');
+    // Recalculate canvas size after move
+    const resizeCanvas = () => {
+      const rect = theater.getBoundingClientRect();
+      if (rect.width > 0 && rect.height > 0) {
+        canvas.width = rect.width;
+        canvas.height = rect.height;
+      }
+    };
+    resizeCanvas();
+    setTimeout(resizeCanvas, 100);
+    setTimeout(resizeCanvas, 350);
+  }
+}
+
+function closeMobileTheater() {
+  if (S.headerTimer) {
+    clearTimeout(S.headerTimer);
+    S.headerTimer = null;
+  }
+  const overlay = document.getElementById('mobile-theater-overlay');
+  const splitLayout = document.querySelector('.split-layout');
+  const rightPanel = document.getElementById('right-panel');
+  if (overlay) overlay.classList.remove('show', 'hide-bar');
+  if (rightPanel && splitLayout) {
+    const rightSidebar = document.querySelector('.right-sidebar');
+    if (rightSidebar) {
+      splitLayout.insertBefore(rightPanel, rightSidebar);
+    } else {
+      splitLayout.appendChild(rightPanel);
+    }
+  }
+  if (S.running) resetAll();
+}
+
+function showMobileCharPreview(seconds, onComplete) {
+  let remaining = seconds;
+
+  // Show character image on canvas while waiting
+  const drawChar = () => {
+    const rect = theater.getBoundingClientRect();
+    if (rect.width > 0) {
+      canvas.width = rect.width;
+      canvas.height = rect.height;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      if (S.charImg) {
+        ctx.drawImage(S.charImg, 0, 0, canvas.width, canvas.height);
+      }
+      canvas.classList.add('visible');
+      canvas.style.opacity = '1';
+    }
+  };
+
+  // Show bg character
+  if (S.charImg) {
+    bgCharImg.src = S.charImg.src;
+    bgCharWrap.classList.add('show');
+  }
+
+  setTimeout(drawChar, 150);
+
+  const tick = () => {
+    if (!S.running) return;
+    remaining--;
+    if (remaining < 0) {
+      canvas.classList.remove('visible');
+      canvas.style.opacity = '';
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      onComplete();
+    } else {
+      setTimeout(tick, 1000);
+    }
+  };
+
+  setTimeout(tick, 1000);
 }
 
 function runChainStep(steps, idx) {
@@ -727,6 +842,25 @@ function showFinalGridScreen() {
 
   // Display final grid overlay
   finalGridWrap.classList.add('show');
+
+  // Mobile: 10s after displaying the 4-result grid, reveal the top header bar again
+  if (S.headerTimer) {
+    clearTimeout(S.headerTimer);
+    S.headerTimer = null;
+  }
+  S.headerTimer = setTimeout(() => {
+    const mobileOverlay = document.getElementById('mobile-theater-overlay');
+    if (mobileOverlay) {
+      mobileOverlay.classList.remove('hide-bar');
+      setTimeout(() => {
+        const rect = theater.getBoundingClientRect();
+        if (rect.width > 0 && rect.height > 0) {
+          canvas.width = rect.width;
+          canvas.height = rect.height;
+        }
+      }, 100);
+    }
+  }, 10000);
 }
 
 /* ─────────────────────── SOUND SYNTHESIZER (Web Audio API) ─────────────────────── */
