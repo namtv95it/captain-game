@@ -25,6 +25,7 @@ const S = {
   chainPrev: null,          // Image used as "character" in current chain step
   lastResultImg: null,      // Last completed result image object
   headerTimer: null,        // Timer for delayed mobile header reveal
+  _escHandler: null,        // Keydown handler for ESC to exit recording mode
 };
 
 /* ─────────────────────── DOM ─────────────────────── */
@@ -493,6 +494,10 @@ function resetAll() {
   setFlyStyle(fly1, { top: '-60%', opacity: '0', bottom: 'auto' });
   setFlyStyle(fly2, { bottom: '-60%', opacity: '0', top: 'auto' });
 
+  // Clean up desktop countdown overlay if present
+  const existingCountdown = document.getElementById('desktop-countdown');
+  if (existingCountdown) existingCountdown.remove();
+
   canvas.classList.remove('visible');
   canvas.style.opacity = '';
   canvas.style.transition = '';
@@ -548,6 +553,9 @@ function resetAll() {
       }
     }
   }
+
+  // Exit desktop recording mode
+  exitRecordingMode();
 }
 
 /* ─────────────────────── RUN BLEND ─────────────────────── */
@@ -594,7 +602,11 @@ function runBlend() {
       if (S.running) runChainStep(effectiveSteps, 0);
     });
   } else {
-    runChainStep(effectiveSteps, 0);
+    enterRecordingMode();
+    // Wait 5s silently before first emoji appears (desktop only, one-time)
+    setTimeout(() => {
+      if (S.running) runChainStep(effectiveSteps, 0);
+    }, 5000);
   }
 }
 
@@ -639,6 +651,65 @@ function closeMobileTheater() {
   if (S.running) resetAll();
 }
 
+/* ─────────────────────── RECORDING MODE (Desktop) ─────────────────────── */
+function enterRecordingMode() {
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+
+  // Theater natural height fills viewport, width = height * 9/16
+  const theaterH = vh;
+  const theaterW = theaterH * 9 / 16;
+
+  // After rotating -90deg: visual width = theaterH, visual height = theaterW
+  // Scale so visual width fits the full viewport width
+  const scale = vw / theaterH;
+
+  // Apply transform: first rotate -90deg so portrait becomes landscape,
+  // then scale to fill viewport width
+  theater.style.transform = `rotate(-90deg) scale(${scale})`;
+  theater.style.transformOrigin = 'center center';
+
+  // Recalculate canvas dimensions after layout settles
+  requestAnimationFrame(() => {
+    const rect = theater.getBoundingClientRect();
+    if (rect.width > 0 && rect.height > 0) {
+      canvas.width  = rect.width;
+      canvas.height = rect.height;
+    }
+  });
+
+  document.body.classList.add('recording-mode');
+
+  // ESC key exits recording mode
+  S._escHandler = (e) => {
+    if (e.key === 'Escape') {
+      resetAll();
+    }
+  };
+  document.addEventListener('keydown', S._escHandler);
+}
+
+function exitRecordingMode() {
+  document.body.classList.remove('recording-mode');
+  theater.style.transform = '';
+  theater.style.transformOrigin = '';
+
+  // Remove ESC listener
+  if (S._escHandler) {
+    document.removeEventListener('keydown', S._escHandler);
+    S._escHandler = null;
+  }
+
+  // Restore canvas dimensions
+  requestAnimationFrame(() => {
+    const rect = theater.getBoundingClientRect();
+    if (rect.width > 0 && rect.height > 0) {
+      canvas.width  = rect.width;
+      canvas.height = rect.height;
+    }
+  });
+}
+
 function showMobileCharPreview(seconds, onComplete) {
   let remaining = seconds;
 
@@ -674,6 +745,87 @@ function showMobileCharPreview(seconds, onComplete) {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       onComplete();
     } else {
+      setTimeout(tick, 1000);
+    }
+  };
+
+  setTimeout(tick, 1000);
+}
+
+function showDesktopCharPreview(seconds, onComplete) {
+  let remaining = seconds;
+
+  // Display the current charImg (or the chain's current prev) on bgCharWrap
+  const previewImg = S.chainPrev || S.charImg;
+  if (previewImg) {
+    bgCharImg.src = previewImg.src;
+    bgCharWrap.classList.add('show');
+  }
+
+  // Create countdown overlay
+  const countdownEl = document.createElement('div');
+  countdownEl.id = 'desktop-countdown';
+  countdownEl.style.cssText = [
+    'position:absolute', 'inset:0', 'z-index:30',
+    'display:flex', 'align-items:center', 'justify-content:center',
+    'pointer-events:none',
+    'background:rgba(0,0,0,0.35)',
+  ].join(';');
+
+  // Inner wrapper – counter-rotated 90deg so text is readable in landscape recording mode
+  const innerEl = document.createElement('div');
+  innerEl.style.cssText = [
+    'transform:rotate(90deg)',
+    'display:flex', 'flex-direction:column',
+    'align-items:center', 'justify-content:center',
+    'gap:14px',
+  ].join(';');
+
+  const numEl = document.createElement('div');
+  numEl.style.cssText = [
+    'font-size:6rem', 'font-weight:900', 'color:#fff',
+    'text-shadow:0 0 40px rgba(124,58,237,.9), 0 2px 16px rgba(0,0,0,.6)',
+    'animation:countdownPop .35s ease',
+    'line-height:1',
+  ].join(';');
+  numEl.textContent = remaining;
+
+  const labelEl = document.createElement('div');
+  labelEl.style.cssText = [
+    'font-size:1.1rem', 'font-weight:700', 'color:rgba(255,255,255,.85)',
+    'letter-spacing:.1em', 'text-transform:uppercase',
+    'text-shadow:0 1px 10px rgba(0,0,0,.5)',
+  ].join(';');
+  labelEl.textContent = 'Chuẩn bị...';
+
+  if (!document.getElementById('countdown-kf')) {
+    const st = document.createElement('style');
+    st.id = 'countdown-kf';
+    st.textContent = '@keyframes countdownPop{0%{transform:scale(1.5);opacity:0}100%{transform:scale(1);opacity:1}}';
+    document.head.appendChild(st);
+  }
+
+  innerEl.appendChild(numEl);
+  innerEl.appendChild(labelEl);
+  countdownEl.appendChild(innerEl);
+  theater.appendChild(countdownEl);
+
+  const tick = () => {
+    if (!S.running) {
+      countdownEl.remove();
+      return;
+    }
+    remaining--;
+    if (remaining <= 0) {
+      countdownEl.remove();
+      bgCharWrap.classList.remove('show');
+      onComplete();
+    } else {
+      numEl.style.animation = 'none';
+      numEl.textContent = remaining;
+      requestAnimationFrame(() => {
+        numEl.style.animation = 'countdownPop .35s ease';
+      });
       setTimeout(tick, 1000);
     }
   };

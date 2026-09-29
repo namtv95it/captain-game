@@ -660,6 +660,46 @@ body::before {
 }
 
 /* ============================
+   RECORDING MODE – Desktop landscape
+   (activated on blend start)
+   ============================ */
+body.recording-mode .left-panel,
+body.recording-mode .right-sidebar {
+  display: none !important;
+}
+
+body.recording-mode .split-layout {
+  overflow: visible;
+}
+
+body.recording-mode .right-panel {
+  flex: 1;
+  width: 100vw !important;
+  height: 100vh !important;
+  padding: 0 !important;
+  background: #000 !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+body.recording-mode .theater-shell {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Theater is rotated -90deg and scaled via JS-injected transform */
+body.recording-mode .theater {
+  transform-origin: center center;
+  /* box-shadow removed for cleaner recording */
+  box-shadow: none !important;
+}
+
+/* ============================
    RIGHT PANEL – Theater
    ============================ */
 .right-panel {
@@ -965,7 +1005,7 @@ body::before {
   /* centered horizontally */
   left: 50%;
   transform: translateX(-50%);
-  width: 55%;
+  width: 38%;
   /* relative to theater width */
   aspect-ratio: 3/4;
   border-radius: 14px;
@@ -1907,4 +1947,4 @@ body::before {
     max-height: none;
     overflow-y: visible;
   }
-}
+}
