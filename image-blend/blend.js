@@ -104,7 +104,7 @@ function clearSlot(n) {
 // S.steps[i] = { emojiImg, resultImg, style, revealStyle }
 // Initialize 4 steps by default with varied preset styles
 S.steps = [
-  { emojiImg: null, resultImg: null, style: 'swirl', revealStyle: 'eraser' },
+  { emojiImg: null, resultImg: null, style: 'swirl', revealStyle: 'eraser-stroke-up' },
   { emojiImg: null, resultImg: null, style: 'marble', revealStyle: 'eraser-stroke-up' },
   { emojiImg: null, resultImg: null, style: 'swirl', revealStyle: 'vortex-spiral' },
   { emojiImg: null, resultImg: null, style: 'marble', revealStyle: 'diamond-grid' }
@@ -125,7 +125,7 @@ function addStep() {
     return;
   }
   const idx = S.stepCount;
-  S.steps.push({ emojiImg: null, resultImg: null, style: 'swirl', revealStyle: 'eraser' });
+  S.steps.push({ emojiImg: null, resultImg: null, style: 'swirl', revealStyle: 'eraser-stroke-up' });
   S.stepCount++;
 
   const html = `
@@ -153,8 +153,7 @@ function addStep() {
           </select>
           <div class="step-arrow"><i class="fa-solid fa-arrow-right"></i></div>
           <select class="step-reveal-select" id="step-reveal-${idx}" onchange="updateStepReveal(${idx}, this.value)" title="Hiệu ứng xuất hiện kết quả">
-            <option value="eraser" selected>🧹 Tẩy tâm</option>
-            <option value="eraser-stroke-up">🪄 Tẩy ngang lên</option>
+            <option value="eraser-stroke-up" selected>🪄 Tẩy ngang lên</option>
             <option value="eraser-up">⬆️ Tẩy thẳng</option>
             <option value="vortex-spiral">🌀 Xoáy ốc</option>
             <option value="diamond-grid">🧱 Mảnh ghép</option>
@@ -1095,7 +1094,7 @@ function phase4() {
 
   // Read revealStyle from current step object
   const currentStep = S._pendingSteps?.[S._pendingIdx];
-  const revealStyle = currentStep?.revealStyle || 'eraser';
+  const revealStyle = currentStep?.revealStyle || 'eraser-stroke-up';
 
   const _doEraserReveal = (eraserFn) => {
     resultWrap.classList.remove('reveal-classic');
@@ -1163,8 +1162,8 @@ function phase4() {
     _doEraserReveal(startEraserSplitCurtain);
 
   } else {
-    // default: eraser (radial from center)
-    _doEraserReveal(startEraserReveal);
+    // default: eraser-stroke-up
+    _doEraserReveal(startEraserStrokeUp);
   }
 }
 
