@@ -46,6 +46,18 @@ const emojiHeaderEl = document.getElementById('emoji-header-inner');
 const emojiPlaceholder = document.getElementById('emoji-header-placeholder');
 const phaseBar = document.getElementById('phase-bar');
 
+/* ─────────────────────── CANVAS SIZE HELPER ─────────────────────── */
+// Always use offsetWidth/offsetHeight (pre-CSS-transform DOM size)
+// getBoundingClientRect() returns post-transform size which is wrong in recording mode
+function syncCanvasSize() {
+  const w = theater.offsetWidth;
+  const h = theater.offsetHeight;
+  if (w > 0 && h > 0) {
+    canvas.width  = w;
+    canvas.height = h;
+  }
+}
+
 /* ─────────────────────── CHARACTER UPLOAD ─────────────────────── */
 function pickFile(n) {
   document.getElementById(`file-${n}`).click();
@@ -618,13 +630,7 @@ function openMobileTheater() {
     content.appendChild(rightPanel);
     overlay.classList.add('show', 'hide-bar');
     // Recalculate canvas size after move
-    const resizeCanvas = () => {
-      const rect = theater.getBoundingClientRect();
-      if (rect.width > 0 && rect.height > 0) {
-        canvas.width = rect.width;
-        canvas.height = rect.height;
-      }
-    };
+    const resizeCanvas = () => syncCanvasSize();
     resizeCanvas();
     setTimeout(resizeCanvas, 100);
     setTimeout(resizeCanvas, 350);
@@ -670,13 +676,7 @@ function enterRecordingMode() {
   theater.style.transformOrigin = 'center center';
 
   // Recalculate canvas dimensions after layout settles
-  requestAnimationFrame(() => {
-    const rect = theater.getBoundingClientRect();
-    if (rect.width > 0 && rect.height > 0) {
-      canvas.width  = rect.width;
-      canvas.height = rect.height;
-    }
-  });
+  requestAnimationFrame(() => syncCanvasSize());
 
   document.body.classList.add('recording-mode');
 
@@ -701,13 +701,7 @@ function exitRecordingMode() {
   }
 
   // Restore canvas dimensions
-  requestAnimationFrame(() => {
-    const rect = theater.getBoundingClientRect();
-    if (rect.width > 0 && rect.height > 0) {
-      canvas.width  = rect.width;
-      canvas.height = rect.height;
-    }
-  });
+  requestAnimationFrame(() => syncCanvasSize());
 }
 
 function showMobileCharPreview(seconds, onComplete) {
@@ -715,17 +709,20 @@ function showMobileCharPreview(seconds, onComplete) {
 
   // Show character image on canvas while waiting
   const drawChar = () => {
-    const rect = theater.getBoundingClientRect();
-    if (rect.width > 0) {
-      canvas.width = rect.width;
-      canvas.height = rect.height;
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      if (S.charImg) {
-        ctx.drawImage(S.charImg, 0, 0, canvas.width, canvas.height);
-      }
-      canvas.classList.add('visible');
-      canvas.style.opacity = '1';
+    syncCanvasSize();
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    if (S.charImg) {
+      // object-fit: contain — draw full image without cropping
+      const img = S.charImg;
+      const ar = img.width / img.height;
+      const W = canvas.width, H = canvas.height;
+      let sw, sh, sx, sy;
+      if (ar > W / H) { sw = W; sh = W / ar; sx = 0; sy = (H - sh) / 2; }
+      else             { sh = H; sw = H * ar; sx = (W - sw) / 2; sy = 0; }
+      ctx.drawImage(img, sx, sy, sw, sh);
     }
+    canvas.classList.add('visible');
+    canvas.style.opacity = '1';
   };
 
   // Show bg character
@@ -859,9 +856,7 @@ function runChainStep(steps, idx) {
 
   // Step label hidden (removed by request)
 
-  const rect = theater.getBoundingClientRect();
-  canvas.width = rect.width;
-  canvas.height = rect.height;
+  syncCanvasSize();
 
   resultWrap.classList.remove('show');
   canvas.classList.remove('visible');
@@ -1004,11 +999,7 @@ function showFinalGridScreen() {
     if (mobileOverlay) {
       mobileOverlay.classList.remove('hide-bar');
       setTimeout(() => {
-        const rect = theater.getBoundingClientRect();
-        if (rect.width > 0 && rect.height > 0) {
-          canvas.width = rect.width;
-          canvas.height = rect.height;
-        }
+        syncCanvasSize();
       }, 100);
     }
   }, 10000);
@@ -1880,10 +1871,11 @@ function drawToOff(img, W, H) {
   const off = document.createElement('canvas');
   off.width = W; off.height = H;
   const c = off.getContext('2d');
+  // object-fit: contain — keep full image visible, letterbox/pillarbox with transparency
   const ar = img.width / img.height;
   let sw, sh, sx, sy;
-  if (ar > W / H) { sh = H; sw = sh * ar; sx = (W - sw) / 2; sy = 0; }
-  else { sw = W; sh = sw / ar; sx = 0; sy = (H - sh) / 2; }
+  if (ar > W / H) { sw = W; sh = W / ar; sx = 0; sy = (H - sh) / 2; }
+  else             { sh = H; sw = H * ar; sx = (W - sw) / 2; sy = 0; }
   c.drawImage(img, sx, sy, sw, sh);
   return c;
 }
