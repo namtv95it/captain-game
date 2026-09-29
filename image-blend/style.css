@@ -571,7 +571,7 @@ body::before {
   max-height: calc(100vh - 32px);
   width: auto;
   background: #ffffff;
-  border-radius: 18px;
+  border-radius: 0;
   box-shadow:
     0 0 0 3px rgba(124,58,237,.25),
     0 20px 60px rgba(0,0,0,.15),
