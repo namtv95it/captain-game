@@ -1243,6 +1243,26 @@ function showFinalGridScreen() {
   // Display final grid overlay
   finalGridWrap.classList.add('show');
 
+  // Trigger sequential badge pop attention animation + sound effect
+  const gridItems = finalGridWrap.querySelectorAll('.final-grid-item');
+  gridItems.forEach((gridItem, idx) => {
+    setTimeout(() => {
+      const emojiBadge = gridItem.querySelector('.final-item-emoji');
+      const textBadge  = gridItem.querySelector('.final-item-badge');
+      if (emojiBadge) {
+        emojiBadge.classList.remove('badge-pop-active');
+        void emojiBadge.offsetWidth;
+        emojiBadge.classList.add('badge-pop-active');
+      }
+      if (textBadge) {
+        textBadge.classList.remove('badge-pop-active');
+        void textBadge.offsetWidth;
+        textBadge.classList.add('badge-pop-active');
+      }
+      playSfxBadgePop(idx);
+    }, 400 + idx * 350);
+  });
+
   // Mobile: 10s after displaying the 4-result grid, reveal the top header bar again
   if (S.headerTimer) {
     clearTimeout(S.headerTimer);
@@ -1267,6 +1287,29 @@ function getAudioCtx() {
   if (!audioCtx) audioCtx = new AudioCtx();
   if (audioCtx.state === 'suspended') audioCtx.resume();
   return audioCtx;
+}
+
+function playSfxBadgePop(index = 0) {
+  try {
+    const ctx = getAudioCtx();
+    const now = ctx.currentTime;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    const pitches = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6 (ascending cheerful pop)
+    const pitch = pitches[index % pitches.length] || 523.25;
+
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(pitch * 0.85, now);
+    osc.frequency.exponentialRampToValueAtTime(pitch * 1.45, now + 0.08);
+
+    gain.gain.setValueAtTime(0.28, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
+
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(now);
+    osc.stop(now + 0.22);
+  } catch (e) { }
 }
 
 function playSfxSwoosh(isBottom = false) {
