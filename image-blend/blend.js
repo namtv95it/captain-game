@@ -386,7 +386,7 @@ function getHeaderBadgeHTML(idx) {
   const badgeType = badgeTypeSelect?.value || 'actions';
   if (badgeType === 'actions') {
     const icons = [
-      '<i class="fa-solid fa-thumbs-up"></i>',
+      '<i class="fa-solid fa-heart"></i>',
       '<i class="fa-solid fa-comment"></i>',
       '<i class="fa-solid fa-share"></i>',
       '<i class="fa-solid fa-bell"></i>'
@@ -410,7 +410,7 @@ function getResultBadgeHTML(idx) {
   const badgeType = badgeTypeSelect?.value || 'actions';
   if (badgeType === 'actions') {
     const actions = [
-      { icon: '<i class="fa-solid fa-thumbs-up"></i>', label: 'LIKE' },
+      { icon: '<i class="fa-solid fa-heart"></i>', label: 'LIKE' },
       { icon: '<i class="fa-solid fa-comment"></i>', label: 'COMMENT' },
       { icon: '<i class="fa-solid fa-share"></i>', label: 'SHARE' },
       { icon: '<i class="fa-solid fa-bell"></i>', label: 'SUBSCRIBE' }
@@ -1040,7 +1040,7 @@ function showFinalGridScreen() {
   let badgeLabels = [];
   if (badgeType === 'actions') {
     badgeLabels = [
-      '<i class="fa-solid fa-thumbs-up"></i> Like',
+      '<i class="fa-solid fa-heart"></i> Like',
       '<i class="fa-solid fa-comment"></i> Comment',
       '<i class="fa-solid fa-share"></i> Share',
       '<i class="fa-solid fa-bell"></i> Subscribe'
