@@ -726,7 +726,7 @@ body.recording-mode .theater {
 /* ── Emoji Header Bar (absolute inside theater) ── */
 .emoji-header-bar {
   position: absolute;
-  top: 28px;
+  top: 70px;
   left: 50%;
   transform: translateX(-50%);
   z-index: 12;
@@ -1638,8 +1638,8 @@ body.recording-mode .theater {
   background: transparent;
   display: flex;
   flex-direction: column;
-  padding: 20px;
-  gap: 14px;
+  padding: 75px 45px 85px;
+  gap: 12px;
   opacity: 0;
   pointer-events: none;
   transition: opacity .5s ease;
