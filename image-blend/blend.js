@@ -201,10 +201,12 @@ function attachColDrag(wrap, col, idx, cell, arr) {
 
 /* ── Main render: 3-column table ── */
 function renderBlendTable() {
-  const tbody     = document.getElementById('blend-table-body');
-  const countEl   = document.getElementById('steps-count');
-  const addRow    = document.getElementById('bt-add-row');
-  const emptyHint = document.getElementById('bt-empty-hint');
+  const tbody        = document.getElementById('blend-table-body');
+  const countEl      = document.getElementById('steps-count');
+  const addRow       = document.getElementById('bt-add-row');
+  const addEmojiBtn  = document.getElementById('bt-add-emoji');
+  const addResultBtn = document.getElementById('bt-add-result');
+  const emptyHint    = document.getElementById('bt-empty-hint');
   if (!tbody) return;
 
   const count = Math.max(G.emojiImages.length, G.resultImages.length);
@@ -213,7 +215,11 @@ function renderBlendTable() {
   tbody.innerHTML = '';
 
   if (emptyHint) emptyHint.style.display = count === 0 ? 'flex' : 'none';
-  if (addRow)    addRow.style.display    = count >= MAX_STEPS ? 'none' : 'flex';
+
+  // Always show bottom add row and both (+) add buttons unconditionally
+  if (addRow)       addRow.style.display       = 'flex';
+  if (addEmojiBtn)  addEmojiBtn.style.visibility  = 'visible';
+  if (addResultBtn) addResultBtn.style.visibility = 'visible';
 
   for (let i = 0; i < count; i++) {
     const eff      = G_effects[i] || { style: 'fusion', revealStyle: 'none' };
@@ -239,13 +245,16 @@ function renderBlendTable() {
       badge.className = 'bt-img-badge';
       badge.textContent = i + 1;
       const del = document.createElement('button');
-      del.className = 'bt-del-btn';
+      del.className = 'bt-img-del';
+      del.type = 'button';
+      del.title = 'Xóa ảnh này';
       del.innerHTML = '<i class="fa-solid fa-xmark"></i>';
+      del.addEventListener('mousedown', e => e.stopPropagation());
       del.addEventListener('click', e => {
+        e.preventDefault();
         e.stopPropagation();
         G.emojiImages.splice(i, 1);
         renderBlendTable();
-        syncStepsFromGallery();
       });
       wrap.appendChild(img);
       wrap.appendChild(badge);
@@ -253,13 +262,6 @@ function renderBlendTable() {
       emojiCell.appendChild(wrap);
       // Attach independent column drag
       attachColDrag(wrap, 'emoji', i, emojiCell, G.emojiImages);
-    } else {
-      const slot = document.createElement('div');
-      slot.className = 'bt-empty-slot bt-emoji-slot';
-      slot.title = 'Thêm emoji';
-      slot.innerHTML = '<i class="fa-solid fa-plus"></i>';
-      slot.addEventListener('click', () => document.getElementById('emoji-multi-input').click());
-      emojiCell.appendChild(slot);
     }
 
     // ── Col 2: Hiệu ứng ──
@@ -319,13 +321,16 @@ function renderBlendTable() {
       badge.className = 'bt-img-badge';
       badge.textContent = i + 1;
       const del = document.createElement('button');
-      del.className = 'bt-del-btn';
+      del.className = 'bt-img-del';
+      del.type = 'button';
+      del.title = 'Xóa ảnh này';
       del.innerHTML = '<i class="fa-solid fa-xmark"></i>';
+      del.addEventListener('mousedown', e => e.stopPropagation());
       del.addEventListener('click', e => {
+        e.preventDefault();
         e.stopPropagation();
         G.resultImages.splice(i, 1);
         renderBlendTable();
-        syncStepsFromGallery();
       });
       wrap.appendChild(img);
       wrap.appendChild(badge);
@@ -333,13 +338,6 @@ function renderBlendTable() {
       resCell.appendChild(wrap);
       // Attach independent column drag
       attachColDrag(wrap, 'result', i, resCell, G.resultImages);
-    } else {
-      const slot = document.createElement('div');
-      slot.className = 'bt-empty-slot bt-result-slot';
-      slot.title = 'Thêm kết quả';
-      slot.innerHTML = '<i class="fa-solid fa-plus"></i>';
-      slot.addEventListener('click', () => document.getElementById('result-multi-input').click());
-      resCell.appendChild(slot);
     }
 
     row.appendChild(emojiCell);
@@ -1208,14 +1206,25 @@ function showFinalGridScreen() {
     img.alt = `Result ${idx + 1}`;
 
     const badge = document.createElement('div');
-    // Top 2 images (idx 0, 1): badge at bottom
-    // Bottom 2 images (idx 2, 3): badge pushed to top
-    const badgePosClass = idx < 2 ? 'badge-bottom' : 'badge-top';
-    badge.className = `final-item-badge ${badgePosClass} badge-color-${idx % 4}`;
+    // Standardized: Emoji on top, Badge type on bottom for all options
+    badge.className = `final-item-badge badge-bottom badge-color-${idx % 4}`;
     badge.innerHTML = badgeLabels[idx] || `Option ${idx + 1}`;
 
     item.appendChild(img);
     item.appendChild(badge);
+
+    // Emoji badge corresponding to option (always at top)
+    if (step.emojiImg) {
+      const emojiBadge = document.createElement('div');
+      emojiBadge.className = 'final-item-emoji emoji-top';
+
+      const emojiImgEl = document.createElement('img');
+      emojiImgEl.src = step.emojiImg.src;
+      emojiImgEl.alt = `Emoji ${idx + 1}`;
+
+      emojiBadge.appendChild(emojiImgEl);
+      item.appendChild(emojiBadge);
+    }
 
     if (idx < 2) {
       finalGridTop.appendChild(item);
