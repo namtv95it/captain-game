@@ -793,6 +793,28 @@ function resetAll() {
   exitRecordingMode();
 }
 
+/* ── Clear all uploaded images (Character, Emojis, Results) ── */
+function clearAllUploadedImages() {
+  // 1. Clear character
+  S.charImg = null;
+  const body1 = document.getElementById('body-1');
+  const prev1 = document.getElementById('prev-1');
+  const file1 = document.getElementById('file-1');
+  if (body1) body1.style.display = 'flex';
+  if (prev1) prev1.style.display = 'none';
+  if (file1) file1.value = '';
+  if (bgCharWrap) bgCharWrap.classList.remove('show');
+  if (bgCharImg) bgCharImg.src = '';
+
+  // 2. Clear gallery blend steps (emojis & results)
+  G.emojiImages = [];
+  G.resultImages = [];
+  renderBlendTable();
+
+  // 3. Reset animation & runtime state
+  resetAll();
+}
+
 /* ─────────────────────── RUN BLEND ─────────────────────── */
 function runBlend() {
   if (S.running) { resetAll(); return; }
