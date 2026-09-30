@@ -111,214 +111,323 @@ function clearSlot(n) {
   }
 }
 
-/* ─────────────────────── MULTI-STEP UI ─────────────────────── */
+/* ─────────────────────── BLEND TABLE SYSTEM ─────────────────────── */
 
-// Steps data store: indexed by step index (0-based)
-// S.steps[i] = { emojiImg, resultImg, style, revealStyle }
-// Initialize 4 steps by default with varied preset styles
-S.steps = [
-  { emojiImg: null, resultImg: null, style: 'fusion', revealStyle: 'none' },
-  { emojiImg: null, resultImg: null, style: 'fusion', revealStyle: 'none' },
-  { emojiImg: null, resultImg: null, style: 'fusion', revealStyle: 'none' },
-  { emojiImg: null, resultImg: null, style: 'fusion', revealStyle: 'none' }
+// G: gallery state
+const G = {
+  emojiImages:  [],     // Image objects in order
+  resultImages: [],     // Image objects in order
+  dragCol:    null,     // 'emoji' | 'result' — which column is being dragged
+  dragColIdx: null,     // index within that column
+};
+
+const MAX_STEPS = 4;
+
+// G_effects: per-step style/reveal cache
+const G_effects = [
+  { style: 'fusion', revealStyle: 'none' },
+  { style: 'fusion', revealStyle: 'none' },
+  { style: 'fusion', revealStyle: 'none' },
+  { style: 'fusion', revealStyle: 'none' },
 ];
-S.stepCount = 4;
 
-function updateStepStyle(idx, styleVal) {
-  if (S.steps[idx]) S.steps[idx].style = styleVal;
-  saveSettings();
-}
-
-function updateStepReveal(idx, revealVal) {
-  if (S.steps[idx]) S.steps[idx].revealStyle = revealVal;
-  saveSettings();
-}
-
-function addStep() {
-  if (S.stepCount >= 4) {
-    toast('Tối đa 4 bước blend! 🎯');
-    return;
+/* ── Sync G arrays → S.steps ── */
+function syncStepsFromGallery() {
+  const count = Math.max(G.emojiImages.length, G.resultImages.length);
+  S.steps = [];
+  S.stepCount = count;
+  for (let i = 0; i < count; i++) {
+    S.steps.push({
+      emojiImg:    G.emojiImages[i]  || null,
+      resultImg:   G.resultImages[i] || null,
+      style:       G_effects[i]?.style       || 'fusion',
+      revealStyle: G_effects[i]?.revealStyle || 'none',
+    });
   }
-  const idx = S.stepCount;
-  S.steps.push({ emojiImg: null, resultImg: null, style: 'fusion', revealStyle: 'eraser-stroke-up' });
-  S.stepCount++;
-
-  const html = `
-    <div class="blend-step" id="step-${idx}" data-index="${idx}">
-      <div class="step-header">
-        <span class="step-badge">Bước ${idx + 1}</span>
-        <button class="step-remove-btn" onclick="removeStep(${idx})" title="Xóa bước"><i class="fa-solid fa-xmark"></i></button>
-      </div>
-      <div class="step-row">
-        <div class="step-card step-emoji" id="emoji-card-${idx}" onclick="pickStepFile(${idx},'emoji')">
-          <input type="file" id="emoji-file-${idx}" accept="image/*" hidden />
-          <div class="step-empty" id="emoji-body-${idx}">
-            <div class="step-empty-icon"><i class="fa-solid fa-face-smile"></i></div>
-            <div class="step-empty-hint">Emoji</div>
-          </div>
-          <div class="step-preview" id="emoji-prev-${idx}" style="display:none">
-            <img id="emoji-img-${idx}" alt="emoji" />
-            <button class="x-btn x-btn-sm" onclick="clearStepSlot(event,${idx},'emoji')"><i class="fa-solid fa-xmark"></i></button>
-          </div>
-        </div>
-        <div class="step-center-col">
-          <select class="step-style-select" id="step-style-${idx}" onchange="updateStepStyle(${idx}, this.value)" title="Kiểu blend bước này">
-            <option value="swirl" selected>🌀 Swirl</option>
-            <option value="marble">🔮 Marble</option>
-          </select>
-          <div class="step-arrow"><i class="fa-solid fa-arrow-right"></i></div>
-          <select class="step-reveal-select" id="step-reveal-${idx}" onchange="updateStepReveal(${idx}, this.value)" title="Hiệu ứng xuất hiện kết quả">
-            <option value="none">🚫 Không có hiệu ứng</option>
-            <option value="eraser-stroke-up" selected>🪄 Tẩy ngang lên</option>
-            <option value="eraser-up">⬆️ Tẩy thẳng</option>
-            <option value="vortex-spiral">🌀 Xoáy ốc</option>
-            <option value="diamond-grid">🧱 Mảnh ghép</option>
-            <option value="split-curtain">🚪 Bóc rèm</option>
-            <option value="classic">✨ Classic</option>
-          </select>
-        </div>
-        <div class="step-card step-result" id="result-card-${idx}" onclick="pickStepFile(${idx},'result')">
-          <input type="file" id="result-file-${idx}" accept="image/*" hidden />
-          <div class="step-empty" id="result-body-${idx}">
-            <div class="step-empty-icon"><i class="fa-solid fa-gift"></i></div>
-            <div class="step-empty-hint">Kết quả</div>
-          </div>
-          <div class="step-preview" id="result-prev-${idx}" style="display:none">
-            <img id="result-img-${idx}" alt="result" />
-            <button class="x-btn x-btn-sm" onclick="clearStepSlot(event,${idx},'result')"><i class="fa-solid fa-xmark"></i></button>
-          </div>
-        </div>
-      </div>
-    </div>`;
-
-  document.getElementById('steps-list').insertAdjacentHTML('beforeend', html);
-
-  // Attach file listener
-  attachStepFileListeners(idx);
-
-  // Disable add button if maxed
-  if (S.stepCount >= 4) {
-    document.getElementById('add-step-btn').disabled = true;
-  }
-}
-
-function removeStep(idx) {
-  if (S.stepCount <= 1) {
-    toast('Cần ít nhất 1 bước blend! 🎯');
-    return;
-  }
-  // Remove from DOM
-  const el = document.getElementById(`step-${idx}`);
-  if (el) el.remove();
-
-  // Rebuild steps array and re-index DOM
-  S.steps.splice(idx, 1);
-  S.stepCount--;
-
-  // Re-label remaining steps
-  const stepEls = document.querySelectorAll('.blend-step');
-  stepEls.forEach((el, i) => {
-    el.id = `step-${i}`;
-    el.dataset.index = i;
-    el.querySelector('.step-badge').textContent = `Bước ${i + 1}`;
-    el.querySelector('.step-remove-btn').setAttribute('onclick', `removeStep(${i})`);
-
-    const emojiCard = el.querySelector('[id^="emoji-card-"]');
-    const resultCard = el.querySelector('[id^="result-card-"]');
-    const emojiFile = el.querySelector('[id^="emoji-file-"]');
-    const resultFile = el.querySelector('[id^="result-file-"]');
-    const emojiBody = el.querySelector('[id^="emoji-body-"]');
-    const resultBody = el.querySelector('[id^="result-body-"]');
-    const emojiPrev = el.querySelector('[id^="emoji-prev-"]');
-    const resultPrev = el.querySelector('[id^="result-prev-"]');
-    const emojiImgEl = el.querySelector('[id^="emoji-img-"]');
-    const resultImgEl = el.querySelector('[id^="result-img-"]');
-    const styleSelect = el.querySelector('[id^="step-style-"]');
-    const revealSelect = el.querySelector('[id^="step-reveal-"]');
-    const emojiXBtn = emojiPrev?.querySelector('.x-btn');
-    const resultXBtn = resultPrev?.querySelector('.x-btn');
-
-    if (emojiCard) {
-      emojiCard.id = `emoji-card-${i}`;
-      emojiCard.setAttribute('onclick', `pickStepFile(${i},'emoji')`);
-    }
-    if (resultCard) {
-      resultCard.id = `result-card-${i}`;
-      resultCard.setAttribute('onclick', `pickStepFile(${i},'result')`);
-    }
-    if (emojiFile) emojiFile.id = `emoji-file-${i}`;
-    if (resultFile) resultFile.id = `result-file-${i}`;
-    if (emojiBody) emojiBody.id = `emoji-body-${i}`;
-    if (resultBody) resultBody.id = `result-body-${i}`;
-    if (emojiPrev) emojiPrev.id = `emoji-prev-${i}`;
-    if (resultPrev) resultPrev.id = `result-prev-${i}`;
-    if (emojiImgEl) emojiImgEl.id = `emoji-img-${i}`;
-    if (resultImgEl) resultImgEl.id = `result-img-${i}`;
-    if (styleSelect) {
-      styleSelect.id = `step-style-${i}`;
-      styleSelect.setAttribute('onchange', `updateStepStyle(${i}, this.value)`);
-      if (S.steps[i]?.style) styleSelect.value = S.steps[i].style;
-    }
-    if (revealSelect) {
-      revealSelect.id = `step-reveal-${i}`;
-      revealSelect.setAttribute('onchange', `updateStepReveal(${i}, this.value)`);
-      if (S.steps[i]?.revealStyle) revealSelect.value = S.steps[i].revealStyle;
-    }
-    if (emojiXBtn) emojiXBtn.setAttribute('onclick', `clearStepSlot(event,${i},'emoji')`);
-    if (resultXBtn) resultXBtn.setAttribute('onclick', `clearStepSlot(event,${i},'result')`);
-
-    // Re-attach file listeners by replacing input elements
-    attachStepFileListeners(i);
-  });
-
-  document.getElementById('add-step-btn').disabled = false;
   refreshEmojiHeader();
 }
 
-function attachStepFileListeners(idx) {
-  // Use a data attribute trick to avoid duplicate listeners
-  const emojiInput = document.getElementById(`emoji-file-${idx}`);
-  const resultInput = document.getElementById(`result-file-${idx}`);
-  const emojiCard = document.getElementById(`emoji-card-${idx}`);
-  const resultCard = document.getElementById(`result-card-${idx}`);
+/* ── Helper: attach per-column drag events to an image wrap ── */
+function attachColDrag(wrap, col, idx, cell, arr) {
+  wrap.draggable = true;
 
-  // ── File input change ──
-  if (emojiInput) {
-    const newEl = emojiInput.cloneNode(true);
-    emojiInput.replaceWith(newEl);
-    newEl.addEventListener('change', e => {
-      const f = e.target.files[0];
-      if (f) loadStepSlot(idx, 'emoji', f);
-    });
-  }
-  if (resultInput) {
-    const newEl = resultInput.cloneNode(true);
-    resultInput.replaceWith(newEl);
-    newEl.addEventListener('change', e => {
-      const f = e.target.files[0];
-      if (f) loadStepSlot(idx, 'result', f);
-    });
-  }
+  wrap.addEventListener('dragstart', e => {
+    e.stopPropagation();
+    G.dragCol    = col;
+    G.dragColIdx = idx;
+    wrap.classList.add('bt-col-dragging');
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setDragImage(new Image(), 0, 0);
+  });
 
-  // ── Drag & Drop helper ──
-  const addDnd = (card, type) => {
-    if (!card) return;
-    card.addEventListener('dragover', e => {
-      e.preventDefault();
-      card.classList.add('drag-over');
-    });
-    card.addEventListener('dragleave', () => card.classList.remove('drag-over'));
-    card.addEventListener('drop', e => {
-      e.preventDefault();
-      card.classList.remove('drag-over');
-      const f = e.dataTransfer.files[0];
-      if (f?.type.startsWith('image/')) loadStepSlot(idx, type, f);
-    });
-  };
+  wrap.addEventListener('dragend', e => {
+    e.stopPropagation();
+    wrap.classList.remove('bt-col-dragging');
+    document.querySelectorAll('.bt-cell-over').forEach(c => c.classList.remove('bt-cell-over'));
+    G.dragCol    = null;
+    G.dragColIdx = null;
+  });
 
-  addDnd(emojiCard, 'emoji');
-  addDnd(resultCard, 'result');
+  // Accept drops on the parent cell
+  cell.addEventListener('dragover', e => {
+    if (e.dataTransfer.types.includes('Files')) return;
+    if (G.dragCol !== col || G.dragColIdx === idx) return;
+    e.preventDefault();
+    e.stopPropagation();
+    // Clear other highlights then highlight this cell
+    document.querySelectorAll('.bt-cell-over').forEach(c => c.classList.remove('bt-cell-over'));
+    cell.classList.add('bt-cell-over');
+  });
+
+  cell.addEventListener('dragleave', e => {
+    if (!cell.contains(e.relatedTarget)) cell.classList.remove('bt-cell-over');
+  });
+
+  cell.addEventListener('drop', e => {
+    if (e.dataTransfer.types.includes('Files')) return;
+    e.preventDefault();
+    e.stopPropagation();
+    cell.classList.remove('bt-cell-over');
+    const from = G.dragColIdx;
+    if (G.dragCol !== col || from === null || from === idx) return;
+    const [moved] = arr.splice(from, 1);
+    arr.splice(idx, 0, moved);
+    G.dragCol    = null;
+    G.dragColIdx = null;
+    renderBlendTable();
+    syncStepsFromGallery();
+  });
 }
+
+/* ── Main render: 3-column table ── */
+function renderBlendTable() {
+  const tbody     = document.getElementById('blend-table-body');
+  const countEl   = document.getElementById('steps-count');
+  const addRow    = document.getElementById('bt-add-row');
+  const emptyHint = document.getElementById('bt-empty-hint');
+  if (!tbody) return;
+
+  const count = Math.max(G.emojiImages.length, G.resultImages.length);
+  if (countEl) countEl.textContent = count > 0 ? `${count}/${MAX_STEPS}` : '';
+
+  tbody.innerHTML = '';
+
+  if (emptyHint) emptyHint.style.display = count === 0 ? 'flex' : 'none';
+  if (addRow)    addRow.style.display    = count >= MAX_STEPS ? 'none' : 'flex';
+
+  for (let i = 0; i < count; i++) {
+    const eff      = G_effects[i] || { style: 'fusion', revealStyle: 'none' };
+    const emojiImg = G.emojiImages[i];
+    const resImg   = G.resultImages[i];
+
+    const row = document.createElement('div');
+    row.className = 'bt-row';
+    // NOT draggable at row level — each column handles its own drag
+
+    // ── Col 1: Emoji (1:1) ──
+    const emojiCell = document.createElement('div');
+    emojiCell.className = 'bt-cell bt-cell-emoji';
+
+    if (emojiImg) {
+      const wrap = document.createElement('div');
+      wrap.className = 'bt-img-wrap bt-emoji-wrap';
+      wrap.title = 'Kéo để đổi thứ tự';
+      const img = document.createElement('img');
+      img.src = emojiImg.src;
+      img.draggable = false;
+      const badge = document.createElement('span');
+      badge.className = 'bt-img-badge';
+      badge.textContent = i + 1;
+      const del = document.createElement('button');
+      del.className = 'bt-del-btn';
+      del.innerHTML = '<i class="fa-solid fa-xmark"></i>';
+      del.addEventListener('click', e => {
+        e.stopPropagation();
+        G.emojiImages.splice(i, 1);
+        renderBlendTable();
+        syncStepsFromGallery();
+      });
+      wrap.appendChild(img);
+      wrap.appendChild(badge);
+      wrap.appendChild(del);
+      emojiCell.appendChild(wrap);
+      // Attach independent column drag
+      attachColDrag(wrap, 'emoji', i, emojiCell, G.emojiImages);
+    } else {
+      const slot = document.createElement('div');
+      slot.className = 'bt-empty-slot bt-emoji-slot';
+      slot.title = 'Thêm emoji';
+      slot.innerHTML = '<i class="fa-solid fa-plus"></i>';
+      slot.addEventListener('click', () => document.getElementById('emoji-multi-input').click());
+      emojiCell.appendChild(slot);
+    }
+
+    // ── Col 2: Hiệu ứng ──
+    const fxCell = document.createElement('div');
+    fxCell.className = 'bt-cell bt-cell-fx';
+
+    const blendSel = document.createElement('select');
+    blendSel.className = 'bt-select';
+    blendSel.id = `gstep-style-${i}`;
+    blendSel.title = 'Kiểu blend';
+    blendSel.innerHTML = `
+      <option value="fusion"${eff.style==='fusion'?' selected':''}>✨ Fusion</option>
+      <option value="ripple"${eff.style==='ripple'?' selected':''}>🌊 Ripple</option>
+      <option value="swirl"${eff.style==='swirl'?' selected':''}>🌀 Swirl</option>
+      <option value="marble"${eff.style==='marble'?' selected':''}>🔮 Marble</option>`;
+    blendSel.addEventListener('change', e => {
+      G_effects[i] = G_effects[i] || { style: 'fusion', revealStyle: 'none' };
+      G_effects[i].style = e.target.value;
+      if (S.steps[i]) S.steps[i].style = e.target.value;
+      saveSettings();
+    });
+
+    const revealSel = document.createElement('select');
+    revealSel.className = 'bt-select';
+    revealSel.id = `gstep-reveal-${i}`;
+    revealSel.title = 'Hiệu ứng kết quả';
+    revealSel.innerHTML = `
+      <option value="none"${eff.revealStyle==='none'?' selected':''}>🚫 Không</option>
+      <option value="eraser-stroke-up"${eff.revealStyle==='eraser-stroke-up'?' selected':''}>🪄 Tẩy ngang</option>
+      <option value="eraser-up"${eff.revealStyle==='eraser-up'?' selected':''}>⬆️ Tẩy thẳng</option>
+      <option value="vortex-spiral"${eff.revealStyle==='vortex-spiral'?' selected':''}>🌀 Xoáy ốc</option>
+      <option value="diamond-grid"${eff.revealStyle==='diamond-grid'?' selected':''}>🧱 Mảnh ghép</option>
+      <option value="split-curtain"${eff.revealStyle==='split-curtain'?' selected':''}>🚪 Bóc rèm</option>
+      <option value="classic"${eff.revealStyle==='classic'?' selected':''}>✨ Classic</option>`;
+    revealSel.addEventListener('change', e => {
+      G_effects[i] = G_effects[i] || { style: 'fusion', revealStyle: 'none' };
+      G_effects[i].revealStyle = e.target.value;
+      if (S.steps[i]) S.steps[i].revealStyle = e.target.value;
+      saveSettings();
+    });
+
+    fxCell.appendChild(blendSel);
+    fxCell.appendChild(revealSel);
+
+    // ── Col 3: Kết quả (9:16) ──
+    const resCell = document.createElement('div');
+    resCell.className = 'bt-cell bt-cell-result';
+
+    if (resImg) {
+      const wrap = document.createElement('div');
+      wrap.className = 'bt-img-wrap bt-result-wrap';
+      wrap.title = 'Kéo để đổi thứ tự';
+      const img = document.createElement('img');
+      img.src = resImg.src;
+      img.draggable = false;
+      const badge = document.createElement('span');
+      badge.className = 'bt-img-badge';
+      badge.textContent = i + 1;
+      const del = document.createElement('button');
+      del.className = 'bt-del-btn';
+      del.innerHTML = '<i class="fa-solid fa-xmark"></i>';
+      del.addEventListener('click', e => {
+        e.stopPropagation();
+        G.resultImages.splice(i, 1);
+        renderBlendTable();
+        syncStepsFromGallery();
+      });
+      wrap.appendChild(img);
+      wrap.appendChild(badge);
+      wrap.appendChild(del);
+      resCell.appendChild(wrap);
+      // Attach independent column drag
+      attachColDrag(wrap, 'result', i, resCell, G.resultImages);
+    } else {
+      const slot = document.createElement('div');
+      slot.className = 'bt-empty-slot bt-result-slot';
+      slot.title = 'Thêm kết quả';
+      slot.innerHTML = '<i class="fa-solid fa-plus"></i>';
+      slot.addEventListener('click', () => document.getElementById('result-multi-input').click());
+      resCell.appendChild(slot);
+    }
+
+    row.appendChild(emojiCell);
+    row.appendChild(fxCell);
+    row.appendChild(resCell);
+    tbody.appendChild(row);
+  }
+
+  syncStepsFromGallery();
+}
+
+/* ── Load files into G array then re-render ── */
+function loadFilesIntoGallery(type, files) {
+  const arr    = type === 'emoji' ? G.emojiImages : G.resultImages;
+  const remain = MAX_STEPS - arr.length;
+  if (remain <= 0) { toast(`Tối đa ${MAX_STEPS} ảnh! 🎯`); return; }
+
+  const toLoad = Array.from(files).filter(f => f.type.startsWith('image/')).slice(0, remain);
+  if (toLoad.length === 0) return;
+
+  let loaded = 0;
+  toLoad.forEach(file => {
+    const reader = new FileReader();
+    reader.onload = ev => {
+      const img = new Image();
+      img.onload = () => {
+        arr.push(img);
+        loaded++;
+        if (loaded === toLoad.length) renderBlendTable();
+      };
+      img.src = ev.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+/* ── Init file inputs & drop targets ── */
+(function initBlendTable() {
+  ['emoji', 'result'].forEach(type => {
+    const input = document.getElementById(`${type}-multi-input`);
+    if (input) {
+      input.addEventListener('change', e => {
+        loadFilesIntoGallery(type, e.target.files);
+        e.target.value = '';
+      });
+    }
+  });
+
+  const addEmoji  = document.getElementById('bt-add-emoji');
+  const addResult = document.getElementById('bt-add-result');
+  if (addEmoji)  addEmoji.addEventListener('click',  () => document.getElementById('emoji-multi-input').click());
+  if (addResult) addResult.addEventListener('click', () => document.getElementById('result-multi-input').click());
+
+  // File drag-drop onto the whole table area
+  const wrapEl = document.querySelector('.bt-wrap');
+  if (wrapEl) {
+    wrapEl.addEventListener('dragover', e => {
+      if (e.dataTransfer.types.includes('Files')) e.preventDefault();
+    });
+    wrapEl.addEventListener('drop', e => {
+      if (!e.dataTransfer.files.length) return;
+      e.preventDefault();
+      const type = G.emojiImages.length <= G.resultImages.length ? 'emoji' : 'result';
+      loadFilesIntoGallery(type, e.dataTransfer.files);
+    });
+  }
+
+  renderBlendTable();
+})();
+
+/* ── Compatibility stubs ── */
+function updateStepStyle(idx, v)  { G_effects[idx]=G_effects[idx]||{}; G_effects[idx].style=v; if(S.steps[idx]) S.steps[idx].style=v; saveSettings(); }
+function updateStepReveal(idx, v) { G_effects[idx]=G_effects[idx]||{}; G_effects[idx].revealStyle=v; if(S.steps[idx]) S.steps[idx].revealStyle=v; saveSettings(); }
+function pickStepFile() {}
+function addStep()    {}
+function removeStep() {}
+function clearStepSlot(ev, idx, type) {
+  if (ev) ev.stopPropagation();
+  if (type === 'emoji')  G.emojiImages.splice(idx, 1);
+  else                   G.resultImages.splice(idx, 1);
+  renderBlendTable();
+  syncStepsFromGallery();
+}
+function renderGallery()          {}
+function syncDropzoneVisibility() {}
+
+/* ─────────────────────── QUESTION CHIPS ─────────────────────── */
+
 
 /* ─────────────────────── QUESTION CHIPS ─────────────────────── */
 function applyQuestion(btn) {

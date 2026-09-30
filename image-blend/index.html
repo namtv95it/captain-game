@@ -48,229 +48,41 @@
         </div>
       </div>
 
-      <!-- ── Emoji + Result Steps ── -->
-      <div class="section-label" style="margin-top:6px;"><i class="fa-solid fa-layer-group"></i> Các bước blend (1–4
-        emoji)</div>
-
-      <div class="steps-list" id="steps-list">
-        <!-- Step 1 -->
-        <div class="blend-step" id="step-0" data-index="0">
-          <div class="step-header">
-            <span class="step-badge">Bước 1</span>
-            <button class="step-remove-btn" onclick="removeStep(0)" title="Xóa bước"><i
-                class="fa-solid fa-xmark"></i></button>
-          </div>
-          <div class="step-row">
-            <div class="step-card step-emoji" id="emoji-card-0" onclick="pickStepFile(0,'emoji')">
-              <input type="file" id="emoji-file-0" accept="image/*" hidden />
-              <div class="step-empty" id="emoji-body-0">
-                <div class="step-empty-icon"><i class="fa-solid fa-face-smile"></i></div>
-                <div class="step-empty-hint">Emoji</div>
-              </div>
-              <div class="step-preview" id="emoji-prev-0" style="display:none">
-                <img id="emoji-img-0" alt="emoji" />
-                <button class="x-btn x-btn-sm" onclick="clearStepSlot(event,0,'emoji')"><i
-                    class="fa-solid fa-xmark"></i></button>
-              </div>
-            </div>
-            <div class="step-center-col">
-              <select class="step-style-select" id="step-style-0" onchange="updateStepStyle(0, this.value)"
-                title="Kiểu blend bước này">
-                <option value="fusion" selected>✨ Fusion</option>
-                <option value="ripple">🌊 Ripple</option>
-              </select>
-              <div class="step-arrow"><i class="fa-solid fa-arrow-right"></i></div>
-              <select class="step-reveal-select" id="step-reveal-0" onchange="updateStepReveal(0, this.value)"
-                title="Hiệu ứng xuất hiện kết quả">
-                <option value="none" selected>🚫 Không có hiệu ứng</option>
-                <option value="eraser-stroke-up">🪄 Tẩy ngang lên</option>
-                <option value="eraser-up">⬆️ Tẩy thẳng</option>
-                <option value="vortex-spiral">🌀 Xoáy ốc</option>
-                <option value="diamond-grid">🧱 Mảnh ghép</option>
-                <option value="split-curtain">🚪 Bóc rèm</option>
-                <option value="classic">✨ Classic</option>
-              </select>
-            </div>
-            <div class="step-card step-result" id="result-card-0" onclick="pickStepFile(0,'result')">
-              <input type="file" id="result-file-0" accept="image/*" hidden />
-              <div class="step-empty" id="result-body-0">
-                <div class="step-empty-icon"><i class="fa-solid fa-gift"></i></div>
-                <div class="step-empty-hint">Kết quả</div>
-              </div>
-              <div class="step-preview" id="result-prev-0" style="display:none">
-                <img id="result-img-0" alt="result" />
-                <button class="x-btn x-btn-sm" onclick="clearStepSlot(event,0,'result')"><i
-                    class="fa-solid fa-xmark"></i></button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Step 2 -->
-        <div class="blend-step" id="step-1" data-index="1">
-          <div class="step-header">
-            <span class="step-badge">Bước 2</span>
-            <button class="step-remove-btn" onclick="removeStep(1)" title="Xóa bước"><i
-                class="fa-solid fa-xmark"></i></button>
-          </div>
-          <div class="step-row">
-            <div class="step-card step-emoji" id="emoji-card-1" onclick="pickStepFile(1,'emoji')">
-              <input type="file" id="emoji-file-1" accept="image/*" hidden />
-              <div class="step-empty" id="emoji-body-1">
-                <div class="step-empty-icon"><i class="fa-solid fa-face-smile"></i></div>
-                <div class="step-empty-hint">Emoji</div>
-              </div>
-              <div class="step-preview" id="emoji-prev-1" style="display:none">
-                <img id="emoji-img-1" alt="emoji" />
-                <button class="x-btn x-btn-sm" onclick="clearStepSlot(event,1,'emoji')"><i
-                    class="fa-solid fa-xmark"></i></button>
-              </div>
-            </div>
-            <div class="step-center-col">
-              <select class="step-style-select" id="step-style-1" onchange="updateStepStyle(1, this.value)"
-                title="Kiểu blend bước này">
-                <option value="fusion" selected>✨ Fusion</option>
-                <option value="ripple">🌊 Ripple</option>
-              </select>
-              <div class="step-arrow"><i class="fa-solid fa-arrow-right"></i></div>
-              <select class="step-reveal-select" id="step-reveal-1" onchange="updateStepReveal(1, this.value)"
-                title="Hiệu ứng xuất hiện kết quả">
-                <option value="none" selected>🚫 Không có hiệu ứng</option>
-                <option value="eraser-stroke-up">🪄 Tẩy ngang lên</option>
-                <option value="eraser-up">⬆️ Tẩy thẳng</option>
-                <option value="vortex-spiral">🌀 Xoáy ốc</option>
-                <option value="diamond-grid">🧱 Mảnh ghép</option>
-                <option value="split-curtain">🚪 Bóc rèm</option>
-                <option value="classic">✨ Classic</option>
-              </select>
-            </div>
-            <div class="step-card step-result" id="result-card-1" onclick="pickStepFile(1,'result')">
-              <input type="file" id="result-file-1" accept="image/*" hidden />
-              <div class="step-empty" id="result-body-1">
-                <div class="step-empty-icon"><i class="fa-solid fa-gift"></i></div>
-                <div class="step-empty-hint">Kết quả</div>
-              </div>
-              <div class="step-preview" id="result-prev-1" style="display:none">
-                <img id="result-img-1" alt="result" />
-                <button class="x-btn x-btn-sm" onclick="clearStepSlot(event,1,'result')"><i
-                    class="fa-solid fa-xmark"></i></button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Step 3 -->
-        <div class="blend-step" id="step-2" data-index="2">
-          <div class="step-header">
-            <span class="step-badge">Bước 3</span>
-            <button class="step-remove-btn" onclick="removeStep(2)" title="Xóa bước"><i
-                class="fa-solid fa-xmark"></i></button>
-          </div>
-          <div class="step-row">
-            <div class="step-card step-emoji" id="emoji-card-2" onclick="pickStepFile(2,'emoji')">
-              <input type="file" id="emoji-file-2" accept="image/*" hidden />
-              <div class="step-empty" id="emoji-body-2">
-                <div class="step-empty-icon"><i class="fa-solid fa-face-smile"></i></div>
-                <div class="step-empty-hint">Emoji</div>
-              </div>
-              <div class="step-preview" id="emoji-prev-2" style="display:none">
-                <img id="emoji-img-2" alt="emoji" />
-                <button class="x-btn x-btn-sm" onclick="clearStepSlot(event,2,'emoji')"><i
-                    class="fa-solid fa-xmark"></i></button>
-              </div>
-            </div>
-            <div class="step-center-col">
-              <select class="step-style-select" id="step-style-2" onchange="updateStepStyle(2, this.value)"
-                title="Kiểu blend bước này">
-                <option value="fusion" selected>✨ Fusion</option>
-                <option value="ripple">🌊 Ripple</option>
-              </select>
-              <div class="step-arrow"><i class="fa-solid fa-arrow-right"></i></div>
-              <select class="step-reveal-select" id="step-reveal-2" onchange="updateStepReveal(2, this.value)"
-                title="Hiệu ứng xuất hiện kết quả">
-                <option value="none" selected>🚫 Không có hiệu ứng</option>
-                <option value="eraser-stroke-up">🪄 Tẩy ngang lên</option>
-                <option value="eraser-up">⬆️ Tẩy thẳng</option>
-                <option value="vortex-spiral">🌀 Xoáy ốc</option>
-                <option value="diamond-grid">🧱 Mảnh ghép</option>
-                <option value="split-curtain">🚪 Bóc rèm</option>
-                <option value="classic">✨ Classic</option>
-              </select>
-            </div>
-            <div class="step-card step-result" id="result-card-2" onclick="pickStepFile(2,'result')">
-              <input type="file" id="result-file-2" accept="image/*" hidden />
-              <div class="step-empty" id="result-body-2">
-                <div class="step-empty-icon"><i class="fa-solid fa-gift"></i></div>
-                <div class="step-empty-hint">Kết quả</div>
-              </div>
-              <div class="step-preview" id="result-prev-2" style="display:none">
-                <img id="result-img-2" alt="result" />
-                <button class="x-btn x-btn-sm" onclick="clearStepSlot(event,2,'result')"><i
-                    class="fa-solid fa-xmark"></i></button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Step 4 -->
-        <div class="blend-step" id="step-3" data-index="3">
-          <div class="step-header">
-            <span class="step-badge">Bước 4</span>
-            <button class="step-remove-btn" onclick="removeStep(3)" title="Xóa bước"><i
-                class="fa-solid fa-xmark"></i></button>
-          </div>
-          <div class="step-row">
-            <div class="step-card step-emoji" id="emoji-card-3" onclick="pickStepFile(3,'emoji')">
-              <input type="file" id="emoji-file-3" accept="image/*" hidden />
-              <div class="step-empty" id="emoji-body-3">
-                <div class="step-empty-icon"><i class="fa-solid fa-face-smile"></i></div>
-                <div class="step-empty-hint">Emoji</div>
-              </div>
-              <div class="step-preview" id="emoji-prev-3" style="display:none">
-                <img id="emoji-img-3" alt="emoji" />
-                <button class="x-btn x-btn-sm" onclick="clearStepSlot(event,3,'emoji')"><i
-                    class="fa-solid fa-xmark"></i></button>
-              </div>
-            </div>
-            <div class="step-center-col">
-              <select class="step-style-select" id="step-style-3" onchange="updateStepStyle(3, this.value)"
-                title="Kiểu blend bước này">
-                <option value="fusion" selected>✨ Fusion</option>
-                <option value="ripple">🌊 Ripple</option>
-              </select>
-              <div class="step-arrow"><i class="fa-solid fa-arrow-right"></i></div>
-              <select class="step-reveal-select" id="step-reveal-3" onchange="updateStepReveal(3, this.value)"
-                title="Hiệu ứng xuất hiện kết quả">
-                <option value="none" selected>🚫 Không có hiệu ứng</option>
-                <option value="eraser-stroke-up">🪄 Tẩy ngang lên</option>
-                <option value="eraser-up">⬆️ Tẩy thẳng</option>
-                <option value="vortex-spiral">🌀 Xoáy ốc</option>
-                <option value="diamond-grid">🧱 Mảnh ghép</option>
-                <option value="split-curtain">🚪 Bóc rèm</option>
-                <option value="classic">✨ Classic</option>
-              </select>
-            </div>
-            <div class="step-card step-result" id="result-card-3" onclick="pickStepFile(3,'result')">
-              <input type="file" id="result-file-3" accept="image/*" hidden />
-              <div class="step-empty" id="result-body-3">
-                <div class="step-empty-icon"><i class="fa-solid fa-gift"></i></div>
-                <div class="step-empty-hint">Kết quả</div>
-              </div>
-              <div class="step-preview" id="result-prev-3" style="display:none">
-                <img id="result-img-3" alt="result" />
-                <button class="x-btn x-btn-sm" onclick="clearStepSlot(event,3,'result')"><i
-                    class="fa-solid fa-xmark"></i></button>
-              </div>
-            </div>
-          </div>
-        </div>
+      <!-- ── Blend Table (3 cột: Emoji | Hiệu ứng | Kết quả) ── -->
+      <div class="section-label" style="margin-top:6px;">
+        <i class="fa-solid fa-layer-group"></i> Các bước blend
+        <span class="gallery-count" id="steps-count"></span>
       </div>
 
-      <!-- Add Step Button -->
-      <button class="add-step-btn" id="add-step-btn" onclick="addStep()">
-        <span class="add-step-icon"><i class="fa-solid fa-plus"></i></span> Thêm bước blend
-      </button>
+      <!-- Hidden file inputs -->
+      <input type="file" id="emoji-multi-input" accept="image/*" multiple hidden />
+      <input type="file" id="result-multi-input" accept="image/*" multiple hidden />
 
+      <div class="bt-wrap">
+        <!-- Column headers -->
+        <div class="bt-header">
+          <div class="bt-hcol bt-hcol-emoji"><i class="fa-solid fa-face-smile"></i> Emoji</div>
+          <div class="bt-hcol bt-hcol-fx"><i class="fa-solid fa-wand-magic-sparkles"></i> Hiệu ứng</div>
+          <div class="bt-hcol bt-hcol-result"><i class="fa-solid fa-gift"></i> Kết quả</div>
+        </div>
+        <!-- Dynamic rows rendered by JS -->
+        <div id="blend-table-body"></div>
+        <!-- Empty state hint -->
+        <div class="bt-empty-hint" id="bt-empty-hint">
+          <i class="fa-solid fa-arrow-up-from-bracket"></i>
+          <span>Nhấn <b>+</b> bên dưới để thêm ảnh</span>
+        </div>
+        <!-- Add row -->
+        <div class="bt-add-row" id="bt-add-row">
+          <button class="bt-add-btn" id="bt-add-emoji" title="Thêm emoji">
+            <i class="fa-solid fa-plus"></i>
+          </button>
+          <div class="bt-add-center"></div>
+          <button class="bt-add-btn" id="bt-add-result" title="Thêm kết quả">
+            <i class="fa-solid fa-plus"></i>
+          </button>
+        </div>
+      </div>
 
     </aside>
 

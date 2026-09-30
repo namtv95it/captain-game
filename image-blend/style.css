@@ -2028,3 +2028,565 @@ body.recording-mode .theater {
   color: #fff;
   font-weight: 600;
 }
+
+/* ============================
+   GALLERY UPLOAD SYSTEM
+   ============================ */
+
+/* Section label count badge */
+.gallery-count {
+  display: inline-block;
+  margin-left: 6px;
+  font-size: .72rem;
+  font-weight: 700;
+  color: var(--p1);
+  background: rgba(124, 58, 237, .1);
+  padding: 1px 7px;
+  border-radius: 20px;
+  letter-spacing: .03em;
+  vertical-align: middle;
+}
+
+.gallery-upload-area {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* Drop zone (shown when gallery is empty) */
+.gallery-drop-zone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 18px 12px;
+  border: 2px dashed var(--border-h);
+  border-radius: var(--r);
+  background: rgba(124, 58, 237, .03);
+  color: var(--txt3);
+  font-size: .8rem;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color .18s, background .18s, color .18s;
+  user-select: none;
+}
+
+.gallery-drop-zone i {
+  font-size: 1.6rem;
+  color: var(--p1);
+  opacity: .55;
+  margin-bottom: 2px;
+}
+
+.gallery-drop-zone span {
+  font-weight: 500;
+  color: var(--txt2);
+}
+
+.gallery-hint {
+  font-size: .72rem !important;
+  color: var(--txt3) !important;
+  font-weight: 400 !important;
+}
+
+.gallery-drop-zone:hover,
+.gallery-drop-zone.drag-over {
+  border-color: var(--p1);
+  background: rgba(124, 58, 237, .07);
+  color: var(--p1);
+}
+
+/* Gallery list (horizontal scroll row) */
+.gallery-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  min-height: 0;
+}
+
+/* Individual gallery item */
+.gallery-item {
+  position: relative;
+  width: 68px;
+  height: 68px;
+  border-radius: 10px;
+  border: 2px solid var(--border);
+  overflow: hidden;
+  background: var(--bg2);
+  cursor: grab;
+  flex-shrink: 0;
+  transition: border-color .15s, box-shadow .15s, transform .12s, opacity .15s;
+  box-shadow: var(--card-sh);
+}
+
+.gallery-item:active { cursor: grabbing; }
+
+.gallery-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  border-radius: 8px;
+  pointer-events: none;
+  transition: transform .18s;
+}
+
+.gallery-item:hover img { transform: scale(1.04); }
+
+.gallery-item:hover {
+  border-color: var(--p1);
+  box-shadow: var(--card-sh-h), 0 0 0 2px rgba(124,58,237,.2);
+}
+
+/* Dragging state */
+.gallery-item.dragging {
+  opacity: .4;
+  transform: scale(.95);
+  box-shadow: none;
+}
+
+/* Drag-over target state */
+.gallery-item.drag-over-item {
+  border-color: var(--p1);
+  box-shadow: 0 0 0 3px rgba(124,58,237,.35), var(--card-sh-h);
+  transform: scale(1.06);
+}
+
+/* Number badge */
+.gallery-item-badge {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--p1);
+  color: #fff;
+  font-size: .65rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  box-shadow: 0 1px 4px rgba(0,0,0,.25);
+  z-index: 2;
+}
+
+/* Drag handle (shown on hover, top-right) */
+.gallery-drag-handle {
+  position: absolute;
+  top: 2px;
+  right: 20px;
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255,255,255,.9);
+  font-size: .6rem;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .15s;
+  text-shadow: 0 1px 3px rgba(0,0,0,.5);
+  z-index: 3;
+}
+
+.gallery-item:hover .gallery-drag-handle { opacity: 1; pointer-events: auto; }
+
+/* Delete button */
+.gallery-item-del {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: rgba(0,0,0,.55);
+  border: none;
+  color: #fff;
+  font-size: .6rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity .15s, background .15s, transform .12s;
+  z-index: 4;
+  padding: 0;
+  line-height: 1;
+}
+
+.gallery-item:hover .gallery-item-del { opacity: 1; }
+.gallery-item-del:hover {
+  background: #e02;
+  transform: scale(1.15);
+}
+
+/* Add-more chip */
+.gallery-add-chip {
+  width: 68px;
+  height: 68px;
+  border-radius: 10px;
+  border: 2px dashed var(--border-h);
+  background: rgba(124,58,237,.04);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  color: var(--p1);
+  font-size: 1.1rem;
+  opacity: .75;
+  transition: opacity .15s, border-color .15s, background .15s, transform .12s;
+}
+
+.gallery-add-chip:hover {
+  opacity: 1;
+  border-color: var(--p1);
+  background: rgba(124,58,237,.09);
+  transform: scale(1.04);
+}
+
+/* ============================
+   STEP EFFECTS CARDS
+   ============================ */
+
+.step-effects-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* Card wrapper */
+.step-eff-card {
+  background: var(--card);
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: var(--card-sh);
+  transition: border-color .15s, box-shadow .15s;
+}
+.step-eff-card:hover {
+  border-color: var(--border-h);
+  box-shadow: var(--card-sh-h);
+}
+
+/* Header strip */
+.step-eff-header {
+  display: flex;
+  align-items: center;
+  padding: 5px 10px;
+  background: linear-gradient(90deg, rgba(124,58,237,.07) 0%, transparent 100%);
+  border-bottom: 1px solid var(--border);
+}
+
+.step-eff-badge {
+  font-size: .7rem;
+  font-weight: 800;
+  color: var(--p1);
+  text-transform: uppercase;
+  letter-spacing: .06em;
+}
+
+/* Body row: thumb | col | arrow | thumb | col */
+.step-eff-body {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 8px;
+}
+
+/* Thumbnail box */
+.step-eff-thumb {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  border: 1.5px solid var(--border);
+  background: var(--bg);
+  overflow: hidden;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.step-eff-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.step-eff-thumb-placeholder {
+  font-size: .85rem;
+  color: var(--txt3);
+  opacity: .45;
+}
+
+/* Arrow divider */
+.step-eff-arrow {
+  color: var(--txt3);
+  font-size: .7rem;
+  flex-shrink: 0;
+  opacity: .6;
+}
+
+/* Label + select column */
+.step-eff-col {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.step-eff-col-label {
+  font-size: .6rem;
+  font-weight: 700;
+  color: var(--txt3);
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  padding-left: 2px;
+}
+
+.step-eff-select {
+  width: 100%;
+  font-size: .7rem;
+  font-family: inherit;
+  color: var(--txt);
+  background: var(--bg);
+  border: 1.5px solid var(--border);
+  border-radius: 7px;
+  padding: 3px 6px;
+  height: 28px;
+  cursor: pointer;
+  transition: border-color .15s;
+  outline: none;
+  appearance: auto;
+}
+.step-eff-select:hover,
+.step-eff-select:focus {
+  border-color: var(--p1);
+}
+
+/* ============================
+   BLEND TABLE  (3 cols: Emoji | FX | Result)
+   ============================ */
+
+.bt-wrap {
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--card);
+  box-shadow: var(--card-sh);
+}
+
+/* Column header row */
+.bt-header {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  background: linear-gradient(90deg, rgba(124,58,237,.06) 0%, rgba(219,39,119,.04) 100%);
+  border-bottom: 1.5px solid var(--border);
+}
+
+.bt-hcol {
+  padding: 6px 8px;
+  font-size: .68rem;
+  font-weight: 800;
+  color: var(--txt2);
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.bt-hcol i { color: var(--p1); font-size: .75rem; }
+.bt-hcol-fx { justify-content: center; border-left: 1px solid var(--border); border-right: 1px solid var(--border); }
+.bt-hcol-result { justify-content: flex-end; }
+
+/* Step rows */
+.bt-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  border-bottom: 1px solid var(--border);
+  transition: background .12s;
+  cursor: grab;
+}
+.bt-row:last-child { border-bottom: none; }
+.bt-row:hover { background: rgba(124,58,237,.03); }
+.bt-row:active { cursor: grabbing; }
+
+/* Drag states */
+.bt-row-dragging {
+  opacity: .35;
+  box-shadow: none;
+}
+.bt-row-over {
+  background: rgba(124,58,237,.09) !important;
+  box-shadow: inset 0 2px 0 var(--p1), inset 0 -2px 0 var(--p1);
+}
+
+/* Cells */
+.bt-cell {
+  padding: 8px 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 105px;
+}
+.bt-cell-emoji, .bt-cell-result {
+  flex: 1;
+}
+.bt-cell-fx {
+  flex: 1.1;
+  flex-direction: column;
+  gap: 6px;
+  border-left: 1px solid var(--border);
+  border-right: 1px solid var(--border);
+  padding: 8px 6px;
+}
+
+/* Image wrapper */
+.bt-img-wrap {
+  position: relative;
+  width: 56px;
+  height: 56px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 2px solid var(--border);
+  box-shadow: var(--card-sh);
+  transition: border-color .15s, box-shadow .15s, transform .15s;
+  flex-shrink: 0;
+  cursor: grab;
+}
+.bt-img-wrap.bt-img-wrap-res {
+  width: 50px;
+  height: 89px; /* 9:16 aspect ratio */
+}
+.bt-img-wrap:hover {
+  border-color: var(--p1);
+  box-shadow: var(--card-sh-h);
+}
+.bt-img-wrap.dragging {
+  opacity: 0.4;
+}
+.bt-img-wrap.drag-over {
+  border-color: #10b981;
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+  transform: scale(1.05);
+}
+.bt-img-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  pointer-events: none;
+}
+
+/* Delete button on image */
+.bt-img-del {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: rgba(0,0,0,.65);
+  border: none;
+  color: #fff;
+  font-size: .65rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity .15s, background .15s, transform .10s;
+  z-index: 3;
+  padding: 0;
+}
+.bt-img-wrap:hover .bt-img-del { opacity: 1; }
+.bt-img-del:hover { background: #e02; transform: scale(1.15); }
+
+/* Empty slot (+ placeholder) */
+.bt-slot-empty {
+  font-size: .75rem;
+  color: var(--txt3);
+  opacity: .5;
+  font-style: italic;
+}
+
+/* Effect selects inside fx cell */
+.bt-select {
+  width: 100%;
+  font-size: .68rem;
+  font-family: inherit;
+  color: var(--txt);
+  background: var(--bg);
+  border: 1.5px solid var(--border);
+  border-radius: 6px;
+  padding: 2px 4px;
+  height: 24px;
+  cursor: pointer;
+  transition: border-color .15s;
+  outline: none;
+  appearance: auto;
+}
+.bt-select:hover, .bt-select:focus { border-color: var(--p1); }
+
+/* Drag handle inside fx cell */
+.bt-drag-handle {
+  font-size: .65rem;
+  color: var(--txt3);
+  opacity: .4;
+  cursor: grab;
+  align-self: center;
+  transition: opacity .15s;
+  padding: 1px 0;
+}
+.bt-row:hover .bt-drag-handle { opacity: .75; }
+
+/* Empty hint */
+.bt-empty-hint {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  padding: 18px 12px;
+  color: var(--txt3);
+  font-size: .78rem;
+  text-align: center;
+}
+.bt-empty-hint i { font-size: 1.4rem; opacity: .35; color: var(--p1); }
+
+/* Add row (bottom) */
+.bt-add-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 8px;
+  border-top: 1px dashed var(--border);
+  background: rgba(124,58,237,.02);
+}
+.bt-add-center { flex: 1; }
+
+.bt-add-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  border: 2px dashed var(--border-h);
+  background: transparent;
+  color: var(--p1);
+  font-size: .9rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background .15s, border-color .15s, transform .12s;
+  opacity: .7;
+}
+.bt-add-btn:hover {
+  opacity: 1;
+  border-color: var(--p1);
+  background: rgba(124,58,237,.09);
+  transform: scale(1.07);
+}
+
