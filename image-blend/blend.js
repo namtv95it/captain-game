@@ -117,10 +117,10 @@ function clearSlot(n) {
 // S.steps[i] = { emojiImg, resultImg, style, revealStyle }
 // Initialize 4 steps by default with varied preset styles
 S.steps = [
-  { emojiImg: null, resultImg: null, style: 'swirl', revealStyle: 'eraser-stroke-up' },
-  { emojiImg: null, resultImg: null, style: 'marble', revealStyle: 'eraser-stroke-up' },
-  { emojiImg: null, resultImg: null, style: 'swirl', revealStyle: 'vortex-spiral' },
-  { emojiImg: null, resultImg: null, style: 'marble', revealStyle: 'diamond-grid' }
+  { emojiImg: null, resultImg: null, style: 'fusion', revealStyle: 'none' },
+  { emojiImg: null, resultImg: null, style: 'fusion', revealStyle: 'none' },
+  { emojiImg: null, resultImg: null, style: 'fusion', revealStyle: 'none' },
+  { emojiImg: null, resultImg: null, style: 'fusion', revealStyle: 'none' }
 ];
 S.stepCount = 4;
 
@@ -500,7 +500,7 @@ function saveSettings() {
 
   const data = {
     steps: stepsData,
-    question: document.getElementById('final-question-input')?.value || '',
+    question: document.getElementById('final-question-input')?.value || 'VOTE FOR YOUR FAVORITE VERSION!',
     badgeType: document.getElementById('badge-type-select')?.value || 'actions',
     swirl: document.getElementById('sl-swirl')?.value || '100',
     speed: document.getElementById('sl-speed')?.value || '7',

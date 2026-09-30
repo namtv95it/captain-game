@@ -82,8 +82,8 @@
               <div class="step-arrow"><i class="fa-solid fa-arrow-right"></i></div>
               <select class="step-reveal-select" id="step-reveal-0" onchange="updateStepReveal(0, this.value)"
                 title="Hiệu ứng xuất hiện kết quả">
-                <option value="none">🚫 Không có hiệu ứng</option>
-                <option value="eraser-stroke-up" selected>🪄 Tẩy ngang lên</option>
+                <option value="none" selected>🚫 Không có hiệu ứng</option>
+                <option value="eraser-stroke-up">🪄 Tẩy ngang lên</option>
                 <option value="eraser-up">⬆️ Tẩy thẳng</option>
                 <option value="vortex-spiral">🌀 Xoáy ốc</option>
                 <option value="diamond-grid">🧱 Mảnh ghép</option>
@@ -135,8 +135,8 @@
               <div class="step-arrow"><i class="fa-solid fa-arrow-right"></i></div>
               <select class="step-reveal-select" id="step-reveal-1" onchange="updateStepReveal(1, this.value)"
                 title="Hiệu ứng xuất hiện kết quả">
-                <option value="none">🚫 Không có hiệu ứng</option>
-                <option value="eraser-stroke-up" selected>🪄 Tẩy ngang lên</option>
+                <option value="none" selected>🚫 Không có hiệu ứng</option>
+                <option value="eraser-stroke-up">🪄 Tẩy ngang lên</option>
                 <option value="eraser-up">⬆️ Tẩy thẳng</option>
                 <option value="vortex-spiral">🌀 Xoáy ốc</option>
                 <option value="diamond-grid">🧱 Mảnh ghép</option>
@@ -188,10 +188,10 @@
               <div class="step-arrow"><i class="fa-solid fa-arrow-right"></i></div>
               <select class="step-reveal-select" id="step-reveal-2" onchange="updateStepReveal(2, this.value)"
                 title="Hiệu ứng xuất hiện kết quả">
-                <option value="none">🚫 Không có hiệu ứng</option>
+                <option value="none" selected>🚫 Không có hiệu ứng</option>
                 <option value="eraser-stroke-up">🪄 Tẩy ngang lên</option>
                 <option value="eraser-up">⬆️ Tẩy thẳng</option>
-                <option value="vortex-spiral" selected>🌀 Xoáy ốc</option>
+                <option value="vortex-spiral">🌀 Xoáy ốc</option>
                 <option value="diamond-grid">🧱 Mảnh ghép</option>
                 <option value="split-curtain">🚪 Bóc rèm</option>
                 <option value="classic">✨ Classic</option>
@@ -241,11 +241,11 @@
               <div class="step-arrow"><i class="fa-solid fa-arrow-right"></i></div>
               <select class="step-reveal-select" id="step-reveal-3" onchange="updateStepReveal(3, this.value)"
                 title="Hiệu ứng xuất hiện kết quả">
-                <option value="none">🚫 Không có hiệu ứng</option>
+                <option value="none" selected>🚫 Không có hiệu ứng</option>
                 <option value="eraser-stroke-up">🪄 Tẩy ngang lên</option>
                 <option value="eraser-up">⬆️ Tẩy thẳng</option>
                 <option value="vortex-spiral">🌀 Xoáy ốc</option>
-                <option value="diamond-grid" selected>🧱 Mảnh ghép</option>
+                <option value="diamond-grid">🧱 Mảnh ghép</option>
                 <option value="split-curtain">🚪 Bóc rèm</option>
                 <option value="classic">✨ Classic</option>
               </select>
@@ -350,8 +350,8 @@
               class="hint-sub">(Tiếng Anh)</span></label>
           <div class="question-input-wrap">
             <input type="text" class="ctrl-input" id="final-question-input"
-              value="WHICH VERSION DO YOU LIKE MOST?"
-              placeholder="WHICH VERSION DO YOU LIKE MOST?"
+              value="VOTE FOR YOUR FAVORITE VERSION!"
+              placeholder="VOTE FOR YOUR FAVORITE VERSION!"
               list="question-suggestions" autocomplete="off" />
             <button class="question-suggest-btn" id="question-suggest-btn" title="Gợi ý câu hỏi">
               <i class="fa-solid fa-lightbulb"></i>
@@ -361,7 +361,7 @@
             <button class="q-chip" onclick="applyQuestion(this)">Which version do you like most?</button>
             <button class="q-chip" onclick="applyQuestion(this)">Please help me choose a character!</button>
             <button class="q-chip" onclick="applyQuestion(this)">Which hero would you pick?</button>
-            <button class="q-chip" onclick="applyQuestion(this)">Vote for your favorite version!</button>
+            <button class="q-chip q-chip-active" onclick="applyQuestion(this)">Vote for your favorite version!</button>
             <button class="q-chip" onclick="applyQuestion(this)">Who should be the final boss?</button>
             <button class="q-chip" onclick="applyQuestion(this)">Which outfit suits them best?</button>
             <button class="q-chip" onclick="applyQuestion(this)">Comment your choice below!</button>
