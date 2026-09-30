@@ -1726,8 +1726,8 @@ body.recording-mode .theater {
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
-  width: 38px;
-  height: 38px;
+  width: 55px;
+  height: 55px;
   background: #ffffff;
   border: 2px solid rgba(124, 58, 237, 0.35);
   border-radius: 10px;
@@ -1766,6 +1766,7 @@ body.recording-mode .theater {
     transform: translateX(-50%) scale(0.3);
     opacity: 0;
   }
+
   100% {
     transform: translateX(-50%) scale(1);
     opacity: 1;
@@ -2185,7 +2186,9 @@ body.recording-mode .theater {
   box-shadow: var(--card-sh);
 }
 
-.gallery-item:active { cursor: grabbing; }
+.gallery-item:active {
+  cursor: grabbing;
+}
 
 .gallery-item img {
   width: 100%;
@@ -2197,11 +2200,13 @@ body.recording-mode .theater {
   transition: transform .18s;
 }
 
-.gallery-item:hover img { transform: scale(1.04); }
+.gallery-item:hover img {
+  transform: scale(1.04);
+}
 
 .gallery-item:hover {
   border-color: var(--p1);
-  box-shadow: var(--card-sh-h), 0 0 0 2px rgba(124,58,237,.2);
+  box-shadow: var(--card-sh-h), 0 0 0 2px rgba(124, 58, 237, .2);
 }
 
 /* Dragging state */
@@ -2214,7 +2219,7 @@ body.recording-mode .theater {
 /* Drag-over target state */
 .gallery-item.drag-over-item {
   border-color: var(--p1);
-  box-shadow: 0 0 0 3px rgba(124,58,237,.35), var(--card-sh-h);
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, .35), var(--card-sh-h);
   transform: scale(1.06);
 }
 
@@ -2234,7 +2239,7 @@ body.recording-mode .theater {
   align-items: center;
   justify-content: center;
   pointer-events: none;
-  box-shadow: 0 1px 4px rgba(0,0,0,.25);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, .25);
   z-index: 2;
 }
 
@@ -2248,16 +2253,19 @@ body.recording-mode .theater {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: rgba(255,255,255,.9);
+  color: rgba(255, 255, 255, .9);
   font-size: .6rem;
   opacity: 0;
   pointer-events: none;
   transition: opacity .15s;
-  text-shadow: 0 1px 3px rgba(0,0,0,.5);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, .5);
   z-index: 3;
 }
 
-.gallery-item:hover .gallery-drag-handle { opacity: 1; pointer-events: auto; }
+.gallery-item:hover .gallery-drag-handle {
+  opacity: 1;
+  pointer-events: auto;
+}
 
 /* Delete button */
 .gallery-item-del {
@@ -2267,7 +2275,7 @@ body.recording-mode .theater {
   width: 18px;
   height: 18px;
   border-radius: 50%;
-  background: rgba(0,0,0,.55);
+  background: rgba(0, 0, 0, .55);
   border: none;
   color: #fff;
   font-size: .6rem;
@@ -2282,7 +2290,10 @@ body.recording-mode .theater {
   line-height: 1;
 }
 
-.gallery-item:hover .gallery-item-del { opacity: 1; }
+.gallery-item:hover .gallery-item-del {
+  opacity: 1;
+}
+
 .gallery-item-del:hover {
   background: #e02;
   transform: scale(1.15);
@@ -2294,7 +2305,7 @@ body.recording-mode .theater {
   height: 68px;
   border-radius: 10px;
   border: 2px dashed var(--border-h);
-  background: rgba(124,58,237,.04);
+  background: rgba(124, 58, 237, .04);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2309,7 +2320,7 @@ body.recording-mode .theater {
 .gallery-add-chip:hover {
   opacity: 1;
   border-color: var(--p1);
-  background: rgba(124,58,237,.09);
+  background: rgba(124, 58, 237, .09);
   transform: scale(1.04);
 }
 
@@ -2332,6 +2343,7 @@ body.recording-mode .theater {
   box-shadow: var(--card-sh);
   transition: border-color .15s, box-shadow .15s;
 }
+
 .step-eff-card:hover {
   border-color: var(--border-h);
   box-shadow: var(--card-sh-h);
@@ -2342,7 +2354,7 @@ body.recording-mode .theater {
   display: flex;
   align-items: center;
   padding: 5px 10px;
-  background: linear-gradient(90deg, rgba(124,58,237,.07) 0%, transparent 100%);
+  background: linear-gradient(90deg, rgba(124, 58, 237, .07) 0%, transparent 100%);
   border-bottom: 1px solid var(--border);
 }
 
@@ -2375,12 +2387,14 @@ body.recording-mode .theater {
   align-items: center;
   justify-content: center;
 }
+
 .step-eff-thumb img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
 }
+
 .step-eff-thumb-placeholder {
   font-size: .85rem;
   color: var(--txt3);
@@ -2428,6 +2442,7 @@ body.recording-mode .theater {
   outline: none;
   appearance: auto;
 }
+
 .step-eff-select:hover,
 .step-eff-select:focus {
   border-color: var(--p1);
@@ -2449,7 +2464,7 @@ body.recording-mode .theater {
 .bt-header {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
-  background: linear-gradient(90deg, rgba(124,58,237,.06) 0%, rgba(219,39,119,.04) 100%);
+  background: linear-gradient(90deg, rgba(124, 58, 237, .06) 0%, rgba(219, 39, 119, .04) 100%);
   border-bottom: 1.5px solid var(--border);
 }
 
@@ -2464,9 +2479,21 @@ body.recording-mode .theater {
   align-items: center;
   gap: 5px;
 }
-.bt-hcol i { color: var(--p1); font-size: .75rem; }
-.bt-hcol-fx { justify-content: center; border-left: 1px solid var(--border); border-right: 1px solid var(--border); }
-.bt-hcol-result { justify-content: flex-end; }
+
+.bt-hcol i {
+  color: var(--p1);
+  font-size: .75rem;
+}
+
+.bt-hcol-fx {
+  justify-content: center;
+  border-left: 1px solid var(--border);
+  border-right: 1px solid var(--border);
+}
+
+.bt-hcol-result {
+  justify-content: flex-end;
+}
 
 /* Step rows */
 .bt-row {
@@ -2476,17 +2503,27 @@ body.recording-mode .theater {
   transition: background .12s;
   cursor: grab;
 }
-.bt-row:last-child { border-bottom: none; }
-.bt-row:hover { background: rgba(124,58,237,.03); }
-.bt-row:active { cursor: grabbing; }
+
+.bt-row:last-child {
+  border-bottom: none;
+}
+
+.bt-row:hover {
+  background: rgba(124, 58, 237, .03);
+}
+
+.bt-row:active {
+  cursor: grabbing;
+}
 
 /* Drag states */
 .bt-row-dragging {
   opacity: .35;
   box-shadow: none;
 }
+
 .bt-row-over {
-  background: rgba(124,58,237,.09) !important;
+  background: rgba(124, 58, 237, .09) !important;
   box-shadow: inset 0 2px 0 var(--p1), inset 0 -2px 0 var(--p1);
 }
 
@@ -2498,9 +2535,12 @@ body.recording-mode .theater {
   justify-content: center;
   min-height: 105px;
 }
-.bt-cell-emoji, .bt-cell-result {
+
+.bt-cell-emoji,
+.bt-cell-result {
   flex: 1;
 }
+
 .bt-cell-fx {
   flex: 1.1;
   flex-direction: column;
@@ -2523,22 +2563,28 @@ body.recording-mode .theater {
   flex-shrink: 0;
   cursor: grab;
 }
+
 .bt-img-wrap.bt-img-wrap-res {
   width: 50px;
-  height: 89px; /* 9:16 aspect ratio */
+  height: 89px;
+  /* 9:16 aspect ratio */
 }
+
 .bt-img-wrap:hover {
   border-color: var(--p1);
   box-shadow: var(--card-sh-h);
 }
+
 .bt-img-wrap.dragging {
   opacity: 0.4;
 }
+
 .bt-img-wrap.drag-over {
   border-color: #10b981;
   box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
   transform: scale(1.05);
 }
+
 .bt-img-wrap img {
   width: 100%;
   height: 100%;
@@ -2571,8 +2617,15 @@ body.recording-mode .theater {
   padding: 0;
   pointer-events: auto;
 }
-.bt-img-wrap:hover .bt-img-del { opacity: 1; }
-.bt-img-del:hover { background: #dc2626; transform: scale(1.15); }
+
+.bt-img-wrap:hover .bt-img-del {
+  opacity: 1;
+}
+
+.bt-img-del:hover {
+  background: #dc2626;
+  transform: scale(1.15);
+}
 
 /* Empty slot (+ placeholder) */
 .bt-slot-empty {
@@ -2598,7 +2651,11 @@ body.recording-mode .theater {
   outline: none;
   appearance: auto;
 }
-.bt-select:hover, .bt-select:focus { border-color: var(--p1); }
+
+.bt-select:hover,
+.bt-select:focus {
+  border-color: var(--p1);
+}
 
 /* Drag handle inside fx cell */
 .bt-drag-handle {
@@ -2610,7 +2667,10 @@ body.recording-mode .theater {
   transition: opacity .15s;
   padding: 1px 0;
 }
-.bt-row:hover .bt-drag-handle { opacity: .75; }
+
+.bt-row:hover .bt-drag-handle {
+  opacity: .75;
+}
 
 /* Empty hint */
 .bt-empty-hint {
@@ -2623,7 +2683,12 @@ body.recording-mode .theater {
   font-size: .78rem;
   text-align: center;
 }
-.bt-empty-hint i { font-size: 1.4rem; opacity: .35; color: var(--p1); }
+
+.bt-empty-hint i {
+  font-size: 1.4rem;
+  opacity: .35;
+  color: var(--p1);
+}
 
 /* Add row (bottom) */
 .bt-add-row {
@@ -2632,9 +2697,12 @@ body.recording-mode .theater {
   justify-content: space-between;
   padding: 6px 8px;
   border-top: 1px dashed var(--border);
-  background: rgba(124,58,237,.02);
+  background: rgba(124, 58, 237, .02);
 }
-.bt-add-center { flex: 1; }
+
+.bt-add-center {
+  flex: 1;
+}
 
 .bt-add-btn {
   width: 36px;
@@ -2651,10 +2719,10 @@ body.recording-mode .theater {
   transition: background .15s, border-color .15s, transform .12s;
   opacity: .7;
 }
+
 .bt-add-btn:hover {
   opacity: 1;
   border-color: var(--p1);
-  background: rgba(124,58,237,.09);
+  background: rgba(124, 58, 237, .09);
   transform: scale(1.07);
 }
-
