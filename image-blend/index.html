@@ -34,10 +34,13 @@
       <!-- ── Tab Navigation ── -->
       <div class="tab-nav-container mb-2">
         <button class="tab-btn active" id="tab-btn-blend" onclick="switchTab('blend')">
-          <i class="fa-solid fa-wand-magic-sparkles"></i> Hòa trộn Emoji
+          <i class="fa-solid fa-wand-magic-sparkles"></i> Hòa trộn
         </button>
         <button class="tab-btn" id="tab-btn-pokemon" onclick="switchTab('pokemon')">
-          <i class="fa-solid fa-bolt"></i> Pokemon Card
+          <i class="fa-solid fa-bolt"></i> Pokemon
+        </button>
+        <button class="tab-btn" id="tab-btn-battle" onclick="switchTab('battle')">
+          <i class="fa-solid fa-shield-halved"></i> Battle
         </button>
       </div>
 
@@ -152,6 +155,110 @@
 
       </div> <!-- /#tab-content-pokemon -->
 
+      <!-- TAB 3: BATTLE SOLO CONTENT -->
+      <div class="tab-content" id="tab-content-battle" style="display:none;">
+
+        <!-- ── 1. Hero Characters (3 Slots) & Name ── -->
+        <div class="section-label"><i class="fa-solid fa-user-ninja"></i> 3 Trạng thái của nhân vật chính</div>
+        <div class="ctrl-card mb-3 p-2">
+          <label class="ctrl-lbl mb-1"><i class="fa-solid fa-signature"></i> Tên nhân vật chính</label>
+          <input type="text" class="ctrl-input" id="battle-hero-name" value="JESUS" placeholder="Nhập tên nhân vật chính..." />
+        </div>
+
+        <div class="grid grid-cols-3 gap-2 mb-3">
+          <!-- Hero 1: Lowered hands / idle -->
+          <div class="battle-card-slot" onclick="pickBattleFile('jesus-1')" style="cursor:pointer">
+            <input type="file" id="file-jesus-1" accept="image/*" hidden />
+            <div class="card-tag">1. Hạ tay</div>
+            <div class="card-empty" id="body-jesus-1">
+              <div class="empty-icon"><i class="fa-regular fa-image"></i></div>
+              <div class="empty-hint">Ảnh 1</div>
+            </div>
+            <div class="card-preview" id="prev-jesus-1" style="display:none">
+              <img id="pimg-jesus-1" alt="Jesus 1" />
+              <button class="x-btn" onclick="event.stopPropagation();clearBattleSlot('jesus-1')"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+          </div>
+
+          <!-- Hero 2: Attack / raised hand -->
+          <div class="battle-card-slot" onclick="pickBattleFile('jesus-2')" style="cursor:pointer">
+            <input type="file" id="file-jesus-2" accept="image/*" hidden />
+            <div class="card-tag">2. Vung tay</div>
+            <div class="card-empty" id="body-jesus-2">
+              <div class="empty-icon"><i class="fa-regular fa-image"></i></div>
+              <div class="empty-hint">Ảnh 2</div>
+            </div>
+            <div class="card-preview" id="prev-jesus-2" style="display:none">
+              <img id="pimg-jesus-2" alt="Jesus 2" />
+              <button class="x-btn" onclick="event.stopPropagation();clearBattleSlot('jesus-2')"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+          </div>
+
+          <!-- Hero 3: Victory / I AM THE TRUTH -->
+          <div class="battle-card-slot" onclick="pickBattleFile('jesus-3')" style="cursor:pointer">
+            <input type="file" id="file-jesus-3" accept="image/*" hidden />
+            <div class="card-tag">3. Thắng</div>
+            <div class="card-empty" id="body-jesus-3">
+              <div class="empty-icon"><i class="fa-regular fa-image"></i></div>
+              <div class="empty-hint">Ảnh 3</div>
+            </div>
+            <div class="card-preview" id="prev-jesus-3" style="display:none">
+              <img id="pimg-jesus-3" alt="Jesus 3" />
+              <button class="x-btn" onclick="event.stopPropagation();clearBattleSlot('jesus-3')"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── 2. Victory Background Slot (1 Image) ── -->
+        <div class="section-label"><i class="fa-solid fa-mountain-sun"></i> Nền cảnh chiến thắng</div>
+        <div class="upload-card card-1 mb-3" onclick="pickBattleFile('victory-bg')" style="cursor:pointer">
+          <input type="file" id="file-victory-bg" accept="image/*" hidden />
+          <div class="card-tag tag-1"><i class="fa-solid fa-trophy"></i> Nền Thắng</div>
+          <div class="card-empty" id="body-victory-bg">
+            <div class="empty-icon"><i class="fa-regular fa-image"></i></div>
+            <div class="empty-hint">Click chọn ảnh Nền cảnh khi nhân vật chính chiến thắng</div>
+          </div>
+          <div class="card-preview" id="prev-victory-bg" style="display:none">
+            <img id="pimg-victory-bg" alt="Victory BG" />
+            <button class="x-btn" onclick="event.stopPropagation();clearBattleSlot('victory-bg')"><i class="fa-solid fa-xmark"></i></button>
+          </div>
+        </div>
+
+        <!-- ── 3. Opponents & Scenes List ── -->
+        <div class="section-label">
+          <i class="fa-solid fa-skull"></i> Đối thủ & Nền cảnh (Tối đa 8 đối thủ)
+          <span class="gallery-count" id="battle-steps-count"></span>
+        </div>
+
+        <!-- Hidden Inputs for Multi-upload -->
+        <input type="file" id="battle-opponents-input" accept="image/*" multiple hidden />
+        <input type="file" id="battle-scenes-input" accept="image/*" multiple hidden />
+
+        <div class="blend-table-wrap">
+          <div class="bt-header">
+            <div class="bt-col bt-col-head">Ảnh đối thủ</div>
+            <div class="bt-col bt-col-head">Tên đối thủ</div>
+            <div class="bt-col bt-col-head">Nền (Cảnh)</div>
+          </div>
+
+          <div class="bt-body" id="battle-table-body">
+            <!-- Dynamically generated rows for Opponent + Scene pairs -->
+          </div>
+
+          <!-- Add row buttons -->
+          <div class="bt-add-row" id="battle-bt-add-row">
+            <button class="bt-add-btn" id="battle-add-opponents" title="Thêm đối thủ">
+              <i class="fa-solid fa-plus"></i>
+            </button>
+            <div class="bt-add-center"></div>
+            <button class="bt-add-btn" id="battle-add-scenes" title="Thêm nền cảnh">
+              <i class="fa-solid fa-plus"></i>
+            </button>
+          </div>
+        </div>
+
+      </div> <!-- /#tab-content-battle -->
+
     </aside>
 
     <!-- ════════════════════════════════
@@ -223,6 +330,64 @@
             </div>
             <div class="poke-card-question-box" id="poke-fan-question-display">
               HOW MUCH POWER DOES THIS POKEMON CARD DESERVE? LET ME KNOW IN THE COMMENTS!
+            </div>
+          </div>
+
+          <!-- Solo Battle Theater Overlay -->
+          <div class="battle-theater-overlay" id="battle-theater-overlay">
+            <!-- Layer 1: Background Scene -->
+            <div class="battle-bg-wrap" id="battle-bg-wrap">
+              <img id="battle-bg-img" alt="Background Scene" />
+            </div>
+
+            <!-- Layer 2: Opponent Sprite -->
+            <div class="battle-opponent-wrap" id="battle-opponent-wrap">
+              <img id="battle-opponent-img" alt="Opponent" />
+            </div>
+
+            <!-- Layer 3: Slash / Claw FX Overlay -->
+            <div class="battle-slash-wrap" id="battle-slash-wrap">
+              <img id="battle-slash-img" src="mong-vuot.png" alt="Slash FX" />
+            </div>
+
+            <!-- Layer 4: Jesus Sprite -->
+            <div class="battle-jesus-wrap" id="battle-jesus-wrap">
+              <img id="battle-jesus-img" alt="Jesus" />
+            </div>
+
+            <!-- Layer 4 Top: Health Bars & Names -->
+            <div class="battle-health-ui" id="battle-health-ui">
+              <!-- Jesus HP Bar -->
+              <div class="hp-side hp-left">
+                <div class="hp-name" id="battle-jesus-hp-name">JESUS</div>
+                <div class="hp-bar-box">
+                  <span class="hp-heart"><i class="fa-solid fa-heart"></i></span>
+                  <div class="hp-bar-track">
+                    <div class="hp-bar-fill jesus-hp" id="jesus-hp-bar" style="width: 100%;"></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Monster HP Bar -->
+              <div class="hp-side hp-right">
+                <div class="hp-name" id="battle-monster-hp-name">MONSTERS</div>
+                <div class="hp-bar-box">
+                  <div class="hp-bar-track">
+                    <div class="hp-bar-fill monster-hp" id="monster-hp-bar" style="width: 100%;"></div>
+                  </div>
+                  <span class="hp-heart"><i class="fa-solid fa-heart"></i></span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Victory End Screen Overlay (Only Main Character + Victory Background) -->
+            <div class="battle-victory-overlay" id="battle-victory-overlay">
+              <div class="battle-victory-bg-wrap" id="battle-victory-bg-wrap">
+                <img id="battle-victory-bg-img" alt="Victory Background" />
+              </div>
+              <div class="battle-victory-char-wrap" id="battle-victory-char-wrap">
+                <img id="battle-victory-img" alt="Victory Hero" />
+              </div>
             </div>
           </div>
 
@@ -341,6 +506,29 @@ LET ME KNOW IN THE COMMENTS!</textarea>
           </div>
         </div>
       </div> <!-- /#right-tab-content-pokemon -->
+
+      <!-- RIGHT SIDEBAR CONTENT: TAB 3 (BATTLE SOLO) -->
+      <div class="right-tab-content" id="right-tab-content-battle" style="display:none;">
+        <div class="section-label"><i class="fa-solid fa-sliders"></i> Cài đặt Solo Battle</div>
+        <div class="ctrl-card">
+          <div class="ctrl-item">
+            <label class="ctrl-lbl"><i class="fa-solid fa-clock"></i> Thời gian hạ đối thủ (giây)</label>
+            <input type="number" class="ctrl-input" id="battle-step-sec" value="3.0" step="0.5" min="1" max="10" />
+          </div>
+          <div class="ctrl-item">
+            <label class="ctrl-lbl"><i class="fa-solid fa-volume-high"></i> Âm thanh chém & Tấn công</label>
+            <input type="checkbox" id="battle-sound-enable" checked />
+          </div>
+        </div>
+
+        <div class="section-label" style="margin-top:10px;"><i class="fa-solid fa-play"></i> Điều khiển</div>
+        <div class="action-col">
+          <button class="act-btn act-blend" id="btn-battle-run-side" onclick="runBattleSolo()"><i class="fa-solid fa-shield-halved"></i> Bắt đầu Battle</button>
+          <div class="action-row-sm">
+            <button class="act-btn act-reset" onclick="resetBattleSolo()"><i class="fa-solid fa-rotate-left"></i> Reset</button>
+          </div>
+        </div>
+      </div> <!-- /#right-tab-content-battle -->
 
       <!-- ── Phase Indicator ── -->
       <div class="phase-bar" id="phase-bar">
