@@ -34,13 +34,16 @@
       <!-- ── Tab Navigation ── -->
       <div class="tab-nav-container mb-2">
         <button class="tab-btn active" id="tab-btn-blend" onclick="switchTab('blend')">
-          <i class="fa-solid fa-wand-magic-sparkles"></i> Hòa trộn
+          <i class="fa-solid fa-wand-magic-sparkles"></i> Blend
         </button>
         <button class="tab-btn" id="tab-btn-pokemon" onclick="switchTab('pokemon')">
           <i class="fa-solid fa-bolt"></i> Pokemon
         </button>
         <button class="tab-btn" id="tab-btn-battle" onclick="switchTab('battle')">
           <i class="fa-solid fa-shield-halved"></i> Battle
+        </button>
+        <button class="tab-btn" id="tab-btn-puzzle" onclick="switchTab('puzzle')" style="display:none;">
+          <i class="fa-solid fa-puzzle-piece"></i> Puzzle
         </button>
       </div>
 
@@ -259,6 +262,70 @@
 
       </div> <!-- /#tab-content-battle -->
 
+      <!-- TAB 4: PUZZLE GAME CONTENT -->
+      <div class="tab-content" id="tab-content-puzzle" style="display:none;">
+        <div class="section-label"><i class="fa-solid fa-puzzle-piece"></i> Ảnh Puzzle Gốc</div>
+        <div class="upload-card card-1 mb-3" onclick="document.getElementById('file-puzzle-main').click()" style="cursor:pointer">
+          <input type="file" id="file-puzzle-main" accept="image/*" hidden />
+          <div class="card-tag tag-1"><i class="fa-solid fa-image"></i> Ảnh Puzzle (9 mảnh)</div>
+          <div class="card-empty" id="body-puzzle-main">
+            <div class="empty-icon"><i class="fa-regular fa-image"></i></div>
+            <div class="empty-hint">Click chọn 1 hình ảnh để cắt thành 9 mảnh Jigsaw</div>
+          </div>
+          <div class="card-preview" id="prev-puzzle-main" style="display:none">
+            <img id="pimg-puzzle-main" alt="Puzzle Main" />
+            <button class="x-btn" onclick="event.stopPropagation();clearPuzzleSlot()"><i class="fa-solid fa-xmark"></i></button>
+          </div>
+        </div>
+
+        <div class="section-label"><i class="fa-solid fa-shapes"></i> Hình dạng mảnh ghép</div>
+        <div class="ctrl-card mb-3">
+          <select id="puzzle-shape-select" class="ctrl-select" onchange="renderPuzzleGame()">
+            <option value="notched">🛡️ Khiên lượn sóng (Mặc định)</option>
+            <option value="heart">❤️ Trái tim (Heart)</option>
+            <option value="circle">⚪ Hình tròn (Circle)</option>
+            <option value="trapezoid">📐 Hình thang (Trapezoid)</option>
+            <option value="hexagon">⬡ Hình lục giác (Hexagon)</option>
+            <option value="diamond">🔷 Hình thoi (Diamond)</option>
+            <option value="squircle">🔳 Hình vuông bo góc (Squircle)</option>
+          </select>
+        </div>
+
+        <div class="section-label"><i class="fa-solid fa-palette"></i> Màu 3 mảnh ghép phía trên</div>
+        <div class="ctrl-card">
+          <div class="ctrl-item">
+            <label class="ctrl-lbl">💚 Mảnh 1</label>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <input type="color" class="ctrl-input-color" id="puzzle-color-1" value="#22c55e" onchange="renderPuzzleGame()" />
+              <label style="font-size:0.75rem;color:#94a3b8;">Tô màu</label>
+              <input type="checkbox" id="puzzle-color-1-enable" checked onchange="handlePuzzleColorToggle(0)" />
+            </div>
+          </div>
+          <div class="ctrl-item">
+            <label class="ctrl-lbl">💛 Mảnh 2</label>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <input type="color" class="ctrl-input-color" id="puzzle-color-2" value="#eab308" onchange="renderPuzzleGame()" />
+              <label style="font-size:0.75rem;color:#94a3b8;">Tô màu</label>
+              <input type="checkbox" id="puzzle-color-2-enable" onchange="handlePuzzleColorToggle(1)" />
+            </div>
+          </div>
+          <div class="ctrl-item">
+            <label class="ctrl-lbl">💗 Mảnh 3</label>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <input type="color" class="ctrl-input-color" id="puzzle-color-3" value="#ec4899" onchange="renderPuzzleGame()" />
+              <label style="font-size:0.75rem;color:#94a3b8;">Tô màu</label>
+              <input type="checkbox" id="puzzle-color-3-enable" checked onchange="handlePuzzleColorToggle(2)" />
+            </div>
+          </div>
+        </div>
+
+        <div class="blend-ctrl-bar mt-4">
+          <button class="btn-blend-run" id="btn-puzzle-run" onclick="startPuzzleAnimation()">
+            <i class="fa-solid fa-rocket"></i> Bắt đầu Khởi chạy
+          </button>
+        </div>
+      </div> <!-- /#tab-content-puzzle -->
+
     </aside>
 
     <!-- ════════════════════════════════
@@ -389,6 +456,16 @@
                 <img id="battle-victory-img" alt="Victory Hero" />
               </div>
             </div>
+          </div>
+
+          <!-- Puzzle Game Overlay Container (Tab 4) -->
+          <div class="puzzle-theater-overlay" id="puzzle-theater-overlay">
+            <!-- Top variant pieces container -->
+            <div class="puzzle-top-row" id="puzzle-top-row">
+              <!-- 3 colored variant pieces generated here -->
+            </div>
+            <!-- Custom 3x3 puzzle board container -->
+            <div id="custom-puzzle-board" class="custom-puzzle-board"></div>
           </div>
 
         </div><!-- .theater -->
@@ -529,6 +606,9 @@ LET ME KNOW IN THE COMMENTS!</textarea>
           </div>
         </div>
       </div> <!-- /#right-tab-content-battle -->
+
+      <!-- RIGHT SIDEBAR CONTENT: TAB 4 (PUZZLE GAME) -->
+      <div class="right-tab-content" id="right-tab-content-puzzle" style="display:none;"></div>
 
       <!-- ── Phase Indicator ── -->
       <div class="phase-bar" id="phase-bar">
