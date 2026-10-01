@@ -4081,7 +4081,6 @@ const FLASHLIGHT = {
   img2: null,
   radius: 65,
   mode: 'circle', // 'circle' | 'horizontal'
-  torchAngle: -135,
   beamAngle: -135
 };
 
@@ -4090,15 +4089,10 @@ function updateFlashlightMode(val) {
   renderFlashlightTab();
 }
 
-function updateTorchAngle(val) {
-  FLASHLIGHT.torchAngle = parseInt(val) || 0;
-  const valEl = document.getElementById('fl-torch-angle-val');
-  if (valEl) valEl.textContent = FLASHLIGHT.torchAngle + '°';
-
-  const torchIcon = document.getElementById('fl-torch-icon');
-  if (torchIcon) {
-    torchIcon.style.setProperty('--fl-torch-angle', FLASHLIGHT.torchAngle + 'deg');
-  }
+function updateFlashlightRadius(val) {
+  FLASHLIGHT.radius = parseInt(val) || 65;
+  const valEl = document.getElementById('fl-radius-val');
+  if (valEl) valEl.textContent = FLASHLIGHT.radius + 'px';
   renderFlashlightTab();
 }
 
@@ -4283,7 +4277,6 @@ function resetFlashlightMaskCanvas(maskCvs, targetImg, W, H) {
 }
 
 function setupFlashlightSpotlightEvents(stageEl, maskCvs, colorCvs, W, H) {
-  const torchIcon = document.getElementById('fl-torch-icon');
   const mCtx = maskCvs.getContext('2d');
 
   let isDragging = false;
@@ -4302,17 +4295,6 @@ function setupFlashlightSpotlightEvents(stageEl, maskCvs, colorCvs, W, H) {
     const x = cssX * scaleX;
     const y = cssY * scaleY;
 
-    // Show Torch Icon ONLY in Angled Cone mode ('horizontal'), hide it completely in Circle mode
-    if (torchIcon) {
-      if (FLASHLIGHT.mode === 'horizontal') {
-        torchIcon.style.setProperty('display', 'flex', 'important');
-        torchIcon.style.left = cssX + 'px';
-        torchIcon.style.top  = cssY + 'px';
-      } else {
-        torchIcon.style.setProperty('display', 'none', 'important');
-      }
-    }
-
     // Reset mask to black so unlit areas stay pitch black
     resetFlashlightMaskCanvas(maskCvs, targetImg, W, H);
 
@@ -4325,11 +4307,9 @@ function setupFlashlightSpotlightEvents(stageEl, maskCvs, colorCvs, W, H) {
     if (FLASHLIGHT.mode === 'horizontal') {
       // Mode 2: Angled Cone Spotlight Beam (Chiếu chéo góc nón theo FLASHLIGHT.beamAngle riêng)
       const beamRadAngle = (FLASHLIGHT.beamAngle || -135) * Math.PI / 180;
-      const torchRadAngle = (FLASHLIGHT.torchAngle || -135) * Math.PI / 180;
 
-      const offsetCSS = 18;
-      const torchHeadX = x + Math.cos(torchRadAngle) * offsetCSS * scaleCanvasRatio;
-      const torchHeadY = y + Math.sin(torchRadAngle) * offsetCSS * scaleCanvasRatio;
+      const torchHeadX = x;
+      const torchHeadY = y;
 
       const rStart = Math.max(12, rCanvas * 0.25);
       const rEnd = rCanvas * 2.2;
@@ -4416,10 +4396,9 @@ function setupFlashlightSpotlightEvents(stageEl, maskCvs, colorCvs, W, H) {
     }
   };
 
-  // Drag / Touch Handlers for Torch Icon
+  // Drag / Touch Handlers
   const onPointerDown = (e) => {
     isDragging = true;
-    if (torchIcon) torchIcon.classList.add('dragging');
     const { cssX, cssY } = getStageLocalCSS(e);
     renderTorchAtCSSPos(cssX, cssY);
   };
@@ -4432,14 +4411,7 @@ function setupFlashlightSpotlightEvents(stageEl, maskCvs, colorCvs, W, H) {
 
   const onPointerUp = () => {
     isDragging = false;
-    if (torchIcon) torchIcon.classList.remove('dragging');
   };
-
-  // Attach Mouse & Touch listeners on Torch Icon & Stage Container
-  if (torchIcon) {
-    torchIcon.onmousedown = onPointerDown;
-    torchIcon.ontouchstart = (e) => { e.preventDefault(); onPointerDown(e); };
-  }
 
   stageEl.onmousedown = (e) => {
     if (e.target === stageEl || e.target === maskCvs) {

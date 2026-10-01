@@ -3698,11 +3698,11 @@ body.recording-mode .theater {
   background: transparent;
   border: none;
   box-shadow: none;
-  cursor: none !important;
+  cursor: pointer;
 }
 
 .flashlight-bottom-stage * {
-  cursor: none !important;
+  cursor: pointer;
 }
 
 .fl-layer-color {
@@ -3724,38 +3724,4 @@ body.recording-mode .theater {
 .fl-beam-ring {
   display: none !important;
 }
-
-/* Draggable Torch PNG Element */
-/* Draggable Torch PNG Element */
-.fl-torch-icon {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 76px;
-  height: 76px;
-  pointer-events: auto !important;
-  cursor: grab !important;
-  z-index: 20;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transform: translate(-50%, -50%) rotate(var(--fl-torch-angle, 0deg));
-  user-select: none;
-  touch-action: none;
-  transition: transform 0.1s ease, filter 0.2s ease;
-  filter: drop-shadow(0 6px 14px rgba(245, 158, 11, 0.6)) drop-shadow(0 0 25px rgba(251, 191, 36, 0.5));
-}
-
-.fl-torch-icon img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  pointer-events: none;
-}
-
-.fl-torch-icon:active,
-.fl-torch-icon.dragging {
-  cursor: grabbing !important;
-  transform: translate(-50%, -50%) rotate(var(--fl-torch-angle, 0deg)) scale(1.15);
-  filter: drop-shadow(0 8px 20px rgba(245, 158, 11, 0.8)) drop-shadow(0 0 35px rgba(245, 158, 11, 0.8));
-}
+

@@ -53,57 +53,58 @@
       <!-- TAB 1: EMOJI BLEND CONTENT -->
       <div class="tab-content" id="tab-content-blend">
 
-      <!-- ── Character Upload ── -->
-      <div class="section-label"><i class="fa-solid fa-user-astronaut"></i> Ảnh nhân vật gốc</div>
-      <div class="upload-card card-1" id="card-1" onclick="pickFile(1)" style="cursor:pointer">
-        <input type="file" id="file-1" accept="image/*" hidden />
-        <div class="card-tag tag-1"><i class="fa-solid fa-user"></i> Nhân vật</div>
-        <div class="card-empty" id="body-1">
-          <div class="empty-icon"><i class="fa-regular fa-image"></i></div>
-          <div class="empty-hint">Click hoặc kéo thả ảnh vào đây</div>
-          <button class="pick-btn btn-1" onclick="event.stopPropagation();pickFile(1)">Chọn</button>
+        <!-- ── Character Upload ── -->
+        <div class="section-label"><i class="fa-solid fa-user-astronaut"></i> Ảnh nhân vật gốc</div>
+        <div class="upload-card card-1" id="card-1" onclick="pickFile(1)" style="cursor:pointer">
+          <input type="file" id="file-1" accept="image/*" hidden />
+          <div class="card-tag tag-1"><i class="fa-solid fa-user"></i> Nhân vật</div>
+          <div class="card-empty" id="body-1">
+            <div class="empty-icon"><i class="fa-regular fa-image"></i></div>
+            <div class="empty-hint">Click hoặc kéo thả ảnh vào đây</div>
+            <button class="pick-btn btn-1" onclick="event.stopPropagation();pickFile(1)">Chọn</button>
+          </div>
+          <div class="card-preview" id="prev-1" style="display:none">
+            <img id="pimg-1" alt="img1" />
+            <button class="x-btn" onclick="event.stopPropagation();clearSlot(1)"><i
+                class="fa-solid fa-xmark"></i></button>
+          </div>
         </div>
-        <div class="card-preview" id="prev-1" style="display:none">
-          <img id="pimg-1" alt="img1" />
-          <button class="x-btn" onclick="event.stopPropagation();clearSlot(1)"><i class="fa-solid fa-xmark"></i></button>
-        </div>
-      </div>
 
-      <!-- ── Blend Table (3 cột: Emoji | Hiệu ứng | Kết quả) ── -->
-      <div class="section-label" style="margin-top:6px;">
-        <i class="fa-solid fa-layer-group"></i> Các bước blend
-        <span class="gallery-count" id="steps-count"></span>
-      </div>
+        <!-- ── Blend Table (3 cột: Emoji | Hiệu ứng | Kết quả) ── -->
+        <div class="section-label" style="margin-top:6px;">
+          <i class="fa-solid fa-layer-group"></i> Các bước blend
+          <span class="gallery-count" id="steps-count"></span>
+        </div>
 
-      <!-- Hidden file inputs -->
-      <input type="file" id="emoji-multi-input" accept="image/*" multiple hidden />
-      <input type="file" id="result-multi-input" accept="image/*" multiple hidden />
+        <!-- Hidden file inputs -->
+        <input type="file" id="emoji-multi-input" accept="image/*" multiple hidden />
+        <input type="file" id="result-multi-input" accept="image/*" multiple hidden />
 
-      <div class="bt-wrap">
-        <!-- Column headers -->
-        <div class="bt-header">
-          <div class="bt-hcol bt-hcol-emoji"><i class="fa-solid fa-face-smile"></i> Emoji</div>
-          <div class="bt-hcol bt-hcol-fx"><i class="fa-solid fa-wand-magic-sparkles"></i> Hiệu ứng</div>
-          <div class="bt-hcol bt-hcol-result"><i class="fa-solid fa-gift"></i> Kết quả</div>
+        <div class="bt-wrap">
+          <!-- Column headers -->
+          <div class="bt-header">
+            <div class="bt-hcol bt-hcol-emoji"><i class="fa-solid fa-face-smile"></i> Emoji</div>
+            <div class="bt-hcol bt-hcol-fx"><i class="fa-solid fa-wand-magic-sparkles"></i> Hiệu ứng</div>
+            <div class="bt-hcol bt-hcol-result"><i class="fa-solid fa-gift"></i> Kết quả</div>
+          </div>
+          <!-- Dynamic rows rendered by JS -->
+          <div id="blend-table-body"></div>
+          <!-- Empty state hint -->
+          <div class="bt-empty-hint" id="bt-empty-hint">
+            <i class="fa-solid fa-arrow-up-from-bracket"></i>
+            <span>Nhấn <b>+</b> bên dưới để thêm ảnh</span>
+          </div>
+          <!-- Add row -->
+          <div class="bt-add-row" id="bt-add-row">
+            <button class="bt-add-btn" id="bt-add-emoji" title="Thêm emoji">
+              <i class="fa-solid fa-plus"></i>
+            </button>
+            <div class="bt-add-center"></div>
+            <button class="bt-add-btn" id="bt-add-result" title="Thêm kết quả">
+              <i class="fa-solid fa-plus"></i>
+            </button>
+          </div>
         </div>
-        <!-- Dynamic rows rendered by JS -->
-        <div id="blend-table-body"></div>
-        <!-- Empty state hint -->
-        <div class="bt-empty-hint" id="bt-empty-hint">
-          <i class="fa-solid fa-arrow-up-from-bracket"></i>
-          <span>Nhấn <b>+</b> bên dưới để thêm ảnh</span>
-        </div>
-        <!-- Add row -->
-        <div class="bt-add-row" id="bt-add-row">
-          <button class="bt-add-btn" id="bt-add-emoji" title="Thêm emoji">
-            <i class="fa-solid fa-plus"></i>
-          </button>
-          <div class="bt-add-center"></div>
-          <button class="bt-add-btn" id="bt-add-result" title="Thêm kết quả">
-            <i class="fa-solid fa-plus"></i>
-          </button>
-        </div>
-      </div>
       </div> <!-- /#tab-content-blend -->
 
       <!-- TAB 2: POKEMON FUSION CONTENT -->
@@ -111,7 +112,8 @@
 
         <!-- ── Character Upload ── -->
         <div class="section-label"><i class="fa-solid fa-user-astronaut"></i> Ảnh nhân vật gốc</div>
-        <div class="upload-card card-1" id="poke-card-1" onclick="pickPokeCharFile()" style="cursor:pointer; min-height:95px;">
+        <div class="upload-card card-1" id="poke-card-1" onclick="pickPokeCharFile()"
+          style="cursor:pointer; min-height:95px;">
           <input type="file" id="poke-file-char" accept="image/*" hidden />
           <div class="card-empty" id="poke-body-char">
             <div class="empty-icon" style="font-size:1.3rem"><i class="fa-solid fa-user"></i></div>
@@ -119,7 +121,8 @@
           </div>
           <div class="card-preview" id="poke-prev-char" style="display:none">
             <img id="poke-pimg-char" alt="Pokemon Char" />
-            <button class="x-btn" onclick="event.stopPropagation();clearPokeCharSlot()"><i class="fa-solid fa-xmark"></i></button>
+            <button class="x-btn" onclick="event.stopPropagation();clearPokeCharSlot()"><i
+                class="fa-solid fa-xmark"></i></button>
           </div>
         </div>
 
@@ -168,7 +171,8 @@
         <div class="section-label"><i class="fa-solid fa-user-ninja"></i> 3 Trạng thái của nhân vật chính</div>
         <div class="ctrl-card mb-3 p-2">
           <label class="ctrl-lbl mb-1"><i class="fa-solid fa-signature"></i> Tên nhân vật chính</label>
-          <input type="text" class="ctrl-input" id="battle-hero-name" value="JESUS" placeholder="Nhập tên nhân vật chính..." />
+          <input type="text" class="ctrl-input" id="battle-hero-name" value="JESUS"
+            placeholder="Nhập tên nhân vật chính..." />
         </div>
 
         <div class="grid grid-cols-3 gap-2 mb-3">
@@ -182,7 +186,8 @@
             </div>
             <div class="card-preview" id="prev-jesus-1" style="display:none">
               <img id="pimg-jesus-1" alt="Jesus 1" />
-              <button class="x-btn" onclick="event.stopPropagation();clearBattleSlot('jesus-1')"><i class="fa-solid fa-xmark"></i></button>
+              <button class="x-btn" onclick="event.stopPropagation();clearBattleSlot('jesus-1')"><i
+                  class="fa-solid fa-xmark"></i></button>
             </div>
           </div>
 
@@ -196,7 +201,8 @@
             </div>
             <div class="card-preview" id="prev-jesus-2" style="display:none">
               <img id="pimg-jesus-2" alt="Jesus 2" />
-              <button class="x-btn" onclick="event.stopPropagation();clearBattleSlot('jesus-2')"><i class="fa-solid fa-xmark"></i></button>
+              <button class="x-btn" onclick="event.stopPropagation();clearBattleSlot('jesus-2')"><i
+                  class="fa-solid fa-xmark"></i></button>
             </div>
           </div>
 
@@ -210,7 +216,8 @@
             </div>
             <div class="card-preview" id="prev-jesus-3" style="display:none">
               <img id="pimg-jesus-3" alt="Jesus 3" />
-              <button class="x-btn" onclick="event.stopPropagation();clearBattleSlot('jesus-3')"><i class="fa-solid fa-xmark"></i></button>
+              <button class="x-btn" onclick="event.stopPropagation();clearBattleSlot('jesus-3')"><i
+                  class="fa-solid fa-xmark"></i></button>
             </div>
           </div>
         </div>
@@ -226,7 +233,8 @@
           </div>
           <div class="card-preview" id="prev-victory-bg" style="display:none">
             <img id="pimg-victory-bg" alt="Victory BG" />
-            <button class="x-btn" onclick="event.stopPropagation();clearBattleSlot('victory-bg')"><i class="fa-solid fa-xmark"></i></button>
+            <button class="x-btn" onclick="event.stopPropagation();clearBattleSlot('victory-bg')"><i
+                class="fa-solid fa-xmark"></i></button>
           </div>
         </div>
 
@@ -268,7 +276,8 @@
       <!-- TAB 4: PUZZLE GAME CONTENT -->
       <div class="tab-content" id="tab-content-puzzle" style="display:none;">
         <div class="section-label"><i class="fa-solid fa-puzzle-piece"></i> Ảnh Puzzle Gốc</div>
-        <div class="upload-card card-1 mb-3" onclick="document.getElementById('file-puzzle-main').click()" style="cursor:pointer">
+        <div class="upload-card card-1 mb-3" onclick="document.getElementById('file-puzzle-main').click()"
+          style="cursor:pointer">
           <input type="file" id="file-puzzle-main" accept="image/*" hidden />
           <div class="card-tag tag-1"><i class="fa-solid fa-image"></i> Ảnh Puzzle (9 mảnh)</div>
           <div class="card-empty" id="body-puzzle-main">
@@ -277,7 +286,8 @@
           </div>
           <div class="card-preview" id="prev-puzzle-main" style="display:none">
             <img id="pimg-puzzle-main" alt="Puzzle Main" />
-            <button class="x-btn" onclick="event.stopPropagation();clearPuzzleSlot()"><i class="fa-solid fa-xmark"></i></button>
+            <button class="x-btn" onclick="event.stopPropagation();clearPuzzleSlot()"><i
+                class="fa-solid fa-xmark"></i></button>
           </div>
         </div>
 
@@ -299,7 +309,8 @@
           <div class="ctrl-item">
             <label class="ctrl-lbl">💚 Mảnh 1</label>
             <div style="display:flex;align-items:center;gap:8px;">
-              <input type="color" class="ctrl-input-color" id="puzzle-color-1" value="#22c55e" onchange="renderPuzzleGame()" />
+              <input type="color" class="ctrl-input-color" id="puzzle-color-1" value="#22c55e"
+                onchange="renderPuzzleGame()" />
               <label style="font-size:0.75rem;color:#94a3b8;">Tô màu</label>
               <input type="checkbox" id="puzzle-color-1-enable" checked onchange="handlePuzzleColorToggle(0)" />
             </div>
@@ -307,7 +318,8 @@
           <div class="ctrl-item">
             <label class="ctrl-lbl">💛 Mảnh 2</label>
             <div style="display:flex;align-items:center;gap:8px;">
-              <input type="color" class="ctrl-input-color" id="puzzle-color-2" value="#eab308" onchange="renderPuzzleGame()" />
+              <input type="color" class="ctrl-input-color" id="puzzle-color-2" value="#eab308"
+                onchange="renderPuzzleGame()" />
               <label style="font-size:0.75rem;color:#94a3b8;">Tô màu</label>
               <input type="checkbox" id="puzzle-color-2-enable" onchange="handlePuzzleColorToggle(1)" />
             </div>
@@ -315,7 +327,8 @@
           <div class="ctrl-item">
             <label class="ctrl-lbl">💗 Mảnh 3</label>
             <div style="display:flex;align-items:center;gap:8px;">
-              <input type="color" class="ctrl-input-color" id="puzzle-color-3" value="#ec4899" onchange="renderPuzzleGame()" />
+              <input type="color" class="ctrl-input-color" id="puzzle-color-3" value="#ec4899"
+                onchange="renderPuzzleGame()" />
               <label style="font-size:0.75rem;color:#94a3b8;">Tô màu</label>
               <input type="checkbox" id="puzzle-color-3-enable" checked onchange="handlePuzzleColorToggle(2)" />
             </div>
@@ -331,10 +344,11 @@
 
       <!-- TAB 5: FLASHLIGHT / SOI ĐÈN CONTENT -->
       <div class="tab-content" id="tab-content-flashlight" style="display:none;">
-        
+
         <!-- Multi-image Upload Card -->
         <div class="section-label"><i class="fa-solid fa-images"></i> Tải lên 2 hình ảnh (Chọn cùng lúc 2 ảnh)</div>
-        <div class="upload-card card-1 mb-3" onclick="document.getElementById('file-fl-multi').click()" style="cursor:pointer">
+        <div class="upload-card card-1 mb-3" onclick="document.getElementById('file-fl-multi').click()"
+          style="cursor:pointer">
           <input type="file" id="file-fl-multi" accept="image/*" multiple hidden />
           <div class="card-tag tag-1"><i class="fa-solid fa-cloud-arrow-up"></i> Chọn 2 ảnh PNG/JPG</div>
           <div class="card-empty" id="body-fl-multi">
@@ -343,16 +357,23 @@
           </div>
           <div class="card-preview" id="prev-fl-multi" style="display:none">
             <div style="display:flex;gap:8px;justify-content:center;align-items:center;width:100%;">
-              <div style="position:relative;width:45%;height:70px;border-radius:8px;overflow:hidden;background:#0f172a;">
+              <div
+                style="position:relative;width:45%;height:70px;border-radius:8px;overflow:hidden;background:#0f172a;">
                 <img id="pimg-fl-1" alt="Ảnh 1" style="width:100%;height:100%;object-fit:contain;" />
-                <span style="position:absolute;bottom:2px;left:4px;font-size:0.65rem;background:rgba(0,0,0,0.7);color:#fff;padding:1px 4px;border-radius:4px;">1. Trái</span>
+                <span
+                  style="position:absolute;bottom:2px;left:4px;font-size:0.65rem;background:rgba(0,0,0,0.7);color:#fff;padding:1px 4px;border-radius:4px;">1.
+                  Trái</span>
               </div>
-              <div style="position:relative;width:45%;height:70px;border-radius:8px;overflow:hidden;background:#0f172a;">
+              <div
+                style="position:relative;width:45%;height:70px;border-radius:8px;overflow:hidden;background:#0f172a;">
                 <img id="pimg-fl-2" alt="Ảnh 2" style="width:100%;height:100%;object-fit:contain;" />
-                <span style="position:absolute;bottom:2px;left:4px;font-size:0.65rem;background:rgba(0,0,0,0.7);color:#fff;padding:1px 4px;border-radius:4px;">2. Phải</span>
+                <span
+                  style="position:absolute;bottom:2px;left:4px;font-size:0.65rem;background:rgba(0,0,0,0.7);color:#fff;padding:1px 4px;border-radius:4px;">2.
+                  Phải</span>
               </div>
             </div>
-            <button class="x-btn" onclick="event.stopPropagation();clearFlashlightMulti()"><i class="fa-solid fa-xmark"></i></button>
+            <button class="x-btn" onclick="event.stopPropagation();clearFlashlightMulti()"><i
+                class="fa-solid fa-xmark"></i></button>
           </div>
         </div>
 
@@ -374,21 +395,16 @@
           </select>
         </div>
 
-        <!-- Independent Angles Configuration -->
-        <div class="section-label"><i class="fa-solid fa-compass"></i> Tinh chỉnh góc Đèn & Ánh sáng riêng</div>
+        <!-- Flashlight Radius / Beam Width Configuration -->
+        <div class="section-label"><i class="fa-solid fa-expand"></i> Độ rộng vệt sáng</div>
         <div class="ctrl-card mb-3">
           <div class="ctrl-item">
-            <label class="ctrl-lbl">Góc xoay chiếc Đèn Pin</label>
+            <label class="ctrl-lbl">Kích thước vệt sáng (Bán kính)</label>
             <div style="display:flex;align-items:center;gap:8px;">
-              <input type="range" id="fl-torch-angle-range" min="-180" max="180" value="-135" oninput="updateTorchAngle(this.value)" style="width:110px;" />
-              <span id="fl-torch-angle-val" style="font-size:0.8rem;font-weight:700;color:#6366f1;width:45px;text-align:right;">-135°</span>
-            </div>
-          </div>
-          <div class="ctrl-item">
-            <label class="ctrl-lbl">Góc tỏa luồng Ánh sáng</label>
-            <div style="display:flex;align-items:center;gap:8px;">
-              <input type="range" id="fl-beam-angle-range" min="-180" max="180" value="-135" oninput="updateBeamAngle(this.value)" style="width:110px;" />
-              <span id="fl-beam-angle-val" style="font-size:0.8rem;font-weight:700;color:#6366f1;width:45px;text-align:right;">-135°</span>
+              <input type="range" id="fl-radius-range" min="10" max="200" value="65"
+                oninput="updateFlashlightRadius(this.value)" style="width:110px;" />
+              <span id="fl-radius-val"
+                style="font-size:0.8rem;font-weight:700;color:#6366f1;width:45px;text-align:right;">65px</span>
             </div>
           </div>
         </div>
@@ -399,11 +415,13 @@
           <div class="grid grid-cols-2 gap-2">
             <div>
               <label class="ctrl-lbl" style="font-size:0.75rem;">Emoji Ảnh 1 (Trái)</label>
-              <input type="text" class="ctrl-input" id="fl-emoji-1-input" value="💙" placeholder="Emoji 1 (VD: 💙, 🔥)" onchange="renderFlashlightTab()" style="text-align:center;font-size:1.1rem;" />
+              <input type="text" class="ctrl-input" id="fl-emoji-1-input" value="💙" placeholder="Emoji 1 (VD: 💙, 🔥)"
+                onchange="renderFlashlightTab()" style="text-align:center;font-size:1.1rem;" />
             </div>
             <div>
               <label class="ctrl-lbl" style="font-size:0.75rem;">Emoji Ảnh 2 (Phải)</label>
-              <input type="text" class="ctrl-input" id="fl-emoji-2-input" value="❤️" placeholder="Emoji 2 (VD: ❤️, ⭐)" onchange="renderFlashlightTab()" style="text-align:center;font-size:1.1rem;" />
+              <input type="text" class="ctrl-input" id="fl-emoji-2-input" value="❤️" placeholder="Emoji 2 (VD: ❤️, ⭐)"
+                onchange="renderFlashlightTab()" style="text-align:center;font-size:1.1rem;" />
             </div>
           </div>
         </div>
@@ -563,11 +581,13 @@
             <div class="flashlight-top-row" id="flashlight-top-row">
               <div class="fl-card" id="fl-card-1">
                 <div class="fl-card-wrap"><canvas id="fl-cvs-top-1" width="150" height="150"></canvas></div>
-                <div class="fl-badge fl-badge-like" id="fl-badge-1"><i class="fa-solid fa-thumbs-up"></i> LIKE <span id="fl-badge-emoji-1">💙</span></div>
+                <div class="fl-badge fl-badge-like" id="fl-badge-1"><i class="fa-solid fa-thumbs-up"></i> LIKE <span
+                    id="fl-badge-emoji-1">💙</span></div>
               </div>
               <div class="fl-card" id="fl-card-2">
                 <div class="fl-card-wrap"><canvas id="fl-cvs-top-2" width="150" height="150"></canvas></div>
-                <div class="fl-badge fl-badge-sub" id="fl-badge-2"><i class="fa-solid fa-bell"></i> SUBSCRIBE <span id="fl-badge-emoji-2">❤️</span></div>
+                <div class="fl-badge fl-badge-sub" id="fl-badge-2"><i class="fa-solid fa-bell"></i> SUBSCRIBE <span
+                    id="fl-badge-emoji-2">❤️</span></div>
               </div>
             </div>
 
@@ -576,8 +596,7 @@
               <canvas id="fl-color-canvas" class="fl-layer-color" width="360" height="420"></canvas>
               <canvas id="fl-mask-canvas" class="fl-layer-mask" width="360" height="420"></canvas>
               <div id="fl-beam-ring" class="fl-beam-ring"></div>
-              <!-- Torch PNG Follower Element -->
-              <div id="fl-torch-icon" class="fl-torch-icon"><img id="fl-torch-img" src="flashlight.png" alt="Flashlight Torch" /></div>
+
             </div>
           </div>
 
@@ -608,10 +627,8 @@
             <label class="ctrl-lbl"><i class="fa-solid fa-circle-question"></i> Question / Câu hỏi <span
                 class="hint-sub">(Tiếng Anh)</span></label>
             <div class="question-input-wrap">
-              <input type="text" class="ctrl-input" id="final-question-input"
-                value="VOTE FOR YOUR FAVORITE VERSION!"
-                placeholder="VOTE FOR YOUR FAVORITE VERSION!"
-                list="question-suggestions" autocomplete="off" />
+              <input type="text" class="ctrl-input" id="final-question-input" value="VOTE FOR YOUR FAVORITE VERSION!"
+                placeholder="VOTE FOR YOUR FAVORITE VERSION!" list="question-suggestions" autocomplete="off" />
               <button class="question-suggest-btn" id="question-suggest-btn" title="Gợi ý câu hỏi">
                 <i class="fa-solid fa-lightbulb"></i>
               </button>
@@ -620,7 +637,8 @@
               <button class="q-chip" onclick="applyQuestion(this)">Which version do you like most?</button>
               <button class="q-chip" onclick="applyQuestion(this)">Please help me choose a character!</button>
               <button class="q-chip" onclick="applyQuestion(this)">Which hero would you pick?</button>
-              <button class="q-chip q-chip-active" onclick="applyQuestion(this)">Vote for your favorite version!</button>
+              <button class="q-chip q-chip-active" onclick="applyQuestion(this)">Vote for your favorite
+                version!</button>
               <button class="q-chip" onclick="applyQuestion(this)">Who should be the final boss?</button>
               <button class="q-chip" onclick="applyQuestion(this)">Which outfit suits them best?</button>
               <button class="q-chip" onclick="applyQuestion(this)">Comment your choice below!</button>
@@ -650,7 +668,8 @@
           <div class="ctrl-item">
             <label class="ctrl-lbl"><i class="fa-solid fa-bolt"></i> Tốc độ blend <span class="ctrl-num"
                 id="val-speed">7</span></label>
-            <input type="range" class="ctrl-range" id="sl-speed" min="1" max="10" value="7" oninput="syncVal('speed')" />
+            <input type="range" class="ctrl-range" id="sl-speed" min="1" max="10" value="7"
+              oninput="syncVal('speed')" />
           </div>
         </div>
 
@@ -660,8 +679,11 @@
           <button class="act-btn act-blend" id="btn-blend" onclick="runBlend()"><i
               class="fa-solid fa-wand-magic-sparkles"></i> Bắt đầu Blend</button>
           <div class="action-row-sm">
-            <button class="act-btn act-reset" onclick="resetAll()"><i class="fa-solid fa-rotate-left"></i> Reset</button>
-            <button class="act-btn act-clear" onclick="clearAllUploadedImages()" title="Xóa tất cả ảnh đã tải lên (Nhân vật, Emoji, Kết quả)"><i class="fa-solid fa-trash-can"></i> Dọn dẹp</button>
+            <button class="act-btn act-reset" onclick="resetAll()"><i class="fa-solid fa-rotate-left"></i>
+              Reset</button>
+            <button class="act-btn act-clear" onclick="clearAllUploadedImages()"
+              title="Xóa tất cả ảnh đã tải lên (Nhân vật, Emoji, Kết quả)"><i class="fa-solid fa-trash-can"></i> Dọn
+              dẹp</button>
             <button class="act-btn act-dl" id="btn-dl" style="display:none" onclick="downloadFinal()"><i
                 class="fa-solid fa-download"></i> Tải xuống</button>
           </div>
@@ -681,8 +703,10 @@
             </select>
           </div>
           <div class="ctrl-item" style="margin-top:10px;">
-            <label class="ctrl-lbl"><i class="fa-solid fa-comment-dots"></i> Dòng thông báo / Câu hỏi (Hỗ trợ xuống dòng)</label>
-            <textarea class="ctrl-input" id="poke-question-input" rows="3" style="resize:vertical; min-height:60px;" placeholder="Dòng 1: HOW MUCH POWER DOES THIS POKEMON CARD DESERVE?
+            <label class="ctrl-lbl"><i class="fa-solid fa-comment-dots"></i> Dòng thông báo / Câu hỏi (Hỗ trợ xuống
+              dòng)</label>
+            <textarea class="ctrl-input" id="poke-question-input" rows="3" style="resize:vertical; min-height:60px;"
+              placeholder="Dòng 1: HOW MUCH POWER DOES THIS POKEMON CARD DESERVE?
 Dòng 2: LET ME KNOW IN THE COMMENTS!">HOW MUCH POWER DOES THIS POKEMON CARD DESERVE?
 LET ME KNOW IN THE COMMENTS!</textarea>
           </div>
@@ -690,9 +714,11 @@ LET ME KNOW IN THE COMMENTS!</textarea>
 
         <div class="section-label" style="margin-top:10px;"><i class="fa-solid fa-play"></i> Điều khiển</div>
         <div class="action-col">
-          <button class="act-btn act-blend" id="btn-poke-blend-side" onclick="runPokeBlend()"><i class="fa-solid fa-bolt"></i> Tạo Thẻ Pokemon</button>
+          <button class="act-btn act-blend" id="btn-poke-blend-side" onclick="runPokeBlend()"><i
+              class="fa-solid fa-bolt"></i> Tạo Thẻ Pokemon</button>
           <div class="action-row-sm">
-            <button class="act-btn act-reset" onclick="resetAll()"><i class="fa-solid fa-rotate-left"></i> Reset</button>
+            <button class="act-btn act-reset" onclick="resetAll()"><i class="fa-solid fa-rotate-left"></i>
+              Reset</button>
           </div>
         </div>
       </div> <!-- /#right-tab-content-pokemon -->
@@ -713,9 +739,11 @@ LET ME KNOW IN THE COMMENTS!</textarea>
 
         <div class="section-label" style="margin-top:10px;"><i class="fa-solid fa-play"></i> Điều khiển</div>
         <div class="action-col">
-          <button class="act-btn act-blend" id="btn-battle-run-side" onclick="runBattleSolo()"><i class="fa-solid fa-shield-halved"></i> Bắt đầu Battle</button>
+          <button class="act-btn act-blend" id="btn-battle-run-side" onclick="runBattleSolo()"><i
+              class="fa-solid fa-shield-halved"></i> Bắt đầu Battle</button>
           <div class="action-row-sm">
-            <button class="act-btn act-reset" onclick="resetBattleSolo()"><i class="fa-solid fa-rotate-left"></i> Reset</button>
+            <button class="act-btn act-reset" onclick="resetBattleSolo()"><i class="fa-solid fa-rotate-left"></i>
+              Reset</button>
           </div>
         </div>
       </div> <!-- /#right-tab-content-battle -->
