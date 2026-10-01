@@ -37,7 +37,7 @@
           <i class="fa-solid fa-wand-magic-sparkles"></i> Hòa trộn Emoji
         </button>
         <button class="tab-btn" id="tab-btn-pokemon" onclick="switchTab('pokemon')">
-          <i class="fa-solid fa-bolt"></i> Pokemon Card Fusion
+          <i class="fa-solid fa-bolt"></i> Pokemon Card
         </button>
       </div>
 
@@ -99,8 +99,10 @@
 
       <!-- TAB 2: POKEMON FUSION CONTENT -->
       <div class="tab-content" id="tab-content-pokemon" style="display:none">
-        <div class="section-label"><i class="fa-solid fa-user-ninja"></i> 1. Ảnh Nhân Vật</div>
-        <div class="upload-card card-1" id="poke-card-char" onclick="pickPokeFile('char')" style="cursor:pointer; min-height:95px;">
+
+        <!-- ── Character Upload ── -->
+        <div class="section-label"><i class="fa-solid fa-user-astronaut"></i> Ảnh nhân vật gốc</div>
+        <div class="upload-card card-1" id="poke-card-1" onclick="pickPokeCharFile()" style="cursor:pointer; min-height:95px;">
           <input type="file" id="poke-file-char" accept="image/*" hidden />
           <div class="card-empty" id="poke-body-char">
             <div class="empty-icon" style="font-size:1.3rem"><i class="fa-solid fa-user"></i></div>
@@ -108,39 +110,46 @@
           </div>
           <div class="card-preview" id="poke-prev-char" style="display:none">
             <img id="poke-pimg-char" alt="Pokemon Char" />
-            <button class="x-btn" onclick="event.stopPropagation();clearPokeSlot('char')"><i class="fa-solid fa-xmark"></i></button>
+            <button class="x-btn" onclick="event.stopPropagation();clearPokeCharSlot()"><i class="fa-solid fa-xmark"></i></button>
           </div>
         </div>
 
-        <div class="section-label" style="margin-top:8px;"><i class="fa-solid fa-dragon"></i> 2. Ảnh Pokemon</div>
-        <div class="upload-card card-2" id="poke-card-poke" onclick="pickPokeFile('poke')" style="cursor:pointer; min-height:95px;">
-          <input type="file" id="poke-file-poke" accept="image/*" hidden />
-          <div class="card-empty" id="poke-body-poke">
-            <div class="empty-icon" style="font-size:1.3rem"><i class="fa-solid fa-volcano"></i></div>
-            <div class="empty-hint">Chọn ảnh Pokemon</div>
+        <!-- ── Pokemon Blend Table (2 cột: Pokemon Monster | Thẻ Pokemon kết quả) ── -->
+        <div class="section-label" style="margin-top:8px;">
+          <i class="fa-solid fa-layer-group"></i> Các cặp thẻ Pokemon lai
+          <span class="gallery-count" id="poke-steps-count"></span>
+        </div>
+
+        <!-- Hidden file inputs for Pokemon Tab -->
+        <input type="file" id="poke-monster-multi-input" accept="image/*" multiple hidden />
+        <input type="file" id="poke-card-multi-input" accept="image/*" multiple hidden />
+
+        <div class="bt-wrap">
+          <!-- Column headers -->
+          <div class="bt-header">
+            <div class="bt-hcol bt-hcol-emoji"><i class="fa-solid fa-dragon"></i> Pokemon</div>
+            <div class="bt-hcol bt-hcol-fx"><i class="fa-solid fa-wand-magic-sparkles"></i> FX</div>
+            <div class="bt-hcol bt-hcol-result"><i class="fa-solid fa-id-card"></i> Thẻ kết quả</div>
           </div>
-          <div class="card-preview" id="poke-prev-poke" style="display:none">
-            <img id="poke-pimg-poke" alt="Pokemon monster" />
-            <button class="x-btn" onclick="event.stopPropagation();clearPokeSlot('poke')"><i class="fa-solid fa-xmark"></i></button>
+          <!-- Dynamic rows rendered by JS -->
+          <div id="poke-blend-table-body"></div>
+          <!-- Empty state hint -->
+          <div class="bt-empty-hint" id="poke-bt-empty-hint">
+            <i class="fa-solid fa-arrow-up-from-bracket"></i>
+            <span>Nhấn <b>+</b> bên dưới để thêm ảnh Pokemon & Thẻ</span>
+          </div>
+          <!-- Add row -->
+          <div class="bt-add-row" id="poke-bt-add-row">
+            <button class="bt-add-btn" id="poke-bt-add-monster" title="Thêm ảnh Pokemon">
+              <i class="fa-solid fa-plus"></i>
+            </button>
+            <div class="bt-add-center"></div>
+            <button class="bt-add-btn" id="poke-bt-add-card" title="Thêm ảnh Thẻ Pokemon">
+              <i class="fa-solid fa-plus"></i>
+            </button>
           </div>
         </div>
 
-        <div class="section-label" style="margin-top:8px;"><i class="fa-solid fa-id-card"></i> 3. Ảnh Thẻ Pokemon Lai Kết Quả</div>
-        <div class="upload-card card-3" id="poke-card-result" onclick="pickPokeFile('result')" style="cursor:pointer; min-height:95px;">
-          <input type="file" id="poke-file-result" accept="image/*" hidden />
-          <div class="card-empty" id="poke-body-result">
-            <div class="empty-icon" style="font-size:1.3rem"><i class="fa-solid fa-gift"></i></div>
-            <div class="empty-hint">Ảnh thẻ Pokemon lai (chưa có HP/Stats)</div>
-          </div>
-          <div class="card-preview" id="poke-prev-result" style="display:none">
-            <img id="poke-pimg-result" alt="Pokemon card result" />
-            <button class="x-btn" onclick="event.stopPropagation();clearPokeSlot('result')"><i class="fa-solid fa-xmark"></i></button>
-          </div>
-        </div>
-
-        <div class="action-col" style="margin-top:10px;">
-          <button class="act-btn act-blend" id="btn-poke-blend" onclick="runPokeBlend()"><i class="fa-solid fa-bolt"></i> Tạo Thẻ Pokemon</button>
-        </div>
       </div> <!-- /#tab-content-pokemon -->
 
     </aside>
@@ -195,7 +204,7 @@
           <!-- Step label overlay -->
           <div class="step-label-overlay" id="step-label-overlay"></div>
 
-          <!-- Pokemon Card Reveal Overlay -->
+          <!-- Pokemon Card Reveal Overlay (Single Card View during step) -->
           <div class="poke-card-overlay" id="poke-card-overlay">
             <div class="poke-card-full-container" id="poke-card-shell">
               <img id="poke-card-art-img" class="poke-card-full-img" src="" alt="Pokemon Card" />
@@ -203,6 +212,16 @@
             </div>
             <!-- Interactive Question Overlay Text Outside Card -->
             <div class="poke-card-question-box" id="poke-card-question-display">
+              HOW MUCH POWER DOES THIS POKEMON CARD DESERVE? LET ME KNOW IN THE COMMENTS!
+            </div>
+          </div>
+
+          <!-- Pokemon Card Fan-out End Screen Overlay -->
+          <div class="poke-fan-screen-overlay" id="poke-fan-screen-overlay">
+            <div class="poke-fan-cards-container" id="poke-fan-cards-container">
+              <!-- Dynamically populated card deck -->
+            </div>
+            <div class="poke-card-question-box" id="poke-fan-question-display">
               HOW MUCH POWER DOES THIS POKEMON CARD DESERVE? LET ME KNOW IN THE COMMENTS!
             </div>
           </div>
@@ -299,6 +318,14 @@
         <div class="section-label"><i class="fa-solid fa-pen-to-square"></i> Tùy chỉnh thẻ Pokemon</div>
         <div class="ctrl-card" style="padding:12px;">
           <div class="ctrl-item">
+            <label class="ctrl-lbl"><i class="fa-solid fa-tags"></i> Badge Type / Loại nhãn</label>
+            <select class="ctrl-select" id="poke-badge-type-select" onchange="refreshEmojiHeader()">
+              <option value="numbers" selected>Numbers (1, 2, 3, 4)</option>
+              <option value="actions">Actions (Like / Comment / Share / Subscribe)</option>
+              <option value="hearts">Hearts (#1, #2, #3, #4)</option>
+            </select>
+          </div>
+          <div class="ctrl-item" style="margin-top:10px;">
             <label class="ctrl-lbl"><i class="fa-solid fa-comment-dots"></i> Dòng thông báo / Câu hỏi (Hỗ trợ xuống dòng)</label>
             <textarea class="ctrl-input" id="poke-question-input" rows="3" style="resize:vertical; min-height:60px;" placeholder="Dòng 1: HOW MUCH POWER DOES THIS POKEMON CARD DESERVE?
 Dòng 2: LET ME KNOW IN THE COMMENTS!">HOW MUCH POWER DOES THIS POKEMON CARD DESERVE?
