@@ -28,9 +28,21 @@
           <span class="logo-icon"><i class="fa-solid fa-hurricane"></i></span>
           <span class="logo-text">Marble<span class="logo-accent">Blend</span></span>
         </div>
-        <p class="header-sub">Chọn nhân vật · Thêm 1-4 emoji · Nhấn Blend <i
-            class="fa-solid fa-wand-magic-sparkles"></i></p>
+        <p class="header-sub">Hòa trộn hình ảnh & Tạo thẻ Pokemon ✨</p>
       </div>
+
+      <!-- ── Tab Navigation ── -->
+      <div class="tab-nav-container mb-2">
+        <button class="tab-btn active" id="tab-btn-blend" onclick="switchTab('blend')">
+          <i class="fa-solid fa-wand-magic-sparkles"></i> Hòa trộn Emoji
+        </button>
+        <button class="tab-btn" id="tab-btn-pokemon" onclick="switchTab('pokemon')">
+          <i class="fa-solid fa-bolt"></i> Pokemon Card Fusion
+        </button>
+      </div>
+
+      <!-- TAB 1: EMOJI BLEND CONTENT -->
+      <div class="tab-content" id="tab-content-blend">
 
       <!-- ── Character Upload ── -->
       <div class="section-label"><i class="fa-solid fa-user-astronaut"></i> Ảnh nhân vật gốc</div>
@@ -83,6 +95,53 @@
           </button>
         </div>
       </div>
+      </div> <!-- /#tab-content-blend -->
+
+      <!-- TAB 2: POKEMON FUSION CONTENT -->
+      <div class="tab-content" id="tab-content-pokemon" style="display:none">
+        <div class="section-label"><i class="fa-solid fa-user-ninja"></i> 1. Ảnh Nhân Vật</div>
+        <div class="upload-card card-1" id="poke-card-char" onclick="pickPokeFile('char')" style="cursor:pointer; min-height:95px;">
+          <input type="file" id="poke-file-char" accept="image/*" hidden />
+          <div class="card-empty" id="poke-body-char">
+            <div class="empty-icon" style="font-size:1.3rem"><i class="fa-solid fa-user"></i></div>
+            <div class="empty-hint">Chọn ảnh nhân vật</div>
+          </div>
+          <div class="card-preview" id="poke-prev-char" style="display:none">
+            <img id="poke-pimg-char" alt="Pokemon Char" />
+            <button class="x-btn" onclick="event.stopPropagation();clearPokeSlot('char')"><i class="fa-solid fa-xmark"></i></button>
+          </div>
+        </div>
+
+        <div class="section-label" style="margin-top:8px;"><i class="fa-solid fa-dragon"></i> 2. Ảnh Pokemon</div>
+        <div class="upload-card card-2" id="poke-card-poke" onclick="pickPokeFile('poke')" style="cursor:pointer; min-height:95px;">
+          <input type="file" id="poke-file-poke" accept="image/*" hidden />
+          <div class="card-empty" id="poke-body-poke">
+            <div class="empty-icon" style="font-size:1.3rem"><i class="fa-solid fa-volcano"></i></div>
+            <div class="empty-hint">Chọn ảnh Pokemon</div>
+          </div>
+          <div class="card-preview" id="poke-prev-poke" style="display:none">
+            <img id="poke-pimg-poke" alt="Pokemon monster" />
+            <button class="x-btn" onclick="event.stopPropagation();clearPokeSlot('poke')"><i class="fa-solid fa-xmark"></i></button>
+          </div>
+        </div>
+
+        <div class="section-label" style="margin-top:8px;"><i class="fa-solid fa-id-card"></i> 3. Ảnh Thẻ Pokemon Lai Kết Quả</div>
+        <div class="upload-card card-3" id="poke-card-result" onclick="pickPokeFile('result')" style="cursor:pointer; min-height:95px;">
+          <input type="file" id="poke-file-result" accept="image/*" hidden />
+          <div class="card-empty" id="poke-body-result">
+            <div class="empty-icon" style="font-size:1.3rem"><i class="fa-solid fa-gift"></i></div>
+            <div class="empty-hint">Ảnh thẻ Pokemon lai (chưa có HP/Stats)</div>
+          </div>
+          <div class="card-preview" id="poke-prev-result" style="display:none">
+            <img id="poke-pimg-result" alt="Pokemon card result" />
+            <button class="x-btn" onclick="event.stopPropagation();clearPokeSlot('result')"><i class="fa-solid fa-xmark"></i></button>
+          </div>
+        </div>
+
+        <div class="action-col" style="margin-top:10px;">
+          <button class="act-btn act-blend" id="btn-poke-blend" onclick="runPokeBlend()"><i class="fa-solid fa-bolt"></i> Tạo Thẻ Pokemon</button>
+        </div>
+      </div> <!-- /#tab-content-pokemon -->
 
     </aside>
 
@@ -136,6 +195,18 @@
           <!-- Step label overlay -->
           <div class="step-label-overlay" id="step-label-overlay"></div>
 
+          <!-- Pokemon Card Reveal Overlay -->
+          <div class="poke-card-overlay" id="poke-card-overlay">
+            <div class="poke-card-full-container" id="poke-card-shell">
+              <img id="poke-card-art-img" class="poke-card-full-img" src="" alt="Pokemon Card" />
+              <div class="poke-card-art-shine"></div>
+            </div>
+            <!-- Interactive Question Overlay Text Outside Card -->
+            <div class="poke-card-question-box" id="poke-card-question-display">
+              HOW MUCH POWER DOES THIS POKEMON CARD DESERVE? LET ME KNOW IN THE COMMENTS!
+            </div>
+          </div>
+
         </div><!-- .theater -->
       </div>
     </main>
@@ -154,71 +225,95 @@
         <p class="header-sub">Hiệu ứng • Final screen • Tải xuống</p>
       </div>
 
-      <!-- ── Final Screen Settings ── -->
-      <div class="section-label"><i class="fa-solid fa-square-poll-vertical"></i> Final Screen / Màn kết thúc</div>
-      <div class="ctrl-card">
-        <div class="ctrl-item">
-          <label class="ctrl-lbl"><i class="fa-solid fa-circle-question"></i> Question / Câu hỏi <span
-              class="hint-sub">(Tiếng Anh)</span></label>
-          <div class="question-input-wrap">
-            <input type="text" class="ctrl-input" id="final-question-input"
-              value="VOTE FOR YOUR FAVORITE VERSION!"
-              placeholder="VOTE FOR YOUR FAVORITE VERSION!"
-              list="question-suggestions" autocomplete="off" />
-            <button class="question-suggest-btn" id="question-suggest-btn" title="Gợi ý câu hỏi">
-              <i class="fa-solid fa-lightbulb"></i>
-            </button>
+      <!-- RIGHT SIDEBAR CONTENT: TAB 1 (BLEND) -->
+      <div class="right-tab-content" id="right-tab-content-blend">
+        <!-- ── Final Screen Settings ── -->
+        <div class="section-label"><i class="fa-solid fa-square-poll-vertical"></i> Final Screen / Màn kết thúc</div>
+        <div class="ctrl-card">
+          <div class="ctrl-item">
+            <label class="ctrl-lbl"><i class="fa-solid fa-circle-question"></i> Question / Câu hỏi <span
+                class="hint-sub">(Tiếng Anh)</span></label>
+            <div class="question-input-wrap">
+              <input type="text" class="ctrl-input" id="final-question-input"
+                value="VOTE FOR YOUR FAVORITE VERSION!"
+                placeholder="VOTE FOR YOUR FAVORITE VERSION!"
+                list="question-suggestions" autocomplete="off" />
+              <button class="question-suggest-btn" id="question-suggest-btn" title="Gợi ý câu hỏi">
+                <i class="fa-solid fa-lightbulb"></i>
+              </button>
+            </div>
+            <div class="question-chips" id="question-chips">
+              <button class="q-chip" onclick="applyQuestion(this)">Which version do you like most?</button>
+              <button class="q-chip" onclick="applyQuestion(this)">Please help me choose a character!</button>
+              <button class="q-chip" onclick="applyQuestion(this)">Which hero would you pick?</button>
+              <button class="q-chip q-chip-active" onclick="applyQuestion(this)">Vote for your favorite version!</button>
+              <button class="q-chip" onclick="applyQuestion(this)">Who should be the final boss?</button>
+              <button class="q-chip" onclick="applyQuestion(this)">Which outfit suits them best?</button>
+              <button class="q-chip" onclick="applyQuestion(this)">Comment your choice below!</button>
+              <button class="q-chip" onclick="applyQuestion(this)">Which power-up is the strongest?</button>
+            </div>
           </div>
-          <div class="question-chips" id="question-chips">
-            <button class="q-chip" onclick="applyQuestion(this)">Which version do you like most?</button>
-            <button class="q-chip" onclick="applyQuestion(this)">Please help me choose a character!</button>
-            <button class="q-chip" onclick="applyQuestion(this)">Which hero would you pick?</button>
-            <button class="q-chip q-chip-active" onclick="applyQuestion(this)">Vote for your favorite version!</button>
-            <button class="q-chip" onclick="applyQuestion(this)">Who should be the final boss?</button>
-            <button class="q-chip" onclick="applyQuestion(this)">Which outfit suits them best?</button>
-            <button class="q-chip" onclick="applyQuestion(this)">Comment your choice below!</button>
-            <button class="q-chip" onclick="applyQuestion(this)">Which power-up is the strongest?</button>
+          <div class="ctrl-item">
+            <label class="ctrl-lbl"><i class="fa-solid fa-tags"></i> Badge Type / Loại nhãn</label>
+            <select class="ctrl-select" id="badge-type-select" onchange="refreshEmojiHeader()">
+              <option value="actions">Actions (Like / Comment / Share / Subscribe)</option>
+              <option value="numbers">Numbers (1, 2, 3, 4)</option>
+              <option value="hearts">Hearts (#1, #2, #3, #4)</option>
+            </select>
           </div>
         </div>
-        <div class="ctrl-item">
-          <label class="ctrl-lbl"><i class="fa-solid fa-tags"></i> Badge Type / Loại nhãn</label>
-          <select class="ctrl-select" id="badge-type-select" onchange="refreshEmojiHeader()">
-            <option value="actions">Actions (Like / Comment / Share / Subscribe)</option>
-            <option value="numbers">Numbers (1, 2, 3, 4)</option>
-            <option value="hearts">Hearts (#1, #2, #3, #4)</option>
-          </select>
-        </div>
-      </div>
 
-      <!-- ── Effect Controls ── -->
-      <div class="section-label" style="margin-top:6px;"><i class="fa-solid fa-wand-magic-sparkles"></i> Cài đặt hiệu
-        ứng</div>
-      <div class="ctrl-card">
-        <div class="ctrl-item">
-          <label class="ctrl-lbl"><i class="fa-solid fa-hurricane"></i> Cường độ xoáy <span class="ctrl-num"
-              id="val-swirl">100</span></label>
-          <input type="range" class="ctrl-range" id="sl-swirl" min="10" max="100" value="100"
-            oninput="syncVal('swirl')" />
+        <!-- ── Effect Controls ── -->
+        <div class="section-label" style="margin-top:6px;"><i class="fa-solid fa-wand-magic-sparkles"></i> Cài đặt hiệu
+          ứng</div>
+        <div class="ctrl-card">
+          <div class="ctrl-item">
+            <label class="ctrl-lbl"><i class="fa-solid fa-hurricane"></i> Cường độ xoáy <span class="ctrl-num"
+                id="val-swirl">100</span></label>
+            <input type="range" class="ctrl-range" id="sl-swirl" min="10" max="100" value="100"
+              oninput="syncVal('swirl')" />
+          </div>
+          <div class="ctrl-item">
+            <label class="ctrl-lbl"><i class="fa-solid fa-bolt"></i> Tốc độ blend <span class="ctrl-num"
+                id="val-speed">7</span></label>
+            <input type="range" class="ctrl-range" id="sl-speed" min="1" max="10" value="7" oninput="syncVal('speed')" />
+          </div>
         </div>
-        <div class="ctrl-item">
-          <label class="ctrl-lbl"><i class="fa-solid fa-bolt"></i> Tốc độ blend <span class="ctrl-num"
-              id="val-speed">7</span></label>
-          <input type="range" class="ctrl-range" id="sl-speed" min="1" max="10" value="7" oninput="syncVal('speed')" />
-        </div>
-      </div>
 
-      <!-- ── Action Buttons ── -->
-      <div class="section-label" style="margin-top:6px;"><i class="fa-solid fa-play"></i> Điều khiển</div>
-      <div class="action-col">
-        <button class="act-btn act-blend" id="btn-blend" onclick="runBlend()"><i
-            class="fa-solid fa-wand-magic-sparkles"></i> Bắt đầu Blend</button>
-        <div class="action-row-sm">
-          <button class="act-btn act-reset" onclick="resetAll()"><i class="fa-solid fa-rotate-left"></i> Reset</button>
-          <button class="act-btn act-clear" onclick="clearAllUploadedImages()" title="Xóa tất cả ảnh đã tải lên (Nhân vật, Emoji, Kết quả)"><i class="fa-solid fa-trash-can"></i> Dọn dẹp</button>
-          <button class="act-btn act-dl" id="btn-dl" style="display:none" onclick="downloadFinal()"><i
-              class="fa-solid fa-download"></i> Tải xuống</button>
+        <!-- ── Action Buttons ── -->
+        <div class="section-label" style="margin-top:6px;"><i class="fa-solid fa-play"></i> Điều khiển</div>
+        <div class="action-col">
+          <button class="act-btn act-blend" id="btn-blend" onclick="runBlend()"><i
+              class="fa-solid fa-wand-magic-sparkles"></i> Bắt đầu Blend</button>
+          <div class="action-row-sm">
+            <button class="act-btn act-reset" onclick="resetAll()"><i class="fa-solid fa-rotate-left"></i> Reset</button>
+            <button class="act-btn act-clear" onclick="clearAllUploadedImages()" title="Xóa tất cả ảnh đã tải lên (Nhân vật, Emoji, Kết quả)"><i class="fa-solid fa-trash-can"></i> Dọn dẹp</button>
+            <button class="act-btn act-dl" id="btn-dl" style="display:none" onclick="downloadFinal()"><i
+                class="fa-solid fa-download"></i> Tải xuống</button>
+          </div>
         </div>
-      </div>
+      </div> <!-- /#right-tab-content-blend -->
+
+      <!-- RIGHT SIDEBAR CONTENT: TAB 2 (POKEMON) -->
+      <div class="right-tab-content" id="right-tab-content-pokemon" style="display:none">
+        <div class="section-label"><i class="fa-solid fa-pen-to-square"></i> Tùy chỉnh thẻ Pokemon</div>
+        <div class="ctrl-card" style="padding:12px;">
+          <div class="ctrl-item">
+            <label class="ctrl-lbl"><i class="fa-solid fa-comment-dots"></i> Dòng thông báo / Câu hỏi (Hỗ trợ xuống dòng)</label>
+            <textarea class="ctrl-input" id="poke-question-input" rows="3" style="resize:vertical; min-height:60px;" placeholder="Dòng 1: HOW MUCH POWER DOES THIS POKEMON CARD DESERVE?
+Dòng 2: LET ME KNOW IN THE COMMENTS!">HOW MUCH POWER DOES THIS POKEMON CARD DESERVE?
+LET ME KNOW IN THE COMMENTS!</textarea>
+          </div>
+        </div>
+
+        <div class="section-label" style="margin-top:10px;"><i class="fa-solid fa-play"></i> Điều khiển</div>
+        <div class="action-col">
+          <button class="act-btn act-blend" id="btn-poke-blend-side" onclick="runPokeBlend()"><i class="fa-solid fa-bolt"></i> Tạo Thẻ Pokemon</button>
+          <div class="action-row-sm">
+            <button class="act-btn act-reset" onclick="resetAll()"><i class="fa-solid fa-rotate-left"></i> Reset</button>
+          </div>
+        </div>
+      </div> <!-- /#right-tab-content-pokemon -->
 
       <!-- ── Phase Indicator ── -->
       <div class="phase-bar" id="phase-bar">

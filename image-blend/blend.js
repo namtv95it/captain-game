@@ -763,6 +763,13 @@ function resetAll() {
   updateEmojiHeaderState(-1);
   phaseBar.innerHTML = '';
 
+  // Reset Pokemon card overlay
+  const pokeOverlay = document.getElementById('poke-card-overlay');
+  const questionDisp = document.getElementById('poke-card-question-display');
+  if (pokeOverlay) pokeOverlay.classList.remove('show');
+  if (questionDisp) questionDisp.classList.remove('show');
+  P.running = false;
+
   if (S.headerTimer) {
     clearTimeout(S.headerTimer);
     S.headerTimer = null;
@@ -2447,7 +2454,255 @@ function toast(msg) {
   setTimeout(() => toastEl.classList.remove('show'), 2800);
 }
 
+/* ─────────────────────── TAB SWITCHING ─────────────────────── */
+let activeTab = 'blend';
+
+function switchTab(tabName) {
+  activeTab = tabName;
+
+  // Toggle Tab buttons
+  document.getElementById('tab-btn-blend').classList.toggle('active', tabName === 'blend');
+  document.getElementById('tab-btn-pokemon').classList.toggle('active', tabName === 'pokemon');
+
+  // Toggle Left panel contents
+  document.getElementById('tab-content-blend').style.display = tabName === 'blend' ? 'flex' : 'none';
+  document.getElementById('tab-content-pokemon').style.display = tabName === 'pokemon' ? 'flex' : 'none';
+
+  // Toggle Right sidebar tab contents (Always keep right sidebar visible)
+  const rightSidebar = document.querySelector('.right-sidebar');
+  if (rightSidebar) rightSidebar.style.display = 'flex';
+
+  const rightBlend = document.getElementById('right-tab-content-blend');
+  const rightPoke = document.getElementById('right-tab-content-pokemon');
+  if (rightBlend) rightBlend.style.display = tabName === 'blend' ? 'flex' : 'none';
+  if (rightPoke) rightPoke.style.display = tabName === 'pokemon' ? 'flex' : 'none';
+
+  // Toggle Emoji Header Bar visibility
+  const emojiHeaderBar = document.getElementById('emoji-header-bar');
+  if (emojiHeaderBar) {
+    if (tabName === 'pokemon') {
+      emojiHeaderBar.classList.add('hidden');
+    } else {
+      emojiHeaderBar.classList.remove('hidden');
+    }
+  }
+
+  // Hide overlays
+  const pokeOverlay = document.getElementById('poke-card-overlay');
+  if (pokeOverlay) pokeOverlay.classList.remove('show');
+
+  resetAll();
+
+  // If in Pokemon tab and character image is loaded, update theater background
+  if (tabName === 'pokemon' && P.charImg) {
+    bgCharImg.src = P.charImg.src;
+    bgCharWrap.classList.add('show');
+  } else if (tabName === 'blend' && S.charImg) {
+    bgCharImg.src = S.charImg.src;
+    bgCharWrap.classList.add('show');
+  }
+}
+
+/* ─────────────────────── POKEMON FUSION SYSTEM ─────────────────────── */
+const P = {
+  charImg: null,
+  pokeImg: null,
+  resultImg: null,
+  running: false
+};
+
+function pickPokeFile(type) {
+  document.getElementById(`poke-file-${type}`).click();
+}
+
+['char', 'poke', 'result'].forEach(type => {
+  const input = document.getElementById(`poke-file-${type}`);
+  if (input) {
+    input.addEventListener('change', e => {
+      const f = e.target.files[0];
+      if (f) loadPokeSlot(type, f);
+    });
+  }
+});
+
+function loadPokeSlot(type, file) {
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const img = new Image();
+    img.onload = () => {
+      P[`${type}Img`] = img;
+      document.getElementById(`poke-body-${type}`).style.display = 'none';
+      const pv = document.getElementById(`poke-prev-${type}`);
+      pv.style.display = 'flex';
+      document.getElementById(`poke-pimg-${type}`).src = ev.target.result;
+
+      // Show character in theater background right away
+      if (type === 'char') {
+        bgCharImg.src = ev.target.result;
+        bgCharWrap.classList.add('show');
+      }
+    };
+    img.src = ev.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function clearPokeSlot(type) {
+  P[`${type}Img`] = null;
+  document.getElementById(`poke-body-${type}`).style.display = 'flex';
+  document.getElementById(`poke-prev-${type}`).style.display = 'none';
+  document.getElementById(`poke-file-${type}`).value = '';
+  if (type === 'char') {
+    bgCharWrap.classList.remove('show');
+    bgCharImg.src = '';
+  }
+}
+
+function runPokeBlend() {
+  if (!P.charImg || !P.pokeImg || !P.resultImg) {
+    toast('Vui lòng tải đủ: 1. Nhân vật, 2. Pokemon và 3. Ảnh thẻ kết quả! ⚡');
+    return;
+  }
+  if (P.running) return;
+  P.running = true;
+
+  // Enter recording mode (rotate view landscape for short video recording)
+  enterRecordingMode();
+
+  // Hide emoji header & previous overlays
+  const emojiHeaderBar = document.getElementById('emoji-header-bar');
+  if (emojiHeaderBar) emojiHeaderBar.classList.add('hidden');
+  const pokeOverlay = document.getElementById('poke-card-overlay');
+  if (pokeOverlay) pokeOverlay.classList.remove('show');
+
+  // Display background character full-frame
+  bgCharImg.src = P.charImg.src;
+  bgCharWrap.classList.add('show');
+
+  // Wait 5 seconds (5000ms) with character on screen before Pokemon appears
+  setTimeout(() => {
+    if (!P.running) return;
+
+    // Pick a random fly direction ('bottom' | 'left' | 'right')
+    const dirs = ['bottom', 'left', 'right'];
+    const randomDir = dirs[Math.floor(Math.random() * dirs.length)];
+
+    // Prepare flying Pokemon image (fly-box--2)
+    flyImg2.src = P.pokeImg.src;
+
+    // Always center the fly box with transform: translate(-50%, -50%)
+    if (randomDir === 'bottom') {
+      setFlyStyle(fly2, { top: '160%', left: '50%', transform: 'translate(-50%, -50%)', opacity: '1' });
+    } else if (randomDir === 'left') {
+      setFlyStyle(fly2, { top: '50%', left: '-60%', transform: 'translate(-50%, -50%)', opacity: '1' });
+    } else {
+      setFlyStyle(fly2, { top: '50%', left: '160%', transform: 'translate(-50%, -50%)', opacity: '1' });
+    }
+
+    // 1. Play swoosh sound and animate Pokemon into exact center (50%) (850ms)
+    playSfxSwoosh(true);
+
+    const prop = randomDir === 'bottom' ? 'top' : 'left';
+    const startVal = randomDir === 'bottom' ? 160 : (randomDir === 'left' ? -60 : 160);
+    const endVal = 50;
+
+    animateDir(fly2, prop, startVal, endVal, 850, () => {
+      // 2. Pause at dead center for 800ms so viewers see Pokemon monster clearly
+      setTimeout(() => {
+        if (!P.running) return;
+
+        // 3. Collision flash + Start Fusion Blend loop
+        playSfxImpact();
+
+        // Flash overlay
+        const flash = document.createElement('div');
+        flash.style.cssText = [
+          'position:absolute', 'inset:0', 'z-index:20',
+          'background:radial-gradient(ellipse 80% 60% at 50% 50%, rgba(255,255,255,1) 0%, rgba(255,240,255,.8) 40%, transparent 80%)',
+          'border-radius:inherit', 'pointer-events:none', 'animation:flashOut .55s ease forwards'
+        ].join(';');
+        theater.appendChild(flash);
+
+        // Start canvas fusion blend behind flash
+        canvas.classList.add('visible');
+        syncCanvasSize();
+
+        S._currentCharImg = P.charImg;
+        S._currentResultImg = P.resultImg;
+        S._currentStepStyle = 'fusion';
+
+        startPokeSwirlLoop(() => {
+          // Flash cleanup
+          setTimeout(() => flash.remove(), 400);
+          fly2.style.opacity = '0';
+
+          // 4. Reveal Holographic Pokemon Card Overlay over the background character image!
+          revealPokemonCard();
+        });
+      }, 800);
+    });
+  }, 5000);
+}
+
+function startPokeSwirlLoop(onDone) {
+  S.time = 0;
+  let elapsed = 0;
+  const totalMs = 1800;
+  const speed = 7;
+  playSfxSwirlDrone(totalMs);
+
+  function loop() {
+    if (!P.running) return;
+    const progress = Math.min(1, elapsed / totalMs);
+    renderFrame(progress);
+    S.time += speed * 0.14;
+    elapsed += 16 * (speed / 3.5);
+    if (elapsed < totalMs) {
+      S.animId = requestAnimationFrame(loop);
+    } else {
+      onDone();
+    }
+  }
+  S.animId = requestAnimationFrame(loop);
+}
+
+function revealPokemonCard() {
+  canvas.classList.remove('visible');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // Hide background character image to display clean white grid background!
+  bgCharWrap.classList.remove('show');
+
+  const pokeOverlay = document.getElementById('poke-card-overlay');
+  const artImg = document.getElementById('poke-card-art-img');
+  const questionDisp = document.getElementById('poke-card-question-display');
+
+  if (questionDisp) questionDisp.classList.remove('show');
+
+  const questionRaw = document.getElementById('poke-question-input')?.value || 'HOW MUCH POWER DOES THIS POKEMON CARD DESERVE?\nLET ME KNOW IN THE COMMENTS!';
+
+  if (questionDisp) {
+    const lines = questionRaw.split('\n').map(l => l.trim().toUpperCase()).filter(l => l.length > 0);
+    questionDisp.innerHTML = lines.join('<br/>');
+  }
+  if (artImg) artImg.src = P.resultImg.src;
+
+  // 1. Reveal Pokemon Card immediately!
+  playSfxReveal();
+  if (pokeOverlay) pokeOverlay.classList.add('show');
+
+  // 2. Wait 3 seconds (3000ms) before revealing the question box text below the card!
+  setTimeout(() => {
+    if (questionDisp) {
+      questionDisp.classList.add('show');
+      playSfxBadgePop(0);
+    }
+    P.running = false;
+  }, 3000);
+}
+
 /* ─────────────────────── INIT ─────────────────────── */
 // Attach file listeners for all default steps (0, 1, 2, 3)
 [0, 1, 2, 3].forEach(idx => attachStepFileListeners(idx));
+
 
