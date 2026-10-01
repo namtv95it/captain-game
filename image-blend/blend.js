@@ -2592,20 +2592,24 @@ function switchTab(tabName) {
   const btnPoke = document.getElementById('tab-btn-pokemon');
   const btnBattle = document.getElementById('tab-btn-battle');
   const btnPuzzle = document.getElementById('tab-btn-puzzle');
+  const btnFlashlight = document.getElementById('tab-btn-flashlight');
   if (btnBlend) btnBlend.classList.toggle('active', tabName === 'blend');
   if (btnPoke) btnPoke.classList.toggle('active', tabName === 'pokemon');
   if (btnBattle) btnBattle.classList.toggle('active', tabName === 'battle');
   if (btnPuzzle) btnPuzzle.classList.toggle('active', tabName === 'puzzle');
+  if (btnFlashlight) btnFlashlight.classList.toggle('active', tabName === 'flashlight');
 
   // Toggle Left panel contents
   const contentBlend = document.getElementById('tab-content-blend');
   const contentPoke = document.getElementById('tab-content-pokemon');
   const contentBattle = document.getElementById('tab-content-battle');
   const contentPuzzle = document.getElementById('tab-content-puzzle');
+  const contentFlashlight = document.getElementById('tab-content-flashlight');
   if (contentBlend) contentBlend.style.display = tabName === 'blend' ? 'flex' : 'none';
   if (contentPoke) contentPoke.style.display = tabName === 'pokemon' ? 'flex' : 'none';
   if (contentBattle) contentBattle.style.display = tabName === 'battle' ? 'flex' : 'none';
   if (contentPuzzle) contentPuzzle.style.display = tabName === 'puzzle' ? 'flex' : 'none';
+  if (contentFlashlight) contentFlashlight.style.display = tabName === 'flashlight' ? 'flex' : 'none';
 
   // Toggle Right sidebar tab contents (Always keep right sidebar visible)
   const rightSidebar = document.querySelector('.right-sidebar');
@@ -2620,10 +2624,10 @@ function switchTab(tabName) {
   if (rightBattle) rightBattle.style.display = tabName === 'battle' ? 'flex' : 'none';
   if (rightPuzzle) rightPuzzle.style.display = tabName === 'puzzle' ? 'flex' : 'none';
 
-  // Toggle Emoji Header Bar visibility (Hide in Pokemon, Battle & Puzzle mode)
+  // Toggle Emoji Header Bar visibility (Hide in Pokemon, Battle, Puzzle, & Flashlight mode)
   const emojiHeaderBar = document.getElementById('emoji-header-bar');
   if (emojiHeaderBar) {
-    if (tabName === 'pokemon' || tabName === 'battle' || tabName === 'puzzle') {
+    if (tabName === 'pokemon' || tabName === 'battle' || tabName === 'puzzle' || tabName === 'flashlight') {
       emojiHeaderBar.classList.add('hidden');
     } else {
       emojiHeaderBar.classList.remove('hidden');
@@ -2640,9 +2644,13 @@ function switchTab(tabName) {
   if (battleOverlay) battleOverlay.classList.remove('show');
   const puzzleOverlay = document.getElementById('puzzle-theater-overlay');
   if (puzzleOverlay) puzzleOverlay.classList.toggle('show', tabName === 'puzzle');
+  const flOverlay = document.getElementById('flashlight-theater-overlay');
+  if (flOverlay) flOverlay.classList.toggle('show', tabName === 'flashlight');
 
   if (tabName === 'puzzle') {
     renderPuzzleGame();
+  } else if (tabName === 'flashlight') {
+    renderFlashlightTab();
   } else {
     resetAll();
   }
@@ -4031,10 +4039,9 @@ function startPuzzleAnimation() {
   }
 
   const updatePos = (e) => {
-    // Only show big pencil follower when hovering/dragging near puzzle area or when recording mode is active
+    // Only show big pencil follower when hovering/dragging on PUZZLE tab
     const activeTab = document.querySelector('.tab-btn.active')?.dataset.tab;
-    const isRecording = document.body.classList.contains('recording-mode');
-    if (activeTab !== 'puzzle' && !isRecording) {
+    if (activeTab !== 'puzzle') {
       pencilEl.classList.remove('active');
       return;
     }
@@ -4065,3 +4072,410 @@ function startPuzzleAnimation() {
     pencilEl.classList.remove('active');
   });
 })();
+
+// ──────────────────────────────────────────────────────────────
+// FLASHLIGHT / SOI ĐÈN MODULE
+// ──────────────────────────────────────────────────────────────
+const FLASHLIGHT = {
+  img1: null,
+  img2: null,
+  radius: 65,
+  mode: 'circle', // 'circle' | 'horizontal'
+  torchAngle: -135,
+  beamAngle: -135
+};
+
+function updateFlashlightMode(val) {
+  FLASHLIGHT.mode = val || 'circle';
+  renderFlashlightTab();
+}
+
+function updateTorchAngle(val) {
+  FLASHLIGHT.torchAngle = parseInt(val) || 0;
+  const valEl = document.getElementById('fl-torch-angle-val');
+  if (valEl) valEl.textContent = FLASHLIGHT.torchAngle + '°';
+
+  const torchIcon = document.getElementById('fl-torch-icon');
+  if (torchIcon) {
+    torchIcon.style.setProperty('--fl-torch-angle', FLASHLIGHT.torchAngle + 'deg');
+  }
+  renderFlashlightTab();
+}
+
+function updateBeamAngle(val) {
+  FLASHLIGHT.beamAngle = parseInt(val) || 0;
+  const valEl = document.getElementById('fl-beam-angle-val');
+  if (valEl) valEl.textContent = FLASHLIGHT.beamAngle + '°';
+  renderFlashlightTab();
+}
+
+// Init file listeners for Flashlight tab (Supports selecting 2 images at once)
+(function initFlashlightModule() {
+  const multiInput = document.getElementById('file-fl-multi');
+
+  if (multiInput) {
+    multiInput.addEventListener('change', e => {
+      const files = Array.from(e.target.files).filter(f => f.type.startsWith('image/'));
+      if (files.length === 0) return;
+
+      if (files.length >= 2) {
+        // Load first two images
+        loadFlashlightImage(1, files[0]);
+        loadFlashlightImage(2, files[1]);
+      } else if (files.length === 1) {
+        // If 1 image selected, fill empty slot or slot 1
+        if (!FLASHLIGHT.img1) {
+          loadFlashlightImage(1, files[0]);
+        } else {
+          loadFlashlightImage(2, files[0]);
+        }
+      }
+      e.target.value = '';
+    });
+  }
+})();
+
+function loadFlashlightImage(slot, file) {
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const img = new Image();
+    img.onload = () => {
+      if (slot === 1) FLASHLIGHT.img1 = img;
+      if (slot === 2) FLASHLIGHT.img2 = img;
+      updateFlashlightMultiPreview();
+      renderFlashlightTab();
+    };
+    img.src = ev.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function updateFlashlightMultiPreview() {
+  const body = document.getElementById('body-fl-multi');
+  const prev = document.getElementById('prev-fl-multi');
+  const pimg1 = document.getElementById('pimg-fl-1');
+  const pimg2 = document.getElementById('pimg-fl-2');
+
+  if (FLASHLIGHT.img1 || FLASHLIGHT.img2) {
+    if (body) body.style.display = 'none';
+    if (prev) prev.style.display = 'block';
+    if (pimg1) pimg1.src = FLASHLIGHT.img1 ? FLASHLIGHT.img1.src : '';
+    if (pimg2) pimg2.src = FLASHLIGHT.img2 ? FLASHLIGHT.img2.src : '';
+  } else {
+    if (body) body.style.display = 'flex';
+    if (prev) prev.style.display = 'none';
+  }
+}
+
+function clearFlashlightMulti() {
+  FLASHLIGHT.img1 = null;
+  FLASHLIGHT.img2 = null;
+  updateFlashlightMultiPreview();
+  renderFlashlightTab();
+}
+
+function updateFlashlightRadius(val) {
+  FLASHLIGHT.radius = parseInt(val) || 65;
+  const valEl = document.getElementById('fl-radius-val');
+  if (valEl) valEl.textContent = FLASHLIGHT.radius + 'px';
+
+  const ring = document.getElementById('fl-beam-ring');
+  if (ring) {
+    const d = FLASHLIGHT.radius * 2;
+    ring.style.width  = d + 'px';
+    ring.style.height = d + 'px';
+  }
+}
+
+function renderFlashlightTab() {
+  const flOverlay = document.getElementById('flashlight-theater-overlay');
+  const emojiHeader = document.getElementById('emoji-header-bar');
+  if (flOverlay && activeTab === 'flashlight') {
+    flOverlay.classList.add('show');
+    if (emojiHeader) emojiHeader.style.display = 'none';
+  }
+
+  // Update dynamic badges emoji text
+  const e1Val = document.getElementById('fl-emoji-1-input')?.value || '💙';
+  const e2Val = document.getElementById('fl-emoji-2-input')?.value || '❤️';
+  const badge1El = document.getElementById('fl-badge-emoji-1');
+  const badge2El = document.getElementById('fl-badge-emoji-2');
+  if (badge1El) badge1El.textContent = e1Val;
+  if (badge2El) badge2El.textContent = e2Val;
+
+  // 1. Draw top row 2 cards (Image 1 and Image 2)
+  renderTopFlashlightCards();
+
+  // 2. Render bottom main stage (color image + black mask overlay)
+  renderFlashlightStage();
+}
+
+function renderTopFlashlightCards() {
+  const cvs1 = document.getElementById('fl-cvs-top-1');
+  const cvs2 = document.getElementById('fl-cvs-top-2');
+
+  if (cvs1) {
+    const ctx = cvs1.getContext('2d');
+    ctx.clearRect(0, 0, 150, 150);
+    if (FLASHLIGHT.img1 && FLASHLIGHT.img1.complete && FLASHLIGHT.img1.naturalWidth) {
+      drawScaledFit(ctx, FLASHLIGHT.img1, 150, 150);
+    }
+  }
+
+  if (cvs2) {
+    const ctx = cvs2.getContext('2d');
+    ctx.clearRect(0, 0, 150, 150);
+    if (FLASHLIGHT.img2 && FLASHLIGHT.img2.complete && FLASHLIGHT.img2.naturalWidth) {
+      drawScaledFit(ctx, FLASHLIGHT.img2, 150, 150);
+    }
+  }
+}
+
+function drawScaledFit(ctx, img, targetW, targetH) {
+  const srcW = img.naturalWidth  || img.width  || targetW;
+  const srcH = img.naturalHeight || img.height || targetH;
+  const scale = Math.min(targetW / srcW, targetH / srcH);
+  const renderW = srcW * scale;
+  const renderH = srcH * scale;
+  const dx = (targetW - renderW) / 2;
+  const dy = (targetH - renderH) / 2;
+  ctx.drawImage(img, 0, 0, srcW, srcH, dx, dy, renderW, renderH);
+}
+
+function renderFlashlightStage() {
+  const colorCvs = document.getElementById('fl-color-canvas');
+  const maskCvs  = document.getElementById('fl-mask-canvas');
+  const stageEl  = document.getElementById('flashlight-bottom-stage');
+  if (!colorCvs || !maskCvs || !stageEl) return;
+
+  const W = 360, H = 420;
+  const targetSel = document.getElementById('fl-target-select')?.value || '1';
+  const targetImg = (targetSel === '1') ? FLASHLIGHT.img1 : FLASHLIGHT.img2;
+
+  // 1. Render color canvas (bottom layer)
+  const cCtx = colorCvs.getContext('2d');
+  cCtx.clearRect(0, 0, W, H);
+  if (targetImg && targetImg.complete && targetImg.naturalWidth) {
+    drawScaledFit(cCtx, targetImg, W, H);
+  }
+
+  // 2. Render pitch-black mask canvas (top layer)
+  resetFlashlightMaskCanvas(maskCvs, targetImg, W, H);
+
+  // 3. Attach mousemove / touchmove listeners for spotlight reveal
+  setupFlashlightSpotlightEvents(stageEl, maskCvs, colorCvs, W, H);
+}
+
+function resetFlashlightMaskCanvas(maskCvs, targetImg, W, H) {
+  const mCtx = maskCvs.getContext('2d');
+  mCtx.globalCompositeOperation = 'source-over';
+  mCtx.clearRect(0, 0, W, H);
+
+  if (targetImg && targetImg.complete && targetImg.naturalWidth) {
+    // Fill mask strictly matching character's outline/silhouette (Alpha channel)
+    mCtx.save();
+    drawScaledFit(mCtx, targetImg, W, H);
+    mCtx.globalCompositeOperation = 'source-in';
+    mCtx.fillStyle = '#000000';
+    mCtx.fillRect(0, 0, W, H);
+    mCtx.restore();
+  }
+}
+
+function setupFlashlightSpotlightEvents(stageEl, maskCvs, colorCvs, W, H) {
+  const torchIcon = document.getElementById('fl-torch-icon');
+  const mCtx = maskCvs.getContext('2d');
+
+  let isDragging = false;
+
+  // Helper function to render torch light beam at specified CSS position (cssX, cssY)
+  const renderTorchAtCSSPos = (cssX, cssY) => {
+    const targetSel = document.getElementById('fl-target-select')?.value || '1';
+    const targetImg = (targetSel === '1') ? FLASHLIGHT.img1 : FLASHLIGHT.img2;
+
+    const isRotated = document.body.classList.contains('recording-mode');
+    const rect = maskCvs.getBoundingClientRect();
+
+    const scaleX = maskCvs.width / (isRotated ? (rect.height || 1) : (rect.width || 1));
+    const scaleY = maskCvs.height / (isRotated ? (rect.width || 1) : (rect.height || 1));
+
+    const x = cssX * scaleX;
+    const y = cssY * scaleY;
+
+    // Show Torch Icon ONLY in Angled Cone mode ('horizontal'), hide it completely in Circle mode
+    if (torchIcon) {
+      if (FLASHLIGHT.mode === 'horizontal') {
+        torchIcon.style.setProperty('display', 'flex', 'important');
+        torchIcon.style.left = cssX + 'px';
+        torchIcon.style.top  = cssY + 'px';
+      } else {
+        torchIcon.style.setProperty('display', 'none', 'important');
+      }
+    }
+
+    // Reset mask to black so unlit areas stay pitch black
+    resetFlashlightMaskCanvas(maskCvs, targetImg, W, H);
+
+    const rCSS = FLASHLIGHT.radius;
+    const scaleCanvasRatio = maskCvs.width / (isRotated ? rect.height : rect.width);
+    const rCanvas = rCSS * scaleCanvasRatio;
+
+    mCtx.save();
+
+    if (FLASHLIGHT.mode === 'horizontal') {
+      // Mode 2: Angled Cone Spotlight Beam (Chiếu chéo góc nón theo FLASHLIGHT.beamAngle riêng)
+      const beamRadAngle = (FLASHLIGHT.beamAngle || -135) * Math.PI / 180;
+      const torchRadAngle = (FLASHLIGHT.torchAngle || -135) * Math.PI / 180;
+
+      const offsetCSS = 18;
+      const torchHeadX = x + Math.cos(torchRadAngle) * offsetCSS * scaleCanvasRatio;
+      const torchHeadY = y + Math.sin(torchRadAngle) * offsetCSS * scaleCanvasRatio;
+
+      const rStart = Math.max(12, rCanvas * 0.25);
+      const rEnd = rCanvas * 2.2;
+      const beamLength = Math.max(W, H) * 1.5;
+
+      const endX = torchHeadX + Math.cos(beamRadAngle) * beamLength;
+      const endY = torchHeadY + Math.sin(beamRadAngle) * beamLength;
+
+      const perpX = -Math.sin(beamRadAngle);
+      const perpY = Math.cos(beamRadAngle);
+
+      const p1x = torchHeadX + perpX * rStart;
+      const p1y = torchHeadY + perpY * rStart;
+      const p2x = torchHeadX - perpX * rStart;
+      const p2y = torchHeadY - perpY * rStart;
+
+      const p3x = endX - perpX * rEnd;
+      const p3y = endY - perpY * rEnd;
+      const p4x = endX + perpX * rEnd;
+      const p4y = endY + perpY * rEnd;
+
+      const coneGrad = mCtx.createLinearGradient(torchHeadX, torchHeadY, endX, endY);
+      coneGrad.addColorStop(0, 'rgba(0, 0, 0, 1)');
+      coneGrad.addColorStop(0.65, 'rgba(0, 0, 0, 0.9)');
+      coneGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+
+      mCtx.globalCompositeOperation = 'destination-out';
+      mCtx.fillStyle = coneGrad;
+
+      mCtx.beginPath();
+      mCtx.moveTo(p1x, p1y);
+      mCtx.lineTo(p4x, p4y);
+      mCtx.lineTo(p3x, p3y);
+      mCtx.lineTo(p2x, p2y);
+      mCtx.closePath();
+      mCtx.fill();
+
+      // Soft circular tip glow
+      const tipGrad = mCtx.createRadialGradient(torchHeadX, torchHeadY, 0, torchHeadX, torchHeadY, rStart * 1.8);
+      tipGrad.addColorStop(0, 'rgba(0, 0, 0, 1)');
+      tipGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+      mCtx.fillStyle = tipGrad;
+      mCtx.beginPath();
+      mCtx.arc(torchHeadX, torchHeadY, rStart * 1.8, 0, Math.PI * 2);
+      mCtx.fill();
+    } else {
+      // Mode 1: Circle Spotlight (Quầng sáng điểm tròn - Không dùng đèn pin)
+      const radGrad = mCtx.createRadialGradient(x, y, rCanvas * 0.35, x, y, rCanvas);
+      radGrad.addColorStop(0, 'rgba(0, 0, 0, 1)');
+      radGrad.addColorStop(0.7, 'rgba(0, 0, 0, 0.85)');
+      radGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+
+      mCtx.globalCompositeOperation = 'destination-out';
+      mCtx.fillStyle = radGrad;
+      mCtx.beginPath();
+      mCtx.arc(x, y, rCanvas, 0, Math.PI * 2);
+      mCtx.fill();
+    }
+
+    mCtx.restore();
+  };
+
+  // Convert raw pointer screen coordinates to local CSS coordinates inside stage
+  const getStageLocalCSS = (e) => {
+    const rect = maskCvs.getBoundingClientRect();
+    const clientX = e.clientX || (e.touches && e.touches[0] ? e.touches[0].clientX : (e.changedTouches && e.changedTouches[0] ? e.changedTouches[0].clientX : 0));
+    const clientY = e.clientY || (e.touches && e.touches[0] ? e.touches[0].clientY : (e.changedTouches && e.changedTouches[0] ? e.changedTouches[0].clientY : 0));
+
+    const isRotated = document.body.classList.contains('recording-mode');
+    if (isRotated) {
+      const centerX = rect.left + rect.width / 2;
+      const centerY = rect.top + rect.height / 2;
+      const unRotatedX = -(clientY - centerY);
+      const unRotatedY = clientX - centerX;
+      return {
+        cssX: unRotatedX + rect.height / 2,
+        cssY: unRotatedY + rect.width / 2
+      };
+    } else {
+      return {
+        cssX: clientX - rect.left,
+        cssY: clientY - rect.top
+      };
+    }
+  };
+
+  // Drag / Touch Handlers for Torch Icon
+  const onPointerDown = (e) => {
+    isDragging = true;
+    if (torchIcon) torchIcon.classList.add('dragging');
+    const { cssX, cssY } = getStageLocalCSS(e);
+    renderTorchAtCSSPos(cssX, cssY);
+  };
+
+  const onPointerMove = (e) => {
+    if (!isDragging) return;
+    const { cssX, cssY } = getStageLocalCSS(e);
+    renderTorchAtCSSPos(cssX, cssY);
+  };
+
+  const onPointerUp = () => {
+    isDragging = false;
+    if (torchIcon) torchIcon.classList.remove('dragging');
+  };
+
+  // Attach Mouse & Touch listeners on Torch Icon & Stage Container
+  if (torchIcon) {
+    torchIcon.onmousedown = onPointerDown;
+    torchIcon.ontouchstart = (e) => { e.preventDefault(); onPointerDown(e); };
+  }
+
+  stageEl.onmousedown = (e) => {
+    if (e.target === stageEl || e.target === maskCvs) {
+      onPointerDown(e);
+    }
+  };
+  stageEl.ontouchstart = (e) => {
+    if (e.target === stageEl || e.target === maskCvs) {
+      onPointerDown(e);
+    }
+  };
+
+  window.addEventListener('mousemove', onPointerMove);
+  window.addEventListener('touchmove', onPointerMove, { passive: true });
+  window.addEventListener('mouseup', onPointerUp);
+  window.addEventListener('touchend', onPointerUp);
+
+  // Initial center position setup
+  renderTorchAtCSSPos(180, 210);
+}
+
+// ── Launch Flashlight Fullscreen Mode ────────────────────────
+function startFlashlightAnimation() {
+  if (!FLASHLIGHT.img1 && !FLASHLIGHT.img2) {
+    toast('Vui lòng tải ít nhất 1 hình ảnh trước khi khởi chạy! 💡');
+    return;
+  }
+
+  // Enter landscape fullscreen theater mode
+  if (window.innerWidth < 1024) {
+    openMobileTheater();
+  } else {
+    enterRecordingMode();
+  }
+
+  // Re-render and reset mask canvas to pitch black
+  renderFlashlightTab();
+  toast('Di chuyển chuột vào bức ảnh phía dưới để soi đèn pin! 💡');
+}

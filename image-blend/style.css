@@ -3608,3 +3608,154 @@ body.recording-mode .theater {
 .big-pencil-cursor.grabbing {
   transform: translate(-36px, -135px) scale(1.2) rotate(-18deg);
 }
+
+/* ── Flashlight / Soi Đèn Theater Mode ── */
+.flashlight-theater-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 16px 16px 24px;
+  background: transparent;
+  z-index: 50;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.35s ease;
+  gap: 16px;
+}
+
+.flashlight-theater-overlay.show {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Always hide emoji header bar in Flashlight mode */
+.flashlight-theater-overlay.show ~ .emoji-header-bar,
+#theater:has(.flashlight-theater-overlay.show) #emoji-header-bar {
+  display: none !important;
+}
+
+/* Top Row: 2 Cards (Dịch xuống dưới một chút) */
+.flashlight-top-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 36px;
+  width: 100%;
+  margin-top: 120px;
+}
+
+.fl-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.fl-card-wrap {
+  width: 150px;
+  height: 150px;
+  overflow: hidden;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+}
+
+.fl-card-wrap canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.fl-badge {
+  padding: 5px 14px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: #ffffff;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.fl-badge-like {
+  background: linear-gradient(135deg, #2563eb, #3b82f6);
+}
+
+.fl-badge-sub {
+  background: linear-gradient(135deg, #dc2626, #ef4444);
+}
+
+/* Bottom Stage: Main Image with Mask (Dịch lên trên một chút & tăng size) */
+.flashlight-bottom-stage {
+  position: relative;
+  width: 360px;
+  height: 420px;
+  margin-bottom: 20px;
+  overflow: hidden;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  cursor: none !important;
+}
+
+.flashlight-bottom-stage * {
+  cursor: none !important;
+}
+
+.fl-layer-color {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+.fl-layer-mask {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 2;
+}
+
+.fl-beam-ring {
+  display: none !important;
+}
+
+/* Draggable Torch PNG Element */
+/* Draggable Torch PNG Element */
+.fl-torch-icon {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 76px;
+  height: 76px;
+  pointer-events: auto !important;
+  cursor: grab !important;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform: translate(-50%, -50%) rotate(var(--fl-torch-angle, 0deg));
+  user-select: none;
+  touch-action: none;
+  transition: transform 0.1s ease, filter 0.2s ease;
+  filter: drop-shadow(0 6px 14px rgba(245, 158, 11, 0.6)) drop-shadow(0 0 25px rgba(251, 191, 36, 0.5));
+}
+
+.fl-torch-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+.fl-torch-icon:active,
+.fl-torch-icon.dragging {
+  cursor: grabbing !important;
+  transform: translate(-50%, -50%) rotate(var(--fl-torch-angle, 0deg)) scale(1.15);
+  filter: drop-shadow(0 8px 20px rgba(245, 158, 11, 0.8)) drop-shadow(0 0 35px rgba(245, 158, 11, 0.8));
+}
