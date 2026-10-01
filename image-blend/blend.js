@@ -817,8 +817,12 @@ function resetAll() {
 
   const emojiHeaderBar = document.getElementById('emoji-header-bar');
   if (emojiHeaderBar) {
-    if (activeTab === 'pokemon') emojiHeaderBar.classList.add('hidden');
-    else emojiHeaderBar.classList.remove('hidden');
+    emojiHeaderBar.style.display = '';
+    if (activeTab === 'battle' || activeTab === 'flashlight' || activeTab === 'puzzle') {
+      emojiHeaderBar.classList.add('hidden');
+    } else {
+      emojiHeaderBar.classList.remove('hidden');
+    }
   }
 
   const btnBlend = document.getElementById('btn-blend');
@@ -2624,10 +2628,11 @@ function switchTab(tabName) {
   if (rightBattle) rightBattle.style.display = tabName === 'battle' ? 'flex' : 'none';
   if (rightPuzzle) rightPuzzle.style.display = tabName === 'puzzle' ? 'flex' : 'none';
 
-  // Toggle Emoji Header Bar visibility (Hide in Pokemon, Battle, Puzzle, & Flashlight mode)
+  // Toggle Emoji Header Bar visibility (Show in Blend & Pokemon, hide in Battle, Flashlight & Puzzle mode)
   const emojiHeaderBar = document.getElementById('emoji-header-bar');
   if (emojiHeaderBar) {
-    if (tabName === 'pokemon' || tabName === 'battle' || tabName === 'puzzle' || tabName === 'flashlight') {
+    emojiHeaderBar.style.display = '';
+    if (tabName === 'battle' || tabName === 'flashlight' || tabName === 'puzzle') {
       emojiHeaderBar.classList.add('hidden');
     } else {
       emojiHeaderBar.classList.remove('hidden');
@@ -4186,7 +4191,7 @@ function renderFlashlightTab() {
   const emojiHeader = document.getElementById('emoji-header-bar');
   if (flOverlay && activeTab === 'flashlight') {
     flOverlay.classList.add('show');
-    if (emojiHeader) emojiHeader.style.display = 'none';
+    if (emojiHeader) emojiHeader.classList.add('hidden');
   }
 
   // Update dynamic badges emoji text
