@@ -4074,7 +4074,7 @@ function startPuzzleAnimation() {
 const FLASHLIGHT = {
   img1: null,
   img2: null,
-  radius: 65,
+  radius: 110,
   mode: 'circle', // 'circle' | 'horizontal'
   beamAngle: -135
 };
@@ -4179,9 +4179,14 @@ function updateFlashlightRadius(val) {
 function renderFlashlightTab() {
   const flOverlay = document.getElementById('flashlight-theater-overlay');
   const emojiHeader = document.getElementById('emoji-header-bar');
+  const theaterEl = document.getElementById('theater');
+
   if (flOverlay && activeTab === 'flashlight') {
     flOverlay.classList.add('show');
     if (emojiHeader) emojiHeader.classList.add('hidden');
+    if (theaterEl) theaterEl.classList.add('fl-theater-full');
+  } else if (theaterEl) {
+    theaterEl.classList.remove('fl-theater-full');
   }
 
   // Update dynamic badges emoji text
@@ -4394,12 +4399,14 @@ function setupFlashlightSpotlightEvents(stageEl, maskCvs, colorCvs, W, H) {
   // Drag / Touch Handlers
   const onPointerDown = (e) => {
     isDragging = true;
+    if (e.cancelable) e.preventDefault();
     const { cssX, cssY } = getStageLocalCSS(e);
     renderTorchAtCSSPos(cssX, cssY);
   };
 
   const onPointerMove = (e) => {
     if (!isDragging) return;
+    if (e.cancelable) e.preventDefault();
     const { cssX, cssY } = getStageLocalCSS(e);
     renderTorchAtCSSPos(cssX, cssY);
   };
@@ -4408,21 +4415,18 @@ function setupFlashlightSpotlightEvents(stageEl, maskCvs, colorCvs, W, H) {
     isDragging = false;
   };
 
-  stageEl.onmousedown = (e) => {
-    if (e.target === stageEl || e.target === maskCvs) {
-      onPointerDown(e);
-    }
-  };
-  stageEl.ontouchstart = (e) => {
-    if (e.target === stageEl || e.target === maskCvs) {
-      onPointerDown(e);
-    }
-  };
+  stageEl.addEventListener('pointerdown', onPointerDown, { passive: false });
+  stageEl.addEventListener('touchstart', onPointerDown, { passive: false });
+  stageEl.addEventListener('mousedown', onPointerDown);
 
+  window.addEventListener('pointermove', onPointerMove, { passive: false });
+  window.addEventListener('touchmove', onPointerMove, { passive: false });
   window.addEventListener('mousemove', onPointerMove);
-  window.addEventListener('touchmove', onPointerMove, { passive: true });
-  window.addEventListener('mouseup', onPointerUp);
+
+  window.addEventListener('pointerup', onPointerUp);
   window.addEventListener('touchend', onPointerUp);
+  window.addEventListener('mouseup', onPointerUp);
+  window.addEventListener('touchcancel', onPointerUp);
 
   // Initial center position setup
   renderTorchAtCSSPos(180, 210);

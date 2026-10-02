@@ -3609,6 +3609,25 @@ body.recording-mode .theater {
   transform: translate(-36px, -135px) scale(1.2) rotate(-18deg);
 }
 
+/* Mở rộng toàn bộ khung theater khi ở chế độ Soi Đèn Pin */
+.theater.fl-theater-full,
+.theater:has(.flashlight-theater-overlay.show) {
+  width: 100% !important;
+  max-width: 100% !important;
+  height: 100% !important;
+  max-height: 100% !important;
+  aspect-ratio: auto !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.theater.fl-theater-full::before,
+.theater.fl-theater-full::after,
+.theater:has(.flashlight-theater-overlay.show)::before,
+.theater:has(.flashlight-theater-overlay.show)::after {
+  display: none !important;
+}
+
 /* ── Flashlight / Soi Đèn Theater Mode ── */
 .flashlight-theater-overlay {
   position: absolute;
@@ -3616,14 +3635,17 @@ body.recording-mode .theater {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-start;
-  padding: 16px 16px 24px;
+  justify-content: center;
+  padding: 10px;
   background: transparent;
   z-index: 50;
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.35s ease;
-  gap: 16px;
+  gap: clamp(10px, 1.8vh, 24px);
+  overflow: hidden;
+  width: 100%;
+  height: 100%;
 }
 
 .flashlight-theater-overlay.show {
@@ -3637,47 +3659,54 @@ body.recording-mode .theater {
   display: none !important;
 }
 
-/* Top Row: 2 Cards (Dịch xuống dưới một chút) */
+/* Top Row: 2 Cards (Phóng to tối đa trên iPad & Mobile) */
 .flashlight-top-row {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 36px;
+  gap: clamp(16px, 5vw, 64px);
   width: 100%;
-  margin-top: 120px;
+  margin-top: 0;
+  flex-shrink: 0;
 }
 
 .fl-card {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
+  gap: clamp(4px, 1vh, 10px);
 }
 
 .fl-card-wrap {
-  width: 150px;
-  height: 150px;
-  overflow: hidden;
-  background: transparent;
-  border: none;
-  box-shadow: none;
+  width: clamp(160px, 28vh, 380px);
+  height: clamp(160px, 28vh, 380px);
+  max-width: 45vw;
+  max-height: 45vw;
+  overflow: visible;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  transition: transform 0.25s ease;
 }
 
 .fl-card-wrap canvas {
   width: 100%;
   height: 100%;
   display: block;
+  object-fit: contain;
 }
 
 .fl-badge {
-  padding: 5px 14px;
+  padding: clamp(6px, 1.2vh, 12px) clamp(16px, 2.2vw, 30px);
   border-radius: 20px;
-  font-size: 0.8rem;
+  font-size: clamp(0.85rem, 1.8vh, 1.3rem);
   font-weight: 800;
   color: #ffffff;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  white-space: nowrap;
 }
 
 .fl-badge-like {
@@ -3688,17 +3717,40 @@ body.recording-mode .theater {
   background: linear-gradient(135deg, #dc2626, #ef4444);
 }
 
-/* Bottom Stage: Main Image with Mask (Dịch lên trên một chút & tăng size) */
+/* Bottom Stage: Main Image with Mask (Phóng to tối đa trên iPad) */
 .flashlight-bottom-stage {
   position: relative;
-  width: 360px;
-  height: 420px;
-  margin-bottom: 20px;
-  overflow: hidden;
-  background: transparent;
-  border: none;
-  box-shadow: none;
+  width: clamp(380px, 85vw, 950px);
+  aspect-ratio: 360 / 420;
+  max-width: 98vw;
+  max-height: 72vh;
+  margin-bottom: 0;
+  overflow: visible;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
   cursor: pointer;
+  flex-shrink: 0;
+  touch-action: none !important;
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  -webkit-touch-callout: none !important;
+}
+
+/* Tablet & iPad specific optimizations (Phóng to cực lớn) */
+@media (min-width: 600px) or (min-height: 700px) {
+  .flashlight-theater-overlay {
+    gap: clamp(10px, 2vh, 26px);
+  }
+  .fl-card-wrap {
+    width: clamp(200px, 30vh, 420px);
+    height: clamp(200px, 30vh, 420px);
+  }
+  .flashlight-bottom-stage {
+    width: clamp(480px, 75vh, 1000px);
+    max-height: 75vh;
+  }
 }
 
 .flashlight-bottom-stage * {
