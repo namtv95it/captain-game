@@ -2758,44 +2758,57 @@ body.recording-mode .theater {
 }
 
 /* ============================
-   TAB SWITCHER STYLING
+   TAB SWITCHER STYLING (Grid Buttons Layout)
    ============================ */
 .tab-nav-container {
-  display: flex;
-  background: rgba(124, 58, 237, 0.08);
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  background: rgba(124, 58, 237, 0.04);
   border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 3px;
-  gap: 3px;
+  border-radius: 14px;
+  padding: 8px;
+  width: 100%;
 }
 
 .tab-btn {
-  flex: 1;
-  padding: 8px 10px;
-  border: none;
-  border-radius: 9px;
-  background: transparent;
-  color: var(--txt3);
+  width: 100%;
+  padding: 10px 12px;
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  background: #ffffff;
+  color: var(--txt2);
   font-family: inherit;
-  font-size: 0.75rem;
+  font-size: 0.82rem;
   font-weight: 700;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  transition: all 0.2s ease;
+  gap: 7px;
+  white-space: nowrap;
+  transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 2px 6px rgba(100, 60, 200, 0.06);
 }
 
 .tab-btn:hover {
+  border-color: var(--p1);
   color: var(--p1);
-  background: rgba(124, 58, 237, 0.06);
+  background: rgba(124, 58, 237, 0.08);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.15);
+}
+
+.tab-btn:active {
+  transform: translateY(0) scale(0.97);
 }
 
 .tab-btn.active {
   background: var(--grad-v);
+  border-color: transparent;
   color: #ffffff;
-  box-shadow: 0 2px 10px rgba(124, 58, 237, 0.3);
+  box-shadow: 0 4px 16px rgba(124, 58, 237, 0.4);
+  transform: scale(1.02);
 }
 
 .tab-content,
@@ -3609,25 +3622,6 @@ body.recording-mode .theater {
   transform: translate(-36px, -135px) scale(1.2) rotate(-18deg);
 }
 
-/* Mở rộng toàn bộ khung theater khi ở chế độ Soi Đèn Pin */
-.theater.fl-theater-full,
-.theater:has(.flashlight-theater-overlay.show) {
-  width: 100% !important;
-  max-width: 100% !important;
-  height: 100% !important;
-  max-height: 100% !important;
-  aspect-ratio: auto !important;
-  background: transparent !important;
-  box-shadow: none !important;
-}
-
-.theater.fl-theater-full::before,
-.theater.fl-theater-full::after,
-.theater:has(.flashlight-theater-overlay.show)::before,
-.theater:has(.flashlight-theater-overlay.show)::after {
-  display: none !important;
-}
-
 /* ── Flashlight / Soi Đèn Theater Mode ── */
 .flashlight-theater-overlay {
   position: absolute;
@@ -3635,14 +3629,14 @@ body.recording-mode .theater {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  padding: 10px;
+  justify-content: flex-start;
+  padding: 16px 12px 20px;
   background: transparent;
   z-index: 50;
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.35s ease;
-  gap: clamp(10px, 1.8vh, 24px);
+  gap: 16px;
   overflow: hidden;
   width: 100%;
   height: 100%;
@@ -3659,14 +3653,14 @@ body.recording-mode .theater {
   display: none !important;
 }
 
-/* Top Row: 2 Cards (Phóng to tối đa trên iPad & Mobile) */
+/* Top Row: 2 Cards (Vừa vặn trong khung quay 9:16) */
 .flashlight-top-row {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: clamp(16px, 5vw, 64px);
+  gap: 24px;
   width: 100%;
-  margin-top: 0;
+  margin-top: 50px;
   flex-shrink: 0;
 }
 
@@ -3674,14 +3668,12 @@ body.recording-mode .theater {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: clamp(4px, 1vh, 10px);
+  gap: 8px;
 }
 
 .fl-card-wrap {
-  width: clamp(160px, 28vh, 380px);
-  height: clamp(160px, 28vh, 380px);
-  max-width: 45vw;
-  max-height: 45vw;
+  width: 140px;
+  height: 140px;
   overflow: visible;
   background: transparent !important;
   border: none !important;
@@ -3698,9 +3690,9 @@ body.recording-mode .theater {
 }
 
 .fl-badge {
-  padding: clamp(6px, 1.2vh, 12px) clamp(16px, 2.2vw, 30px);
+  padding: 6px 16px;
   border-radius: 20px;
-  font-size: clamp(0.85rem, 1.8vh, 1.3rem);
+  font-size: 0.8rem;
   font-weight: 800;
   color: #ffffff;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
@@ -3717,13 +3709,13 @@ body.recording-mode .theater {
   background: linear-gradient(135deg, #dc2626, #ef4444);
 }
 
-/* Bottom Stage: Main Image with Mask (Phóng to tối đa trên iPad) */
+/* Bottom Stage: Main Image with Mask (Vừa vặn trong khung quay 9:16) */
 .flashlight-bottom-stage {
   position: relative;
-  width: clamp(380px, 85vw, 950px);
+  width: 340px;
   aspect-ratio: 360 / 420;
-  max-width: 98vw;
-  max-height: 72vh;
+  max-width: 95%;
+  max-height: 52vh;
   margin-bottom: 0;
   overflow: visible;
   background: transparent !important;
@@ -3736,21 +3728,6 @@ body.recording-mode .theater {
   user-select: none !important;
   -webkit-user-select: none !important;
   -webkit-touch-callout: none !important;
-}
-
-/* Tablet & iPad specific optimizations (Phóng to cực lớn) */
-@media (min-width: 600px) or (min-height: 700px) {
-  .flashlight-theater-overlay {
-    gap: clamp(10px, 2vh, 26px);
-  }
-  .fl-card-wrap {
-    width: clamp(200px, 30vh, 420px);
-    height: clamp(200px, 30vh, 420px);
-  }
-  .flashlight-bottom-stage {
-    width: clamp(480px, 75vh, 1000px);
-    max-height: 75vh;
-  }
 }
 
 .flashlight-bottom-stage * {

@@ -4179,14 +4179,10 @@ function updateFlashlightRadius(val) {
 function renderFlashlightTab() {
   const flOverlay = document.getElementById('flashlight-theater-overlay');
   const emojiHeader = document.getElementById('emoji-header-bar');
-  const theaterEl = document.getElementById('theater');
 
   if (flOverlay && activeTab === 'flashlight') {
     flOverlay.classList.add('show');
     if (emojiHeader) emojiHeader.classList.add('hidden');
-    if (theaterEl) theaterEl.classList.add('fl-theater-full');
-  } else if (theaterEl) {
-    theaterEl.classList.remove('fl-theater-full');
   }
 
   // Update dynamic badges emoji text
@@ -4449,4 +4445,54 @@ function startFlashlightAnimation() {
   // Re-render and reset mask canvas to pitch black
   renderFlashlightTab();
   toast('Di chuyển chuột vào bức ảnh phía dưới để soi đèn pin! 💡');
+}
+
+/* ─────────────────────── TAB SWITCHER CONTROLLER ─────────────────────── */
+function switchTab(tabName) {
+  activeTab = tabName;
+
+  // Toggle active button
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.classList.remove('active');
+  });
+  const activeBtn = document.getElementById(`tab-btn-${tabName}`);
+  if (activeBtn) {
+    activeBtn.classList.add('active');
+    // Scroll active tab smoothly into view if tab bar overflows
+    activeBtn.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+  }
+
+  // Toggle left tab contents
+  document.querySelectorAll('.tab-content').forEach(content => {
+    content.style.display = 'none';
+  });
+  const targetContent = document.getElementById(`tab-content-${tabName}`);
+  if (targetContent) targetContent.style.display = 'flex';
+
+  // Toggle right sidebar contents
+  document.querySelectorAll('.right-tab-content').forEach(content => {
+    content.style.display = 'none';
+  });
+  const targetRightContent = document.getElementById(`right-tab-content-${tabName}`);
+  if (targetRightContent) targetRightContent.style.display = 'flex';
+
+  // Specific tab initializations
+  const flOverlay = document.getElementById('flashlight-theater-overlay');
+  if (flOverlay) {
+    if (tabName === 'flashlight') {
+      renderFlashlightTab();
+    } else {
+      flOverlay.classList.remove('show');
+      document.getElementById('theater')?.classList.remove('fl-theater-full');
+    }
+  }
+
+  const puzzleOverlay = document.getElementById('puzzle-theater-overlay');
+  if (puzzleOverlay) {
+    if (tabName === 'puzzle') {
+      puzzleOverlay.classList.add('show');
+    } else {
+      puzzleOverlay.classList.remove('show');
+    }
+  }
 }
