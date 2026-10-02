@@ -1004,16 +1004,6 @@ function closeMobileTheater() {
 
 /* ─────────────────────── RECORDING MODE (Desktop) ─────────────────────── */
 function enterRecordingMode() {
-  // Request browser full-screen mode (F11)
-  const elem = document.documentElement;
-  if (elem.requestFullscreen) {
-    elem.requestFullscreen().catch(() => {});
-  } else if (elem.webkitRequestFullscreen) {
-    elem.webkitRequestFullscreen();
-  } else if (elem.msRequestFullscreen) {
-    elem.msRequestFullscreen();
-  }
-
   const updateRecordingLayout = () => {
     if (!document.body.classList.contains('recording-mode')) return;
     const vw = window.innerWidth;
