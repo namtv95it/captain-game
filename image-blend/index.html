@@ -48,6 +48,9 @@
         <button class="tab-btn" id="tab-btn-flashlight" onclick="switchTab('flashlight')">
           <i class="fa-solid fa-lightbulb"></i> Soi Đèn
         </button>
+        <button class="tab-btn" id="tab-btn-climax" onclick="switchTab('climax')">
+          <i class="fa-solid fa-bolt-lightning"></i> Cứu Hero 22s
+        </button>
       </div>
 
       <!-- TAB 1: EMOJI BLEND CONTENT -->
@@ -226,7 +229,7 @@
         <div class="section-label"><i class="fa-solid fa-mountain-sun"></i> Nền cảnh chiến thắng</div>
         <div class="upload-card card-1 mb-3" onclick="pickBattleFile('victory-bg')" style="cursor:pointer">
           <input type="file" id="file-victory-bg" accept="image/*" hidden />
-          <div class="card-tag tag-1"><i class="fa-solid fa-trophy"></i> Nền Thắng</div>
+          <div class="card-tag tag-1"><i class="fa-solid fa-trophy"></i> Nền Thắng (Tùy chọn)</div>
           <div class="card-empty" id="body-victory-bg">
             <div class="empty-icon"><i class="fa-regular fa-image"></i></div>
             <div class="empty-hint">Click chọn ảnh Nền cảnh khi nhân vật chính chiến thắng</div>
@@ -236,6 +239,19 @@
             <button class="x-btn" onclick="event.stopPropagation();clearBattleSlot('victory-bg')"><i
                 class="fa-solid fa-xmark"></i></button>
           </div>
+        </div>
+
+        <!-- ── 2.5 Phong cách Màu Nền (Dùng khi không có ảnh nền) ── -->
+        <div class="section-label"><i class="fa-solid fa-palette"></i> Màu Nền (Khi đối thủ không có ảnh nền)</div>
+        <div class="ctrl-card mb-3">
+          <select id="battle-bg-style-select" class="ctrl-select" onchange="updateBattleBgStyle(this.value)">
+            <option value="solid-red">🔴 Full Màu Đỏ (Crimson Red)</option>
+            <option value="solid-dark">⬛ Full Màu Xám Đen (Dark Charcoal)</option>
+            <option value="solid-purple">🟣 Full Màu Tím Cyber (Cyber Purple)</option>
+            <option value="solid-blue">💙 Full Màu Xanh Dương (Deep Blue)</option>
+            <option value="solid-gold">🟡 Full Màu Vàng Kim (Royal Gold)</option>
+            <option value="gradient-fire">🔥 Full Gradient Đỏ Lửa (Fire Arena)</option>
+          </select>
         </div>
 
         <!-- ── 3. Opponents & Scenes List ── -->
@@ -433,6 +449,94 @@
         </div>
       </div> <!-- /#tab-content-flashlight -->
 
+      <!-- TAB 6: CLIMAX AUTOMATION 15S CONTENT -->
+      <div class="tab-content" id="tab-content-climax" style="display:none;">
+
+        <!-- ── 1. Hero Normal Form (Pomni Bình thường) ── -->
+        <div class="section-label"><i class="fa-solid fa-user"></i> 1. Pomni Bình thường (Giao chiến)</div>
+        <div class="upload-card card-1 mb-2" onclick="pickClimaxFile('hero-normal')" style="cursor:pointer; min-height:75px;">
+          <input type="file" id="file-climax-hero-normal" accept="image/*" hidden />
+          <div class="card-empty" id="body-climax-hero-normal">
+            <div class="empty-icon" style="font-size:1.1rem"><i class="fa-solid fa-face-smile"></i></div>
+            <div class="empty-hint">Click chọn ảnh Pomni bình thường (Lúc đầu)</div>
+          </div>
+          <div class="card-preview" id="prev-climax-hero-normal" style="display:none">
+            <img id="pimg-climax-hero-normal" alt="Hero Normal" />
+            <button class="x-btn" onclick="event.stopPropagation();clearClimaxSlot('hero-normal')"><i class="fa-solid fa-xmark"></i></button>
+          </div>
+        </div>
+
+        <!-- ── 2. Hero Weak Form (Pomni Thất bại / Thua cuộc) ── -->
+        <div class="section-label"><i class="fa-solid fa-heart-crack"></i> 2. Pomni Thất bại (Nằm run rẩy)</div>
+        <div class="upload-card card-2 mb-2" onclick="pickClimaxFile('hero-weak')" style="cursor:pointer; min-height:75px;">
+          <input type="file" id="file-climax-hero-weak" accept="image/*" hidden />
+          <div class="card-empty" id="body-climax-hero-weak">
+            <div class="empty-icon" style="font-size:1.1rem"><i class="fa-solid fa-face-frown-open"></i></div>
+            <div class="empty-hint">Click chọn ảnh Pomni bị đánh gục</div>
+          </div>
+          <div class="card-preview" id="prev-climax-hero-weak" style="display:none">
+            <img id="pimg-climax-hero-weak" alt="Hero Weak" />
+            <button class="x-btn" onclick="event.stopPropagation();clearClimaxSlot('hero-weak')"><i class="fa-solid fa-xmark"></i></button>
+          </div>
+        </div>
+
+        <!-- ── 3. Hero Awaken / Super Form (Pomni Bùng nổ sức mạnh) ── -->
+        <div class="section-label"><i class="fa-solid fa-fire-flame-curved"></i> 3. Pomni Bùng nổ sức mạnh (Thức tỉnh)</div>
+        <div class="upload-card card-3 mb-2" onclick="pickClimaxFile('hero-strong')" style="cursor:pointer; min-height:75px;">
+          <input type="file" id="file-climax-hero-strong" accept="image/*" hidden />
+          <div class="card-empty" id="body-climax-hero-strong">
+            <div class="empty-icon" style="font-size:1.1rem"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
+            <div class="empty-hint">Click chọn ảnh Pomni siêu sức mạnh</div>
+          </div>
+          <div class="card-preview" id="prev-climax-hero-strong" style="display:none">
+            <img id="pimg-climax-hero-strong" alt="Hero Strong" />
+            <button class="x-btn" onclick="event.stopPropagation();clearClimaxSlot('hero-strong')"><i class="fa-solid fa-xmark"></i></button>
+          </div>
+        </div>
+
+        <!-- ── 4. Opponent Sprite (Jax 1 ảnh duy nhất) ── -->
+        <div class="section-label"><i class="fa-solid fa-skull-crossbones"></i> 4. Jax (Dùng giao chiến & bay đi)</div>
+        <div class="upload-card card-1 mb-2" onclick="pickClimaxFile('opponent')" style="cursor:pointer; min-height:75px;">
+          <input type="file" id="file-climax-opponent" accept="image/*" hidden />
+          <div class="card-empty" id="body-climax-opponent">
+            <div class="empty-icon" style="font-size:1.1rem"><i class="fa-solid fa-ghost"></i></div>
+            <div class="empty-hint">Click chọn 1 ảnh Jax duy nhất</div>
+          </div>
+          <div class="card-preview" id="prev-climax-opponent" style="display:none">
+            <img id="pimg-climax-opponent" alt="Opponent" />
+            <button class="x-btn" onclick="event.stopPropagation();clearClimaxSlot('opponent')"><i class="fa-solid fa-xmark"></i></button>
+          </div>
+        </div>
+
+        <!-- ── 5. Background Upload ── -->
+        <div class="section-label"><i class="fa-solid fa-image"></i> 5. Ảnh Nền cảnh (Tùy chọn)</div>
+        <div class="upload-card card-2 mb-2" onclick="pickClimaxFile('bg')" style="cursor:pointer; min-height:75px;">
+          <input type="file" id="file-climax-bg" accept="image/*" hidden />
+          <div class="card-empty" id="body-climax-bg">
+            <div class="empty-icon" style="font-size:1.1rem"><i class="fa-solid fa-mountain-sun"></i></div>
+            <div class="empty-hint">Click chọn ảnh Nền cảnh (Nếu có)</div>
+          </div>
+          <div class="card-preview" id="prev-climax-bg" style="display:none">
+            <img id="pimg-climax-bg" alt="Climax BG" />
+            <button class="x-btn" onclick="event.stopPropagation();clearClimaxSlot('bg')"><i class="fa-solid fa-xmark"></i></button>
+          </div>
+        </div>
+
+        <!-- ── 6. Phong cách Màu Nền (Nếu không chọn ảnh nền) ── -->
+        <div class="section-label"><i class="fa-solid fa-palette"></i> 6. Phong cách Màu Nền Full (Tỉ lệ 1:1)</div>
+        <div class="ctrl-card mb-2">
+          <select id="climax-bg-style-select" class="ctrl-select" onchange="updateClimaxBgStyle(this.value)">
+            <option value="solid-red">🔴 Full Màu Đỏ (Crimson Red)</option>
+            <option value="solid-dark">⬛ Full Màu Xám Đen (Dark Charcoal)</option>
+            <option value="solid-purple">🟣 Full Màu Tím Cyber (Cyber Purple)</option>
+            <option value="solid-blue">💙 Full Màu Xanh Dương (Deep Blue)</option>
+            <option value="solid-gold">🟡 Full Màu Vàng Kim (Royal Gold)</option>
+            <option value="gradient-fire">🔥 Full Gradient Đỏ Lửa (Fire Arena)</option>
+          </select>
+        </div>
+
+      </div> <!-- /#tab-content-climax -->
+
     </aside>
 
     <!-- ════════════════════════════════
@@ -595,8 +699,92 @@
             <div class="flashlight-bottom-stage" id="flashlight-bottom-stage">
               <canvas id="fl-color-canvas" class="fl-layer-color" width="360" height="420"></canvas>
               <canvas id="fl-mask-canvas" class="fl-layer-mask" width="360" height="420"></canvas>
-              <div id="fl-beam-ring" class="fl-beam-ring"></div>
+            </div>
+          </div>
 
+          <!-- Climax Automation Split Battle Theater Overlay -->
+          <div class="climax-theater-overlay" id="climax-theater-overlay">
+            <!-- Layer 1: Background Scene & Side Defeat Darkening -->
+            <div class="climax-bg-wrap" id="climax-bg-wrap">
+              <img id="climax-bg-img" alt="Background Scene" />
+              <div class="climax-split-divider" id="climax-split-divider"></div>
+              <div class="climax-side-darken left" id="climax-darken-left"></div>
+              <div class="climax-side-darken right" id="climax-darken-right"></div>
+            </div>
+
+            <!-- Layer 2: Opponent Sprite (JAX Level 67 - Trái/Phải) -->
+            <div class="climax-opponent-wrap" id="climax-opponent-wrap">
+              <img id="climax-opponent-img" alt="Opponent" />
+            </div>
+
+            <!-- Layer 3: Hero Sprite (POMNI Level 20 - Yếu / Thức tỉnh) -->
+            <div class="climax-hero-wrap" id="climax-hero-wrap">
+              <img id="climax-hero-img" alt="Hero" />
+            </div>
+
+            <!-- Collision Clash FX Spreads / Sparks -->
+            <div class="climax-clash-fx" id="climax-clash-fx">
+              <div class="clash-spark-center">💥</div>
+            </div>
+
+            <!-- Layer 4: Top Dual HP Bars (Pomni Lv 20 vs Jax Lv 67) -->
+            <div class="climax-dual-hp-ui" id="climax-dual-hp-ui">
+              <!-- Left HP Side: Hero (Pomni) -->
+              <div class="climax-hp-side hero-side">
+                <div class="climax-hp-head">
+                  <span class="hp-hero-name" id="climax-hero-name-display">POMNI</span>
+                  <span class="hp-hero-lv" id="climax-hero-lv-display">Lv 20</span>
+                </div>
+                <div class="climax-hp-track">
+                  <div class="climax-hp-fill hero-hp-fill" id="climax-hp-fill" style="width: 100%;"></div>
+                </div>
+              </div>
+
+              <!-- VS Badge -->
+              <div class="climax-vs-badge">VS</div>
+
+              <!-- Right HP Side: Opponent (Jax) -->
+              <div class="climax-hp-side opp-side">
+                <div class="climax-hp-head">
+                  <span class="hp-opp-lv" id="climax-opp-lv-display">Lv 67</span>
+                  <span class="hp-opp-name" id="climax-opp-name-display">JAX</span>
+                </div>
+                <div class="climax-hp-track">
+                  <div class="climax-hp-fill opp-hp-fill" id="climax-opp-hp-fill" style="width: 100%;"></div>
+                </div>
+              </div>
+            </div>
+
+
+            <!-- Layer 5: CTA Emergency Help Banner (5s Countdown) -->
+            <div class="climax-cta-overlay" id="climax-cta-overlay">
+              <div class="climax-countdown-box" id="climax-countdown-box">5</div>
+              <div class="climax-cta-banner" id="climax-cta-banner">
+                <span id="climax-cta-text-line1">POMNI NEEDS POWER!</span>
+                <span id="climax-cta-text-line2">LIKE & SUBSCRIBE TO SAVE HER!</span>
+              </div>
+              <div class="climax-power-bar-wrap">
+                <div class="climax-power-bar-label">RECHARGING ENERGY... <span id="climax-power-pct">0%</span></div>
+                <div class="climax-power-track">
+                  <div class="climax-power-fill" id="climax-power-fill" style="width: 0%;"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Layer 3.5: Dragon / Super Saiyan Energy Charge Aura & Lightning FX -->
+            <div class="climax-aura-fx" id="climax-aura-fx">
+              <div class="saiyan-aura-flame"></div>
+              <div class="aura-fire-ring"></div>
+              <div class="saiyan-sparks">⚡ 🔥 ⚡</div>
+            </div>
+
+            <!-- Layer 6: Flash White Explosion & Shake Screen FX -->
+            <div class="climax-flash-fx" id="climax-flash-fx"></div>
+
+            <!-- Layer 7: Final Victory KO Celebration Screen -->
+            <div class="climax-finish-banner" id="climax-finish-banner">
+              <div class="finish-title">VICTORY KO!</div>
+              <div class="finish-sub">POMNI DEFEATED JAX! 🏆</div>
             </div>
           </div>
 
@@ -731,7 +919,18 @@ LET ME KNOW IN THE COMMENTS!</textarea>
             <label class="ctrl-lbl"><i class="fa-solid fa-clock"></i> Thời gian hạ đối thủ (giây)</label>
             <input type="number" class="ctrl-input" id="battle-step-sec" value="3.0" step="0.5" min="1" max="10" />
           </div>
-          <div class="ctrl-item">
+          <div class="ctrl-item" style="margin-top:8px;">
+            <label class="ctrl-lbl"><i class="fa-solid fa-palette"></i> Màu Nền (Khi không có ảnh nền)</label>
+            <select id="right-battle-bg-style-select" class="ctrl-select" onchange="updateBattleBgStyle(this.value)">
+              <option value="solid-red">🔴 Full Màu Đỏ (Crimson Red)</option>
+              <option value="solid-dark">⬛ Full Màu Xám Đen (Dark Charcoal)</option>
+              <option value="solid-purple">🟣 Full Màu Tím Cyber (Cyber Purple)</option>
+              <option value="solid-blue">💙 Full Màu Xanh Dương (Deep Blue)</option>
+              <option value="solid-gold">🟡 Full Màu Vàng Kim (Royal Gold)</option>
+              <option value="gradient-fire">🔥 Full Gradient Đỏ Lửa (Fire Arena)</option>
+            </select>
+          </div>
+          <div class="ctrl-item" style="margin-top:8px;">
             <label class="ctrl-lbl"><i class="fa-solid fa-volume-high"></i> Âm thanh chém & Tấn công</label>
             <input type="checkbox" id="battle-sound-enable" checked />
           </div>
@@ -748,8 +947,59 @@ LET ME KNOW IN THE COMMENTS!</textarea>
         </div>
       </div> <!-- /#right-tab-content-battle -->
 
-      <!-- RIGHT SIDEBAR CONTENT: TAB 4 (PUZZLE GAME) -->
-      <div class="right-tab-content" id="right-tab-content-puzzle" style="display:none;"></div>
+      <!-- RIGHT SIDEBAR CONTENT: TAB 5 (FLASHLIGHT) -->
+      <div class="right-tab-content" id="right-tab-content-flashlight" style="display:none;">
+        <div class="section-label"><i class="fa-solid fa-play"></i> Điều khiển</div>
+        <div class="action-col">
+          <button class="act-btn act-blend" id="btn-fl-side" onclick="startFlashlightAnimation()"><i class="fa-solid fa-rocket"></i> Chạy Soi Đèn Pin</button>
+          <div class="action-row-sm">
+            <button class="act-btn act-reset" onclick="resetAll()"><i class="fa-solid fa-rotate-left"></i> Reset</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT SIDEBAR CONTENT: TAB 6 (CLIMAX AUTOMATION 15S) -->
+      <div class="right-tab-content" id="right-tab-content-climax" style="display:none;">
+        <div class="section-label"><i class="fa-solid fa-gear"></i> Cài đặt Kịch bản 15s (Climax)</div>
+        <div class="ctrl-card mb-2">
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="ctrl-lbl"><i class="fa-solid fa-user-shield"></i> Tên Nhân vật</label>
+              <input type="text" class="ctrl-input" id="climax-hero-name-input" value="POMNI" placeholder="VD: POMNI" onchange="updateClimaxHeroName(this.value)" />
+            </div>
+            <div>
+              <label class="ctrl-lbl"><i class="fa-solid fa-arrow-up-right-dots"></i> Level Hero</label>
+              <input type="text" class="ctrl-input" id="climax-hero-lv-input" value="Lv 20" placeholder="VD: Lv 20" />
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-2" style="margin-top:8px;">
+            <div>
+              <label class="ctrl-lbl"><i class="fa-solid fa-skull"></i> Tên Đối thủ</label>
+              <input type="text" class="ctrl-input" id="climax-opp-name-input" value="JAX" placeholder="VD: JAX" />
+            </div>
+            <div>
+              <label class="ctrl-lbl"><i class="fa-solid fa-arrow-up-right-dots"></i> Level Đối thủ</label>
+              <input type="text" class="ctrl-input" id="climax-opp-lv-input" value="Lv 67" placeholder="VD: Lv 67" />
+            </div>
+          </div>
+          <div class="ctrl-item" style="margin-top:8px;">
+            <label class="ctrl-lbl"><i class="fa-solid fa-bullhorn"></i> Dòng 1: Lời kêu gọi CTA (Khổng lồ)</label>
+            <input type="text" class="ctrl-input" id="climax-cta-line1-input" value="POMNI NEEDS POWER!" placeholder="Dòng 1 kêu gọi..." />
+          </div>
+          <div class="ctrl-item" style="margin-top:8px;">
+            <label class="ctrl-lbl"><i class="fa-solid fa-thumbs-up"></i> Dòng 2: Hướng dẫn Tương tác</label>
+            <input type="text" class="ctrl-input" id="climax-cta-line2-input" value="LIKE & SUBSCRIBE TO SAVE HER!" placeholder="Dòng 2 tương tác..." />
+          </div>
+        </div>
+
+        <div class="section-label" style="margin-top:6px;"><i class="fa-solid fa-play"></i> Điều khiển Kịch bản</div>
+        <div class="action-col">
+          <button class="act-btn act-blend" id="btn-climax-run-side" onclick="runClimaxAutomation()"><i class="fa-solid fa-bolt-lightning"></i> Khởi chạy Kịch bản 22s</button>
+          <div class="action-row-sm">
+            <button class="act-btn act-reset" onclick="resetClimaxAutomation()"><i class="fa-solid fa-rotate-left"></i> Reset</button>
+          </div>
+        </div>
+      </div>
 
       <!-- ── Phase Indicator ── -->
       <div class="phase-bar" id="phase-bar">

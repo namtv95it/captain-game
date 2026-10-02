@@ -1009,15 +1009,21 @@ function enterRecordingMode() {
     const vw = window.innerWidth;
     const vh = window.innerHeight;
 
-    // Theater natural height fills viewport, width = height * 9/16
-    const theaterH = vh;
-    const theaterW = theaterH * 9 / 16;
+    const is1to1 = document.body.classList.contains('climax-active-mode');
 
-    // After rotating -90deg: visual width = theaterH, visual height = theaterW
-    // Scale so visual width fits the full viewport width
-    const scale = vw / theaterH;
-
-    theater.style.transform = `rotate(-90deg) scale(${scale})`;
+    if (is1to1) {
+      // 1:1 Square Theater in rotated Landscape Mode
+      // When rotated -90deg, natural size is S x S where S = min(vw, vh)
+      // Scale down slightly (0.96) to ensure 100% full view without top/bottom cropping
+      const side = Math.min(vw, vh);
+      const scale = (side / theater.offsetHeight) * 0.96;
+      theater.style.transform = `rotate(-90deg) scale(${scale})`;
+    } else {
+      // 9:16 Portrait Theater in rotated Landscape Mode
+      const theaterH = vh;
+      const scale = vw / theaterH;
+      theater.style.transform = `rotate(-90deg) scale(${scale})`;
+    }
     theater.style.transformOrigin = 'center center';
 
     // Recalculate canvas dimensions after layout settles
@@ -3128,6 +3134,7 @@ const B = {
   jesus3Img: null,   // Jesus 3 (Victory)
   victoryBgImg: null,// Victory Background Scene
   slashImg: null,    // Slash PNG FX
+  bgStyle: 'solid-red', // Default Background Color Style
   opponents: [],     // Array of Image objects
   scenes: [],        // Array of Image objects
   oppNames: [],      // Array of Opponent Name strings
@@ -3135,6 +3142,15 @@ const B = {
   timer: null,
   stepIdx: 0
 };
+
+function updateBattleBgStyle(styleVal) {
+  B.bgStyle = styleVal;
+  const sel1 = document.getElementById('battle-bg-style-select');
+  const sel2 = document.getElementById('right-battle-bg-style-select');
+  if (sel1) sel1.value = styleVal;
+  if (sel2) sel2.value = styleVal;
+  renderBattleTable();
+}
 
 function pickBattleFile(type) {
   const el = document.getElementById(`file-${type}`);
@@ -3248,7 +3264,7 @@ function renderBattleTable() {
   const countEl = document.getElementById('battle-steps-count');
   if (!tbody) return;
 
-  const total = Math.max(B.opponents.length, B.scenes.length);
+  const total = B.opponents.length;
   if (countEl) countEl.textContent = total > 0 ? `(${total} đối thủ)` : '';
   tbody.innerHTML = '';
 
@@ -3256,7 +3272,7 @@ function renderBattleTable() {
     tbody.innerHTML = `
       <div class="bt-empty-state" style="padding: 16px; text-align: center; color: var(--text-dim); font-size: 0.82rem;">
         <i class="fa-solid fa-cloud-arrow-up" style="font-size: 1.4rem; display: block; margin-bottom: 6px;"></i>
-        <span>Tải lên các đối thủ & nền cảnh tương ứng để bắt đầu battle!</span>
+        <span>Tải lên các đối thủ để bắt đầu battle! (Nền cảnh tùy chọn, nếu thiếu sẽ tự động dùng Màu Nền)</span>
       </div>
     `;
     return;
@@ -3317,7 +3333,7 @@ function renderBattleTable() {
     nameInput.oninput = (e) => { B.oppNames[i] = e.target.value; };
     colFx.appendChild(nameInput);
 
-    // Col 3: Background Scene Image
+    // Col 3: Background Scene Image (or Default Color Fallback Slot)
     const colScene = document.createElement('div');
     colScene.className = 'bt-col bt-col-card';
     if (sceneImgObj) {
@@ -3344,8 +3360,8 @@ function renderBattleTable() {
       attachColDrag(wrap, 'battle-scene', i, colScene, B.scenes, renderBattleTable);
     } else {
       colScene.innerHTML = `
-        <div class="bt-slot-empty" onclick="document.getElementById('battle-scenes-input').click()">
-          <i class="fa-solid fa-plus"></i><span>Nền cảnh ${i + 1}</span>
+        <div class="bt-slot-empty color-fallback" onclick="document.getElementById('battle-scenes-input').click()" title="Đang dùng Màu Nền (Bấm để chọn ảnh nền riêng)">
+          <i class="fa-solid fa-palette"></i><span>Dùng Màu Nền</span>
         </div>
       `;
       attachCellDropTarget(colScene, 'battle-scene', i, B.scenes, renderBattleTable);
@@ -3359,13 +3375,13 @@ function renderBattleTable() {
 }
 
 function runBattleSolo() {
-  const total = Math.min(B.opponents.length, B.scenes.length);
+  const total = B.opponents.length;
   if (!B.jesus1Img || !B.jesus2Img || !B.jesus3Img) {
     toast('Vui lòng tải đủ 3 trạng thái của nhân vật chính (1. Hạ tay, 2. Vung tay, 3. Thắng)! ⚔️');
     return;
   }
   if (total === 0) {
-    toast('Vui lòng tải lên ít nhất 1 cặp (Đối thủ + Nền cảnh)! ⚡');
+    toast('Vui lòng tải lên ít nhất 1 đối thủ! ⚡');
     return;
   }
   if (B.running) return;
@@ -3391,7 +3407,7 @@ function runBattleSolo() {
 }
 
 function startBattleStepSequence(stepIdx) {
-  const total = Math.min(B.opponents.length, B.scenes.length);
+  const total = B.opponents.length;
   if (stepIdx >= total) {
     // All opponents defeated! Show Victory screen!
     showBattleVictoryScreen();
@@ -3423,9 +3439,20 @@ function startBattleStepSequence(stepIdx) {
   const monsterHpName = document.getElementById('battle-monster-hp-name');
   if (monsterHpName) monsterHpName.textContent = oppName.toUpperCase();
 
-  // Reset states
-  if (bgImg && currentScene) bgImg.src = currentScene.src;
-  if (bgWrap) bgWrap.classList.remove('grayscale');
+  // Reset states & Apply Background Scene Image OR Selected Background Color
+  if (bgWrap) {
+    if (currentScene) {
+      bgWrap.style.background = 'none';
+      if (bgImg) {
+        bgImg.src = currentScene.src;
+        bgImg.style.display = 'block';
+      }
+    } else {
+      if (bgImg) bgImg.style.display = 'none';
+      bgWrap.className = 'battle-bg-wrap ' + (B.bgStyle || 'solid-red');
+    }
+    bgWrap.classList.remove('grayscale');
+  }
 
   if (oppImg && currentOpp) oppImg.src = currentOpp.src;
   if (oppWrap) {
@@ -3492,6 +3519,7 @@ function showBattleVictoryScreen() {
   const victoryOverlay = document.getElementById('battle-victory-overlay');
   const victoryImg = document.getElementById('battle-victory-img');
   const victoryBgImg = document.getElementById('battle-victory-bg-img');
+  const victoryBgWrap = document.getElementById('battle-victory-bg-wrap');
   const jesusWrap = document.getElementById('battle-jesus-wrap');
   const slashWrap = document.getElementById('battle-slash-wrap');
   const healthUi = document.getElementById('battle-health-ui');
@@ -3505,11 +3533,22 @@ function showBattleVictoryScreen() {
     victoryImg.src = B.jesus3Img.src;
   }
 
-  // Set Victory Background Scene image (custom victory bg or fallback to last scene image)
-  if (victoryBgImg && B.victoryBgImg) {
-    victoryBgImg.src = B.victoryBgImg.src;
-  } else if (victoryBgImg && B.scenes.length > 0) {
-    victoryBgImg.src = B.scenes[B.scenes.length - 1].src;
+  // Set Victory Background Scene image OR Background Color Style
+  if (B.victoryBgImg) {
+    if (victoryBgWrap) victoryBgWrap.style.background = 'none';
+    if (victoryBgImg) {
+      victoryBgImg.src = B.victoryBgImg.src;
+      victoryBgImg.style.display = 'block';
+    }
+  } else if (B.scenes.length > 0 && B.scenes[B.scenes.length - 1]) {
+    if (victoryBgWrap) victoryBgWrap.style.background = 'none';
+    if (victoryBgImg) {
+      victoryBgImg.src = B.scenes[B.scenes.length - 1].src;
+      victoryBgImg.style.display = 'block';
+    }
+  } else {
+    if (victoryBgImg) victoryBgImg.style.display = 'none';
+    if (victoryBgWrap) victoryBgWrap.className = 'battle-victory-bg-wrap ' + (B.bgStyle || 'solid-red');
   }
 
   if (victoryOverlay) {
@@ -4495,4 +4534,542 @@ function switchTab(tabName) {
       puzzleOverlay.classList.remove('show');
     }
   }
+
+  const climaxOverlay = document.getElementById('climax-theater-overlay');
+  if (climaxOverlay) {
+    if (tabName === 'climax') {
+      climaxOverlay.classList.add('show');
+      document.body.classList.add('climax-active-mode');
+      renderClimaxPreview();
+    } else {
+      climaxOverlay.classList.remove('show');
+      document.body.classList.remove('climax-active-mode');
+    }
+  }
+}
+
+// ──────────────────────────────────────────────────────────────
+// CLIMAX AUTOMATION MODULE (SPLIT DUEL & REVENGE CLIMAX)
+// ──────────────────────────────────────────────────────────────
+const CLIMAX = {
+  heroNormalImg: null,
+  heroWeakImg: null,
+  heroStrongImg: null,
+  opponentImg: null,
+  bgImg: null,
+  bgStyle: 'solid-red',
+  heroName: 'POMNI',
+  running: false,
+  timers: []
+};
+
+function pickClimaxFile(slot) {
+  document.getElementById(`file-climax-${slot}`).click();
+}
+
+(function initClimaxListeners() {
+  ['hero-normal', 'hero-weak', 'hero-strong', 'opponent', 'bg'].forEach(slot => {
+    const input = document.getElementById(`file-climax-${slot}`);
+    if (input) {
+      input.addEventListener('change', e => {
+        const file = e.target.files[0];
+        if (file) loadClimaxSlot(slot, file);
+      });
+    }
+  });
+})();
+
+function loadClimaxSlot(slot, file) {
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const img = new Image();
+    img.onload = () => {
+      if (slot === 'hero-normal') CLIMAX.heroNormalImg = img;
+      if (slot === 'hero-weak')   CLIMAX.heroWeakImg   = img;
+      if (slot === 'hero-strong') CLIMAX.heroStrongImg = img;
+      if (slot === 'opponent')    CLIMAX.opponentImg    = img;
+      if (slot === 'bg')          CLIMAX.bgImg          = img;
+
+      document.getElementById(`body-climax-${slot}`).style.display = 'none';
+      const pv = document.getElementById(`prev-climax-${slot}`);
+      if (pv) pv.style.display = 'flex';
+      document.getElementById(`pimg-climax-${slot}`).src = ev.target.result;
+
+      renderClimaxPreview();
+    };
+    img.src = ev.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function clearClimaxSlot(slot) {
+  if (slot === 'hero-normal') CLIMAX.heroNormalImg = null;
+  if (slot === 'hero-weak')   CLIMAX.heroWeakImg   = null;
+  if (slot === 'hero-strong') CLIMAX.heroStrongImg = null;
+  if (slot === 'opponent')    CLIMAX.opponentImg    = null;
+  if (slot === 'bg')          CLIMAX.bgImg          = null;
+
+  document.getElementById(`body-climax-${slot}`).style.display = 'flex';
+  const pv = document.getElementById(`prev-climax-${slot}`);
+  if (pv) pv.style.display = 'none';
+  document.getElementById(`file-climax-${slot}`).value = '';
+
+  renderClimaxPreview();
+}
+
+function updateClimaxBgStyle(styleVal) {
+  CLIMAX.bgStyle = styleVal;
+  const bgWrap = document.getElementById('climax-bg-wrap');
+  if (bgWrap) {
+    bgWrap.className = 'climax-bg-wrap ' + styleVal;
+  }
+}
+
+function updateClimaxHeroName(val) {
+  CLIMAX.heroName = (val.trim() || 'POMNI').toUpperCase();
+  const nameDisplay = document.getElementById('climax-hero-name-display');
+  if (nameDisplay) nameDisplay.textContent = CLIMAX.heroName;
+
+  // Auto suggest CTA line 1 if empty or default
+  const line1Input = document.getElementById('climax-cta-line1-input');
+  if (line1Input) {
+    line1Input.value = `${CLIMAX.heroName} NEEDS POWER!`;
+  }
+}
+
+function getClimaxFallbackImg(type) {
+  if (type === 'bg') {
+    return '';
+  }
+  if (type === 'hero-normal') {
+    return 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="400" height="500" viewBox="0 0 400 500"><g transform="translate(200, 260)"><circle cx="0" cy="-70" r="65" fill="%233b82f6"/><path d="M-50,60 C-50,-10 50,-10 50,60 Z" fill="%232563eb"/><circle cx="-22" cy="-80" r="8" fill="%23ffffff"/><circle cx="22" cy="-80" r="8" fill="%23ffffff"/><circle cx="-22" cy="-80" r="4" fill="%23000"/><circle cx="22" cy="-80" r="4" fill="%23000"/><path d="M-25,-45 Q0,-30 25,-45" stroke="%23ffffff" stroke-width="5" fill="none"/><text x="0" y="-150" font-family="sans-serif" font-size="28" font-weight="900" fill="%2360a5fa" text-anchor="middle">😀 HERO NORMAL</text></g></svg>';
+  }
+  if (type === 'hero-weak') {
+    return 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="400" height="500" viewBox="0 0 400 500"><g transform="translate(200, 260)"><circle cx="0" cy="-70" r="65" fill="%23f43f5e"/><path d="M-50,60 C-50,-10 50,-10 50,60 Z" fill="%23e11d48"/><circle cx="-22" cy="-80" r="8" fill="%23ffffff"/><circle cx="22" cy="-80" r="8" fill="%23ffffff"/><circle cx="-22" cy="-78" r="4" fill="%23000"/><circle cx="22" cy="-78" r="4" fill="%23000"/><path d="M-25,-45 Q0,-65 25,-45" stroke="%23ffffff" stroke-width="5" fill="none"/><text x="0" y="-150" font-family="sans-serif" font-size="28" font-weight="900" fill="%23fef08a" text-anchor="middle">⚡ HERO WEAK</text></g></svg>';
+  }
+  if (type === 'hero-strong') {
+    return 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="400" height="500" viewBox="0 0 400 500"><g transform="translate(200, 260)"><circle cx="0" cy="-70" r="75" fill="%23a855f7"/><path d="M-60,70 C-60,-20 60,-20 60,70 Z" fill="%239333ea"/><circle cx="-24" cy="-82" r="12" fill="%23fef08a"/><circle cx="24" cy="-82" r="12" fill="%23fef08a"/><circle cx="-24" cy="-82" r="6" fill="%23dc2626"/><circle cx="24" cy="-82" r="6" fill="%23dc2626"/><path d="M-30,-45 Q0,-25 30,-45" stroke="%23fef08a" stroke-width="6" fill="none"/><text x="0" y="-160" font-family="sans-serif" font-size="32" font-weight="900" fill="%23ef4444" text-anchor="middle">🔥 SUPER HERO</text></g></svg>';
+  }
+  if (type === 'opponent') {
+    return 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 400 400"><g transform="translate(200, 200)"><polygon points="0,-110 35,-35 110,0 35,35 0,110 -35,35 -110,0 -35,-35" fill="%23dc2626"/><circle cx="0" cy="0" r="50" fill="%230f172a"/><circle cx="-16" cy="-12" r="8" fill="%23fbbf24"/><circle cx="16" cy="-12" r="8" fill="%23fbbf24"/><text x="0" y="-130" font-family="sans-serif" font-size="26" font-weight="900" fill="%23fca5a5" text-anchor="middle">😈 JAX BOSS</text></g></svg>';
+  }
+  return '';
+}
+
+function renderClimaxPreview() {
+  const bgWrap        = document.getElementById('climax-bg-wrap');
+  const bgImgEl       = document.getElementById('climax-bg-img');
+  const opponentImgEl = document.getElementById('climax-opponent-img');
+  const heroImgEl     = document.getElementById('climax-hero-img');
+  const nameDisplay   = document.getElementById('climax-hero-name-display');
+
+  if (bgWrap) {
+    if (CLIMAX.bgImg) {
+      bgWrap.style.background = 'none';
+      if (bgImgEl) {
+        bgImgEl.src = CLIMAX.bgImg.src;
+        bgImgEl.style.display = 'block';
+      }
+    } else {
+      if (bgImgEl) bgImgEl.style.display = 'none';
+      bgWrap.className = 'climax-bg-wrap ' + (CLIMAX.bgStyle || 'solid-red');
+    }
+  }
+
+  const heroNormalSrc = CLIMAX.heroNormalImg ? CLIMAX.heroNormalImg.src : (CLIMAX.heroWeakImg ? CLIMAX.heroWeakImg.src : getClimaxFallbackImg('hero-normal'));
+  if (opponentImgEl) opponentImgEl.src = CLIMAX.opponentImg ? CLIMAX.opponentImg.src : getClimaxFallbackImg('opponent');
+  if (heroImgEl)     heroImgEl.src     = heroNormalSrc;
+  if (nameDisplay)   nameDisplay.textContent = CLIMAX.heroName;
+}
+
+function clearClimaxTimers() {
+  CLIMAX.timers.forEach(t => clearTimeout(t));
+  CLIMAX.timers = [];
+}
+
+function resetClimaxAutomation() {
+  CLIMAX.running = false;
+  clearClimaxTimers();
+
+  document.body.classList.remove('climax-active-mode');
+
+  const overlay      = document.getElementById('climax-theater-overlay');
+  const bgWrap       = document.getElementById('climax-bg-wrap');
+  const oppWrap      = document.getElementById('climax-opponent-wrap');
+  const heroWrap     = document.getElementById('climax-hero-wrap');
+  const splitDivider = document.getElementById('climax-split-divider');
+  const clashFx      = document.getElementById('climax-clash-fx');
+  const warningEl    = document.getElementById('climax-error-warning');
+  const ctaOverlay   = document.getElementById('climax-cta-overlay');
+  const hpFill       = document.getElementById('climax-hp-fill');
+  const oppHpFill    = document.getElementById('climax-opp-hp-fill');
+  const powerFill    = document.getElementById('climax-power-fill');
+  const flashFx      = document.getElementById('climax-flash-fx');
+  const auraFx       = document.getElementById('climax-aura-fx');
+  const finishBanner = document.getElementById('climax-finish-banner');
+
+  const darkenLeft   = document.getElementById('climax-darken-left');
+  const darkenRight  = document.getElementById('climax-darken-right');
+
+  if (overlay)      overlay.classList.remove('shake');
+  if (bgWrap)       bgWrap.classList.remove('darkened');
+  if (darkenLeft)   darkenLeft.classList.remove('show');
+  if (darkenRight)  darkenRight.classList.remove('show');
+  if (splitDivider) splitDivider.classList.remove('show');
+  if (clashFx)      clashFx.classList.remove('active');
+  if (oppWrap)      oppWrap.classList.remove('enter-right', 'clash-right', 'blow-away', 'entered');
+  if (heroWrap)     heroWrap.classList.remove('enter-left', 'clash-left', 'weak', 'awaken', 'charging-saiyan');
+  if (warningEl)    warningEl.classList.remove('show');
+  if (ctaOverlay)   ctaOverlay.classList.remove('show');
+  if (flashFx)      flashFx.classList.remove('active');
+  if (auraFx)       auraFx.classList.remove('show');
+  if (finishBanner) finishBanner.classList.remove('show');
+  if (hpFill)       hpFill.style.width = '100%';
+  if (oppHpFill)    oppHpFill.style.width = '100%';
+  if (powerFill)    powerFill.style.width = '0%';
+
+  renderClimaxPreview();
+}
+
+/* ── RUN SCRIPT: SPLIT BATTLE & REVENGE CLIMAX ── */
+function runClimaxAutomation() {
+  resetClimaxAutomation();
+  CLIMAX.running = true;
+  document.body.classList.add('climax-active-mode');
+
+  // Enter mobile/desktop recording view
+  if (window.innerWidth < 1024) {
+    openMobileTheater();
+  } else {
+    enterRecordingMode();
+  }
+
+  const climaxOverlay = document.getElementById('climax-theater-overlay');
+  if (climaxOverlay) climaxOverlay.classList.add('show');
+
+  const heroNameInput = document.getElementById('climax-hero-name-input');
+  const heroLvInput   = document.getElementById('climax-hero-lv-input');
+  const oppNameInput  = document.getElementById('climax-opp-name-input');
+  const oppLvInput    = document.getElementById('climax-opp-lv-input');
+  const line1Input    = document.getElementById('climax-cta-line1-input');
+  const line2Input    = document.getElementById('climax-cta-line2-input');
+
+  const heroName = (heroNameInput?.value.trim() || 'POMNI').toUpperCase();
+  const heroLv   = heroLvInput?.value.trim()   || 'Lv 20';
+  const oppName  = (oppNameInput?.value.trim()  || 'JAX').toUpperCase();
+  const oppLv    = oppLvInput?.value.trim()    || 'Lv 67';
+  const ctaLine1 = line1Input?.value.trim() || `${heroName} NEEDS POWER!`;
+  const ctaLine2 = line2Input?.value.trim() || 'LIKE & SUBSCRIBE TO SAVE HER!';
+
+  document.getElementById('climax-hero-name-display').textContent = heroName;
+  document.getElementById('climax-hero-lv-display').textContent   = heroLv;
+  document.getElementById('climax-opp-name-display').textContent  = oppName;
+  document.getElementById('climax-opp-lv-display').textContent    = oppLv;
+  document.getElementById('climax-cta-text-line1').textContent   = ctaLine1;
+  document.getElementById('climax-cta-text-line2').textContent   = ctaLine2;
+
+  const bgWrap       = document.getElementById('climax-bg-wrap');
+  const oppWrap      = document.getElementById('climax-opponent-wrap');
+  const heroWrap     = document.getElementById('climax-hero-wrap');
+  const splitDivider = document.getElementById('climax-split-divider');
+  const clashFx      = document.getElementById('climax-clash-fx');
+  const bgImgEl      = document.getElementById('climax-bg-img');
+  const oppImgEl     = document.getElementById('climax-opponent-img');
+  const heroImgEl    = document.getElementById('climax-hero-img');
+
+  const warningEl    = document.getElementById('climax-error-warning');
+  const ctaOverlay   = document.getElementById('climax-cta-overlay');
+  const countdown    = document.getElementById('climax-countdown-box');
+  const hpFill       = document.getElementById('climax-hp-fill');
+  const oppHpFill    = document.getElementById('climax-opp-hp-fill');
+  const powerFill    = document.getElementById('climax-power-fill');
+  const powerPct     = document.getElementById('climax-power-pct');
+  const flashFx      = document.getElementById('climax-flash-fx');
+  const auraFx       = document.getElementById('climax-aura-fx');
+  const finishBanner = document.getElementById('climax-finish-banner');
+
+  // Set images (User uploaded or Demo Fallback)
+  const heroNormalSrc = CLIMAX.heroNormalImg ? CLIMAX.heroNormalImg.src : (CLIMAX.heroWeakImg ? CLIMAX.heroWeakImg.src : getClimaxFallbackImg('hero-normal'));
+  const heroWeakSrc   = CLIMAX.heroWeakImg   ? CLIMAX.heroWeakImg.src   : (CLIMAX.heroNormalImg ? CLIMAX.heroNormalImg.src : getClimaxFallbackImg('hero-weak'));
+  const heroStrongSrc = CLIMAX.heroStrongImg ? CLIMAX.heroStrongImg.src : (CLIMAX.heroWeakImg   ? CLIMAX.heroWeakImg.src   : getClimaxFallbackImg('hero-strong'));
+  const opponentSrc   = CLIMAX.opponentImg   ? CLIMAX.opponentImg.src   : getClimaxFallbackImg('opponent');
+
+  if (bgWrap) {
+    if (CLIMAX.bgImg) {
+      bgWrap.style.background = 'none';
+      if (bgImgEl) {
+        bgImgEl.src = CLIMAX.bgImg.src;
+        bgImgEl.style.display = 'block';
+      }
+    } else {
+      if (bgImgEl) bgImgEl.style.display = 'none';
+      bgWrap.className = 'climax-bg-wrap ' + (CLIMAX.bgStyle || 'solid-red');
+    }
+  }
+
+  if (oppImgEl)  oppImgEl.src  = opponentSrc;
+  if (heroImgEl) heroImgEl.src = heroNormalSrc;
+
+  // ══════════════════════════════════════════════════════════════
+  // GIAI ĐOẠN 1 (Giây 0 - 3s): Màn hình ban đầu KHÔNG CÓ nhân vật nào.
+  // 1. Pomni xuất hiện di chuyển từ ngoài bên trái vào.
+  // 2. Jax xuất hiện di chuyển từ ngoài bên phải vào (sau 1.2s).
+  // ══════════════════════════════════════════════════════════════
+  if (splitDivider) splitDivider.classList.add('show');
+  if (heroWrap) heroWrap.classList.add('enter-left');
+  playSfxSwoosh(true);
+
+  CLIMAX.timers.push(setTimeout(() => {
+    if (!CLIMAX.running) return;
+    if (oppWrap) oppWrap.classList.add('enter-right', 'entered');
+    playSfxSwoosh(true);
+  }, 1200));
+
+  // ══════════════════════════════════════════════════════════════
+  // GIAI ĐOẠN 2 (Giây 3.5 - 7s): Giao chiến dữ dội (Hất va chạm, tia lửa nhấp nháy 💥)
+  // ══════════════════════════════════════════════════════════════
+  CLIMAX.timers.push(setTimeout(() => {
+    if (!CLIMAX.running) return;
+
+    if (heroWrap) {
+      heroWrap.classList.remove('enter-left');
+      heroWrap.classList.add('clash-left');
+    }
+    if (oppWrap) {
+      oppWrap.classList.remove('enter-right');
+      oppWrap.classList.add('clash-right');
+    }
+    if (clashFx) clashFx.classList.add('active');
+
+    playSfxImpact();
+  }, 3500));
+
+  // ══════════════════════════════════════════════════════════════
+  // GIAI ĐOẠN 3 (Giây 7 - 10s): Pomni thua cuộc nằm run rẩy & HP tụt cạn, Cảnh báo nguy cấp
+  // ══════════════════════════════════════════════════════════════
+  CLIMAX.timers.push(setTimeout(() => {
+    if (!CLIMAX.running) return;
+
+    if (clashFx)  clashFx.classList.remove('active');
+    if (oppWrap)  oppWrap.classList.remove('clash-right');
+
+    // Chuyển sang ảnh Pomni Thất bại / Thua cuộc
+    if (heroImgEl && heroWeakSrc) heroImgEl.src = heroWeakSrc;
+
+    if (heroWrap) {
+      heroWrap.classList.remove('clash-left');
+      heroWrap.classList.add('weak');
+    }
+
+    // Pomni HP Bar drops to 8%
+    if (hpFill) hpFill.style.width = '8%';
+
+    // Chỉ tối 1 nửa màn hình phía bên Pomni (Bên Trái) khi Pomni bị thua gục
+    const darkenLeft = document.getElementById('climax-darken-left');
+    if (darkenLeft) darkenLeft.classList.add('show');
+
+    playClimaxWarningSound();
+  }, 7000));
+
+  // ══════════════════════════════════════════════════════════════
+  // GIAI ĐOẠN 4 (Giây 10 - 15s): Đếm ngược 5s & Kêu gọi Like/Sub tiếp sức
+  // ══════════════════════════════════════════════════════════════
+  CLIMAX.timers.push(setTimeout(() => {
+    if (!CLIMAX.running) return;
+
+    if (warningEl)  warningEl.classList.remove('show');
+    if (ctaOverlay) ctaOverlay.classList.add('show');
+
+    let sec = 5;
+    if (countdown) countdown.textContent = sec;
+
+    const countInterval = setInterval(() => {
+      if (!CLIMAX.running) {
+        clearInterval(countInterval);
+        return;
+      }
+      sec--;
+      if (sec >= 0) {
+        if (countdown) countdown.textContent = sec;
+        const pct = Math.round(((5 - sec) / 5) * 100);
+        if (powerFill) powerFill.style.width = pct + '%';
+        if (powerPct)  powerPct.textContent  = pct + '%';
+        playClimaxBeepSound(sec);
+      }
+      if (sec <= 0) {
+        clearInterval(countInterval);
+      }
+    }, 1000);
+  }, 10000));
+
+  // ══════════════════════════════════════════════════════════════
+  // GIAI ĐOẠN 5 (Giây 15 - 18s): Gồng nhận sức mạnh kiểu Songoku & Level tăng từ level hiện tại lên 999
+  // ══════════════════════════════════════════════════════════════
+  CLIMAX.timers.push(setTimeout(() => {
+    if (!CLIMAX.running) return;
+
+    if (ctaOverlay) ctaOverlay.classList.remove('show');
+
+    // Tắt tối bên trái của Hero
+    const darkenLeft  = document.getElementById('climax-darken-left');
+    const darkenRight = document.getElementById('climax-darken-right');
+    if (darkenLeft) darkenLeft.classList.remove('show');
+
+    // 1. Pomni vào tư thế Gồng nhận sức mạnh (Super Saiyan Charge)
+    if (heroWrap) {
+      heroWrap.classList.remove('weak');
+      heroWrap.classList.add('charging-saiyan');
+    }
+    if (auraFx) auraFx.classList.add('show');
+
+    // 2. Chữ Level bùng nổ hiệu ứng ánh sáng
+    const heroLvDisplay = document.getElementById('climax-hero-lv-display');
+    if (heroLvDisplay) heroLvDisplay.classList.add('lv-power-burst');
+
+    // Tăng Level liên tục từ Level hiện tại -> Level 999
+    const startLvNum = parseInt((heroLv || '').replace(/\D/g, '')) || 20;
+    const targetLvNum = 999;
+    const chargeDuration = 2500; // 2.5 giây gồng nhận năng lượng
+    const startTime = Date.now();
+
+    playClimaxChargingSound(2.5);
+
+    const lvInterval = setInterval(() => {
+      if (!CLIMAX.running) {
+        clearInterval(lvInterval);
+        return;
+      }
+      const elapsed = Date.now() - startTime;
+      const progress = Math.min(1, elapsed / chargeDuration);
+      
+      // Đường cong tăng tốc Level
+      const currentLv = Math.floor(startLvNum + (targetLvNum - startLvNum) * Math.pow(progress, 2.2));
+      
+      if (heroLvDisplay) heroLvDisplay.textContent = 'Lv ' + currentLv;
+
+      // Hồi lại thanh máu của Hero
+      if (hpFill) {
+        const recoverPct = Math.min(100, Math.floor(8 + progress * 92));
+        hpFill.style.width = recoverPct + '%';
+      }
+
+      if (progress >= 1) {
+        clearInterval(lvInterval);
+        if (heroLvDisplay) heroLvDisplay.textContent = 'Lv 999';
+        if (hpFill) hpFill.style.width = '100%';
+      }
+    }, 30);
+
+    // ══════════════════════════════════════════════════════════════
+    // GIAI ĐOẠN 5.5 (Sau khi đạt Lv 999): Bùng nổ chiêu thức ĐÁNH BAY Jax & Máu Jax về 0
+    // ══════════════════════════════════════════════════════════════
+    CLIMAX.timers.push(setTimeout(() => {
+      if (!CLIMAX.running) return;
+
+      // Pomni đổi sang dạng Thức tỉnh (Awaken Form)
+      if (heroWrap) {
+        heroWrap.classList.remove('charging-saiyan');
+        heroWrap.classList.add('awaken');
+      }
+      if (heroImgEl && heroStrongSrc) heroImgEl.src = heroStrongSrc;
+
+      // Chớp sáng nổ tung cực đại + Rung chấn
+      if (flashFx) {
+        flashFx.classList.add('active');
+        setTimeout(() => flashFx.classList.remove('active'), 350);
+      }
+      if (climaxOverlay) climaxOverlay.classList.add('shake');
+      playClimaxExplosionSound();
+
+      // Máu của Jax bị bùng nổ tụt về 0%, tối bên Jax và Jax bị đánh bay ra ngoài
+      if (darkenRight) darkenRight.classList.add('show');
+      if (oppHpFill)   oppHpFill.style.width = '0%';
+      if (oppWrap)     oppWrap.classList.add('blow-away');
+    }, 2600));
+
+  }, 15000));
+
+  // ══════════════════════════════════════════════════════════════
+  // GIAI ĐOẠN 6 (Giây 21 - 25s): Màn ăn mừng chiến thắng rực rỡ (Victory KO Celebration)
+  // ══════════════════════════════════════════════════════════════
+  CLIMAX.timers.push(setTimeout(() => {
+    if (!CLIMAX.running) return;
+
+    if (finishBanner) {
+      finishBanner.querySelector('.finish-title').textContent = 'VICTORY KO!';
+      finishBanner.querySelector('.finish-sub').textContent   = `${heroName} DEFEATED ${oppName}! 🏆`;
+      finishBanner.classList.add('show');
+    }
+    playSfxReveal();
+  }, 21000));
+}
+
+/* ── Web Audio Synth Sounds for Climax Mode ── */
+function playClimaxWarningSound() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(440, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.3);
+    gain.gain.setValueAtTime(0.2, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.4);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start();
+    osc.stop(ctx.currentTime + 0.4);
+  } catch (e) {}
+}
+
+function playClimaxBeepSound(sec) {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'sine';
+    const freq = sec === 0 ? 1200 : (600 + (5 - sec) * 100);
+    osc.frequency.setValueAtTime(freq, ctx.currentTime);
+    gain.gain.setValueAtTime(0.25, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.2);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start();
+    osc.stop(ctx.currentTime + 0.2);
+  } catch (e) {}
+}
+
+function playClimaxExplosionSound() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(120, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(30, ctx.currentTime + 0.8);
+    gain.gain.setValueAtTime(0.5, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.8);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start();
+    osc.stop(ctx.currentTime + 0.8);
+  } catch (e) {}
+}
+
+function playClimaxChargingSound(durationSec) {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(150, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(1200, ctx.currentTime + (durationSec || 2.5));
+    gain.gain.setValueAtTime(0.1, ctx.currentTime);
+    gain.gain.linearRampToValueAtTime(0.35, ctx.currentTime + (durationSec || 2.5) * 0.8);
+    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + (durationSec || 2.5));
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start();
+    osc.stop(ctx.currentTime + (durationSec || 2.5));
+  } catch (e) {}
 }
