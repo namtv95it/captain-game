@@ -542,7 +542,9 @@ function getHeaderBadgeHTML(idx) {
     badgeType = badgeTypeSelect?.value || 'actions';
   }
 
-  if (badgeType === 'actions') {
+  if (badgeType === 'none') {
+    return '';
+  } else if (badgeType === 'actions') {
     const icons = [
       '<i class="fa-solid fa-heart"></i>',
       '<i class="fa-solid fa-comment"></i>',
@@ -573,7 +575,9 @@ function getResultBadgeHTML(idx, isPokeMode = false) {
     badgeType = badgeTypeSelect?.value || 'actions';
   }
 
-  if (badgeType === 'actions') {
+  if (badgeType === 'none') {
+    return '';
+  } else if (badgeType === 'actions') {
     const actions = [
       { icon: '<i class="fa-solid fa-heart"></i>', label: 'LIKE' },
       { icon: '<i class="fa-solid fa-comment"></i>', label: 'COMMENT' },
@@ -623,16 +627,19 @@ function refreshEmojiHeader() {
     item.className = 'emoji-header-item';
     item.id = `emoji-header-item-${idx}`;
 
-    const badge = document.createElement('span');
-    badge.className = 'step-num-badge';
-    badge.innerHTML = getHeaderBadgeHTML(idx);
+    const badgeContent = getHeaderBadgeHTML(idx);
+    if (badgeContent) {
+      const badge = document.createElement('span');
+      badge.className = 'step-num-badge';
+      badge.innerHTML = badgeContent;
+      item.appendChild(badge);
+    }
 
     const imgEl = document.createElement('img');
     imgEl.src = img.src;
     imgEl.alt = `Emoji bước ${idx + 1}`;
 
     item.appendChild(imgEl);
-    item.appendChild(badge);
     emojiHeaderEl.appendChild(item);
   });
 }
@@ -1310,7 +1317,9 @@ function showFinalGridScreen() {
   // Badges setup
   const badgeType = badgeTypeSelect?.value || 'actions';
   let badgeLabels = [];
-  if (badgeType === 'actions') {
+  if (badgeType === 'none') {
+    badgeLabels = [];
+  } else if (badgeType === 'actions') {
     badgeLabels = [
       '<i class="fa-solid fa-heart"></i> Like',
       '<i class="fa-solid fa-comment"></i> Comment',
@@ -1347,14 +1356,15 @@ function showFinalGridScreen() {
     const img = document.createElement('img');
     img.src = step.resultImg.src;
     img.alt = `Result ${idx + 1}`;
-
-    const badge = document.createElement('div');
-    // Standardized: Emoji on top, Badge type on bottom for all options
-    badge.className = `final-item-badge badge-bottom badge-color-${idx % 4}`;
-    badge.innerHTML = badgeLabels[idx] || `Option ${idx + 1}`;
-
     item.appendChild(img);
-    item.appendChild(badge);
+
+    if (badgeType !== 'none') {
+      const badge = document.createElement('div');
+      // Standardized: Emoji on top, Badge type on bottom for all options
+      badge.className = `final-item-badge badge-bottom badge-color-${idx % 4}`;
+      badge.innerHTML = badgeLabels[idx] || `Option ${idx + 1}`;
+      item.appendChild(badge);
+    }
 
     // Emoji badge corresponding to option (always at top)
     if (step.emojiImg) {
@@ -1692,9 +1702,10 @@ function phase4() {
 
   // Prepare Result Badge (do not show yet, wait for reveal to finish)
   const resultBadge = document.getElementById('result-badge');
+  const badgeHTML = getResultBadgeHTML(S._pendingIdx);
   if (resultBadge) {
     resultBadge.className = `result-badge badge-color-${S._pendingIdx % 4}`;
-    resultBadge.innerHTML = getResultBadgeHTML(S._pendingIdx);
+    resultBadge.innerHTML = badgeHTML;
     resultBadge.classList.remove('show');
   }
 
@@ -1716,8 +1727,8 @@ function phase4() {
         canvas.style.transition = '';
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         canvas.style.opacity = '';
-        // Reveal finished: Now show the badge with spring animation!
-        if (resultBadge) {
+        // Reveal finished: Now show the badge with spring animation if not none!
+        if (resultBadge && badgeHTML) {
           void resultBadge.offsetWidth;
           resultBadge.classList.add('show');
         }
@@ -1739,7 +1750,7 @@ function phase4() {
     playSfxReveal();
     S.chainPrev = S._currentResultImg;
     S.lastResultImg = S._currentResultImg;
-    if (resultBadge) {
+    if (resultBadge && badgeHTML) {
       void resultBadge.offsetWidth;
       resultBadge.classList.add('show');
     }
@@ -1763,7 +1774,7 @@ function phase4() {
       S.lastResultImg = S._currentResultImg;
       // Show badge after classic morph finishes
       setTimeout(() => {
-        if (resultBadge) {
+        if (resultBadge && badgeHTML) {
           void resultBadge.offsetWidth;
           resultBadge.classList.add('show');
         }
