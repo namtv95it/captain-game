@@ -764,10 +764,13 @@ body.recording-mode .theater {
 .emoji-header-inner {
   display: flex;
   align-items: center;
-  justify-content: space-around;
+  justify-content: space-evenly;
+  gap: 8px;
   width: 100%;
   flex-wrap: nowrap;
   min-height: 80px;
+  overflow: visible;
+  padding: 4px 2px;
 }
 
 .emoji-header-placeholder {
@@ -779,15 +782,17 @@ body.recording-mode .theater {
 }
 
 .emoji-header-item {
-  width: 74px;
-  height: 74px;
+  flex: 1 1 0;
+  min-width: 0;
+  max-width: 74px;
+  aspect-ratio: 1 / 1;
+  height: auto;
   border-radius: 18px;
   background: rgba(255, 255, 255, 0.9);
   border: 2px solid rgba(124, 58, 237, .18);
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
   overflow: visible;
   position: relative;
   transition: transform .3s var(--ease-spring), border-color .3s, box-shadow .3s;

@@ -600,34 +600,49 @@ function getResultBadgeHTML(idx, isPokeMode = false) {
 }
 
 function refreshEmojiHeader() {
-  if (!emojiHeaderEl) return;
+  const bar = document.getElementById('emoji-header-bar');
+  const inner = document.getElementById('emoji-header-inner') || emojiHeaderEl;
+  if (!inner) return;
 
   let uploaded = [];
   if (activeTab === 'pokemon') {
-    uploaded = P.monsterImages.map((img, i) => ({ idx: i, img }));
-  } else {
-    uploaded = S.steps
+    uploaded = (typeof P !== 'undefined' && P.monsterImages ? P.monsterImages : [])
+      .map((img, i) => ({ idx: i, img }))
+      .filter(s => s.img && s.img.src);
+  } else if (activeTab === 'blendplus') {
+    uploaded = (typeof BP !== 'undefined' && BP.streams ? BP.streams : [])
       .map((s, i) => ({ idx: i, img: s.emojiImg }))
-      .filter(s => s.img !== null);
+      .filter(s => s.img && s.img.src);
+  } else {
+    uploaded = (typeof S !== 'undefined' && S.steps ? S.steps : [])
+      .map((s, i) => ({ idx: i, img: s.emojiImg }))
+      .filter(s => s.img && s.img.src);
   }
 
   if (uploaded.length === 0) {
-    emojiHeaderEl.innerHTML = '';
+    inner.innerHTML = '';
     const ph = document.createElement('span');
     ph.className = 'emoji-header-placeholder';
     ph.id = 'emoji-header-placeholder';
     ph.textContent = activeTab === 'pokemon' ? 'Pokemon sẽ hiển thị ở đây sau khi tải lên ✨' : 'Emoji sẽ hiển thị ở đây sau khi tải lên ✨';
-    emojiHeaderEl.appendChild(ph);
+    inner.appendChild(ph);
     return;
   }
 
-  emojiHeaderEl.innerHTML = '';
+  inner.innerHTML = '';
+  // Dynamic sizing when there are many items so they all display nicely
+  const itemCount = uploaded.length;
+  let itemSize = 74;
+  if (itemCount > 4) {
+    itemSize = Math.max(48, Math.floor(320 / itemCount));
+  }
+
   uploaded.forEach(({ idx, img }) => {
     const item = document.createElement('div');
     item.className = 'emoji-header-item';
     item.id = `emoji-header-item-${idx}`;
 
-    const badgeContent = getHeaderBadgeHTML(idx);
+    const badgeContent = activeTab === 'blendplus' ? '' : getHeaderBadgeHTML(idx);
     if (badgeContent) {
       const badge = document.createElement('span');
       badge.className = 'step-num-badge';
@@ -640,7 +655,7 @@ function refreshEmojiHeader() {
     imgEl.alt = `Emoji bước ${idx + 1}`;
 
     item.appendChild(imgEl);
-    emojiHeaderEl.appendChild(item);
+    inner.appendChild(item);
   });
 }
 
@@ -1700,12 +1715,10 @@ function phase4() {
   fly1.style.opacity = '0';
   fly2.style.opacity = '0';
 
-  // Prepare Result Badge (do not show yet, wait for reveal to finish)
+  // Result Badge ẩn khi xuất hiện kết quả (theo yêu cầu người dùng)
   const resultBadge = document.getElementById('result-badge');
-  const badgeHTML = getResultBadgeHTML(S._pendingIdx);
   if (resultBadge) {
-    resultBadge.className = `result-badge badge-color-${S._pendingIdx % 4}`;
-    resultBadge.innerHTML = badgeHTML;
+    resultBadge.innerHTML = '';
     resultBadge.classList.remove('show');
   }
 
@@ -1727,11 +1740,6 @@ function phase4() {
         canvas.style.transition = '';
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         canvas.style.opacity = '';
-        // Reveal finished: Now show the badge with spring animation if not none!
-        if (resultBadge && badgeHTML) {
-          void resultBadge.offsetWidth;
-          resultBadge.classList.add('show');
-        }
         _scheduleNextAfterReveal(2500);
       });
     }, 200);
@@ -1750,10 +1758,6 @@ function phase4() {
     playSfxReveal();
     S.chainPrev = S._currentResultImg;
     S.lastResultImg = S._currentResultImg;
-    if (resultBadge && badgeHTML) {
-      void resultBadge.offsetWidth;
-      resultBadge.classList.add('show');
-    }
     _scheduleNextAfterReveal(2500);
 
   } else if (revealStyle === 'classic') {
@@ -1772,13 +1776,6 @@ function phase4() {
       playSfxReveal();
       S.chainPrev = S._currentResultImg;
       S.lastResultImg = S._currentResultImg;
-      // Show badge after classic morph finishes
-      setTimeout(() => {
-        if (resultBadge && badgeHTML) {
-          void resultBadge.offsetWidth;
-          resultBadge.classList.add('show');
-        }
-      }, 700);
       _scheduleNextAfterReveal(2500);
     }, 550);
 
@@ -4510,8 +4507,10 @@ function switchTab(tabName) {
   if (tabName === 'blendplus') {
     renderBpTable();
     updateBpPreview();
+    refreshEmojiHeader();
   } else if (tabName !== 'puzzle' && tabName !== 'flashlight' && tabName !== 'climax') {
     resetAll();
+    refreshEmojiHeader();
   }
 }
 
@@ -5330,30 +5329,37 @@ function pickBpFile(streamIdx, type) {
       reader.readAsDataURL(files[0]);
     } else {
       // Tải nhiều ảnh: đổ tiếp nối vào các ô (từ ô hiện tại sang ô tiếp theo)
-      let curStream = streamIdx;
-      let curSlot = type;
-
-      files.forEach((file) => {
+      let loaded = 0;
+      const loadedImgs = [];
+      files.forEach((file, fIdx) => {
         const reader = new FileReader();
         reader.onload = ev => {
           const img = new Image();
           img.onload = () => {
-            while (BP.streams.length <= curStream) {
-              BP.streams.push({ charImg: null, emojiImg: null, resultImg: null });
+            loadedImgs[fIdx] = img;
+            loaded++;
+            if (loaded === files.length) {
+              let curStream = streamIdx;
+              let curSlot = type;
+              loadedImgs.forEach(imageObj => {
+                while (BP.streams.length <= curStream) {
+                  BP.streams.push({ charImg: null, emojiImg: null, resultImg: null });
+                }
+                if (curSlot === 'char') {
+                  BP.streams[curStream].charImg = imageObj;
+                  curSlot = 'emoji';
+                } else if (curSlot === 'emoji') {
+                  BP.streams[curStream].emojiImg = imageObj;
+                  curSlot = 'result';
+                } else if (curSlot === 'result') {
+                  BP.streams[curStream].resultImg = imageObj;
+                  curSlot = 'char';
+                  curStream++;
+                }
+              });
+              renderBpTable();
+              updateBpPreview();
             }
-            if (curSlot === 'char') {
-              BP.streams[curStream].charImg = img;
-              curSlot = 'emoji';
-            } else if (curSlot === 'emoji') {
-              BP.streams[curStream].emojiImg = img;
-              curSlot = 'result';
-            } else if (curSlot === 'result') {
-              BP.streams[curStream].resultImg = img;
-              curSlot = 'char';
-              curStream++;
-            }
-            renderBpTable();
-            updateBpPreview();
           };
           img.src = ev.target.result;
         };
@@ -5493,6 +5499,8 @@ function renderBpTable() {
     row.appendChild(colAction);
     tbody.appendChild(row);
   });
+
+  refreshEmojiHeader();
 }
 
 // Lắng nghe sự kiện tải nhiều ảnh từ các input ẩn của Blend +
@@ -5548,6 +5556,7 @@ function updateBpPreview() {
   } else {
     bgCharWrap.classList.remove('show');
   }
+  refreshEmojiHeader();
 }
 
 /* ── RUN BLEND + FLOW ── */
@@ -5611,6 +5620,7 @@ function startBpStreamSequence(validStreams, sIdx) {
   });
 
   setPhase(sIdx, validStreams.length);
+  updateEmojiHeaderState(sIdx);
 
   syncCanvasSize();
   resultWrap.classList.remove('show', 'reveal-eraser', 'reveal-classic');
@@ -5807,5 +5817,6 @@ function finishBlendPlus() {
   });
 
   setPhase(BP.streams.length, BP.streams.length);
+  updateEmojiHeaderState(-1);
   toast('Đã hoàn thành tất cả các luồng Blend +! 🎉');
 }
