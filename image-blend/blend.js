@@ -827,8 +827,19 @@ function resetAll() {
 
   const btnBlend = document.getElementById('btn-blend');
   if (btnBlend) btnBlend.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles"></i> Bắt đầu Blend';
+  const btnBpBlend = document.getElementById('btn-bp-blend');
+  if (btnBpBlend) btnBpBlend.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles"></i> Bắt đầu Blend +';
   const btnDl = document.getElementById('btn-dl');
   if (btnDl) btnDl.style.display = 'none';
+
+  // Reset Blend+ running & timer state
+  if (typeof BP !== 'undefined') {
+    if (BP.timer) { clearTimeout(BP.timer); BP.timer = null; }
+    BP.running = false;
+    document.querySelectorAll('.bp-stream-row').forEach(el => {
+      el.classList.remove('active-blend', 'done-blend');
+    });
+  }
 
   // Reset step highlight states
   document.querySelectorAll('.blend-step').forEach(el => {
@@ -2583,79 +2594,6 @@ function toast(msg) {
   setTimeout(() => toastEl.classList.remove('show'), 2800);
 }
 
-/* ─────────────────────── TAB SWITCHING ─────────────────────── */
-function switchTab(tabName) {
-  activeTab = tabName;
-
-  // Toggle Tab buttons
-  const btnBlend = document.getElementById('tab-btn-blend');
-  const btnPoke = document.getElementById('tab-btn-pokemon');
-  const btnBattle = document.getElementById('tab-btn-battle');
-  const btnPuzzle = document.getElementById('tab-btn-puzzle');
-  const btnFlashlight = document.getElementById('tab-btn-flashlight');
-  if (btnBlend) btnBlend.classList.toggle('active', tabName === 'blend');
-  if (btnPoke) btnPoke.classList.toggle('active', tabName === 'pokemon');
-  if (btnBattle) btnBattle.classList.toggle('active', tabName === 'battle');
-  if (btnPuzzle) btnPuzzle.classList.toggle('active', tabName === 'puzzle');
-  if (btnFlashlight) btnFlashlight.classList.toggle('active', tabName === 'flashlight');
-
-  // Toggle Left panel contents
-  const contentBlend = document.getElementById('tab-content-blend');
-  const contentPoke = document.getElementById('tab-content-pokemon');
-  const contentBattle = document.getElementById('tab-content-battle');
-  const contentPuzzle = document.getElementById('tab-content-puzzle');
-  const contentFlashlight = document.getElementById('tab-content-flashlight');
-  if (contentBlend) contentBlend.style.display = tabName === 'blend' ? 'flex' : 'none';
-  if (contentPoke) contentPoke.style.display = tabName === 'pokemon' ? 'flex' : 'none';
-  if (contentBattle) contentBattle.style.display = tabName === 'battle' ? 'flex' : 'none';
-  if (contentPuzzle) contentPuzzle.style.display = tabName === 'puzzle' ? 'flex' : 'none';
-  if (contentFlashlight) contentFlashlight.style.display = tabName === 'flashlight' ? 'flex' : 'none';
-
-  // Toggle Right sidebar tab contents (Always keep right sidebar visible)
-  const rightSidebar = document.querySelector('.right-sidebar');
-  if (rightSidebar) rightSidebar.style.display = 'flex';
-
-  const rightBlend = document.getElementById('right-tab-content-blend');
-  const rightPoke = document.getElementById('right-tab-content-pokemon');
-  const rightBattle = document.getElementById('right-tab-content-battle');
-  const rightPuzzle = document.getElementById('right-tab-content-puzzle');
-  if (rightBlend) rightBlend.style.display = tabName === 'blend' ? 'flex' : 'none';
-  if (rightPoke) rightPoke.style.display = tabName === 'pokemon' ? 'flex' : 'none';
-  if (rightBattle) rightBattle.style.display = tabName === 'battle' ? 'flex' : 'none';
-  if (rightPuzzle) rightPuzzle.style.display = tabName === 'puzzle' ? 'flex' : 'none';
-
-  // Toggle Emoji Header Bar visibility (Show in Blend & Pokemon, hide in Battle, Flashlight & Puzzle mode)
-  const emojiHeaderBar = document.getElementById('emoji-header-bar');
-  if (emojiHeaderBar) {
-    emojiHeaderBar.style.display = '';
-    if (tabName === 'battle' || tabName === 'flashlight' || tabName === 'puzzle') {
-      emojiHeaderBar.classList.add('hidden');
-    } else {
-      emojiHeaderBar.classList.remove('hidden');
-      refreshEmojiHeader();
-    }
-  }
-
-  // Hide overlays
-  const pokeOverlay = document.getElementById('poke-card-overlay');
-  if (pokeOverlay) pokeOverlay.classList.remove('show');
-  const pokeFanOverlay = document.getElementById('poke-fan-screen-overlay');
-  if (pokeFanOverlay) pokeFanOverlay.classList.remove('show');
-  const battleOverlay = document.getElementById('battle-theater-overlay');
-  if (battleOverlay) battleOverlay.classList.remove('show');
-  const puzzleOverlay = document.getElementById('puzzle-theater-overlay');
-  if (puzzleOverlay) puzzleOverlay.classList.toggle('show', tabName === 'puzzle');
-  const flOverlay = document.getElementById('flashlight-theater-overlay');
-  if (flOverlay) flOverlay.classList.toggle('show', tabName === 'flashlight');
-
-  if (tabName === 'puzzle') {
-    renderPuzzleGame();
-  } else if (tabName === 'flashlight') {
-    renderFlashlightTab();
-  } else {
-    resetAll();
-  }
-}
 
 /* ─────────────────────── POKEMON FUSION SYSTEM (MULTI-STEP) ─────────────────────── */
 const P = {
@@ -4546,6 +4484,24 @@ function switchTab(tabName) {
       document.body.classList.remove('climax-active-mode');
     }
   }
+
+  // Toggle Emoji Header Bar visibility (Show in Blend, Blend+ & Pokemon)
+  const emojiHeaderBar = document.getElementById('emoji-header-bar');
+  if (emojiHeaderBar) {
+    emojiHeaderBar.style.display = '';
+    if (tabName === 'battle' || tabName === 'flashlight' || tabName === 'puzzle' || tabName === 'climax') {
+      emojiHeaderBar.classList.add('hidden');
+    } else {
+      emojiHeaderBar.classList.remove('hidden');
+    }
+  }
+
+  if (tabName === 'blendplus') {
+    renderBpTable();
+    updateBpPreview();
+  } else if (tabName !== 'puzzle' && tabName !== 'flashlight' && tabName !== 'climax') {
+    resetAll();
+  }
 }
 
 // ──────────────────────────────────────────────────────────────
@@ -5072,4 +5028,773 @@ function playClimaxChargingSound(durationSec) {
     osc.start();
     osc.stop(ctx.currentTime + (durationSec || 2.5));
   } catch (e) {}
+}
+
+/* ──────────────────────────────────────────────────────────────
+   BLEND + MODULE (MULTI-STREAM INDEPENDENT FUSION BLEND)
+   Mỗi luồng: { charImg, emojiImg, resultImg }
+   Hiệu ứng blend: Fusion. Không dùng hiệu ứng xuất hiện kết quả (none).
+   Chuyển luồng: Giữ kết quả ~2.5s rồi chuyển mượt sang luồng kế tiếp.
+   ────────────────────────────────────────────────────────────── */
+
+const BP = {
+  streams: [
+    { charImg: null, emojiImg: null, resultImg: null }
+  ],
+  running: false,
+  streamIdx: 0,
+  timer: null
+};
+
+function syncBpVal(type) {
+  if (type === 'swirl') {
+    const el = document.getElementById('sl-bp-swirl');
+    const val = document.getElementById('val-bp-swirl');
+    if (el && val) val.textContent = el.value;
+  } else if (type === 'speed') {
+    const el = document.getElementById('sl-bp-speed');
+    const val = document.getElementById('val-bp-speed');
+    if (el && val) val.textContent = el.value;
+  }
+}
+
+function addBpStream() {
+  BP.streams.push({ charImg: null, emojiImg: null, resultImg: null });
+  renderBpTable();
+  const tbody = document.getElementById('bp-table-body');
+  if (tbody && tbody.lastElementChild) {
+    tbody.lastElementChild.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+}
+
+function removeBpStream(index) {
+  if (BP.streams.length <= 1) {
+    BP.streams = [{ charImg: null, emojiImg: null, resultImg: null }];
+  } else {
+    BP.streams.splice(index, 1);
+  }
+  renderBpTable();
+  updateBpPreview();
+}
+
+function clearAllBpStreams() {
+  BP.streams = [
+    { charImg: null, emojiImg: null, resultImg: null }
+  ];
+  resetAll();
+  renderBpTable();
+  updateBpPreview();
+  toast('Đã dọn dẹp tất cả các luồng Blend +! 🧹');
+}
+
+// Tải nhiều ảnh và đổ lần lượt vào tất cả các ô trống (Nhân vật -> Emoji -> Ảnh mới) theo thứ tự
+function loadBpFilesIntoAllSlots(files) {
+  const imageFiles = Array.from(files).filter(f => f.type.startsWith('image/'));
+  if (imageFiles.length === 0) return;
+
+  let loaded = 0;
+  const loadedImgs = [];
+
+  imageFiles.forEach((file, fIdx) => {
+    const reader = new FileReader();
+    reader.onload = ev => {
+      const img = new Image();
+      img.onload = () => {
+        loadedImgs[fIdx] = img;
+        loaded++;
+        if (loaded === imageFiles.length) {
+          // Duyệt và đổ vào các ô theo hàng ngang: stream 0 (char -> emoji -> result), stream 1, ...
+          let currentStreamIdx = 0;
+          let currentSlotType = 'char'; // 'char' | 'emoji' | 'result'
+
+          // Tìm ô trống đầu tiên để bắt đầu đổ
+          let foundStart = false;
+          for (let s = 0; s < BP.streams.length; s++) {
+            if (!BP.streams[s].charImg) {
+              currentStreamIdx = s; currentSlotType = 'char'; foundStart = true; break;
+            }
+            if (!BP.streams[s].emojiImg) {
+              currentStreamIdx = s; currentSlotType = 'emoji'; foundStart = true; break;
+            }
+            if (!BP.streams[s].resultImg) {
+              currentStreamIdx = s; currentSlotType = 'result'; foundStart = true; break;
+            }
+          }
+          if (!foundStart) {
+            currentStreamIdx = BP.streams.length;
+            currentSlotType = 'char';
+          }
+
+          loadedImgs.forEach(imageObj => {
+            while (BP.streams.length <= currentStreamIdx) {
+              BP.streams.push({ charImg: null, emojiImg: null, resultImg: null });
+            }
+
+            if (currentSlotType === 'char') {
+              BP.streams[currentStreamIdx].charImg = imageObj;
+              currentSlotType = 'emoji';
+            } else if (currentSlotType === 'emoji') {
+              BP.streams[currentStreamIdx].emojiImg = imageObj;
+              currentSlotType = 'result';
+            } else if (currentSlotType === 'result') {
+              BP.streams[currentStreamIdx].resultImg = imageObj;
+              currentSlotType = 'char';
+              currentStreamIdx++;
+            }
+          });
+
+          renderBpTable();
+          updateBpPreview();
+          toast(`Đã đổ ${loadedImgs.length} ảnh vào các ô của Blend +! ✨`);
+        }
+      };
+      img.src = ev.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function loadBpFilesIntoColumn(type, files) {
+  const imageFiles = Array.from(files).filter(f => f.type.startsWith('image/'));
+  if (imageFiles.length === 0) return;
+
+  let loaded = 0;
+  const loadedImgs = [];
+
+  imageFiles.forEach((file, fIdx) => {
+    const reader = new FileReader();
+    reader.onload = ev => {
+      const img = new Image();
+      img.onload = () => {
+        loadedImgs[fIdx] = img;
+        loaded++;
+        if (loaded === imageFiles.length) {
+          // Gán lần lượt ảnh vào các stream từ stream đầu tiên
+          loadedImgs.forEach((imageObj, i) => {
+            if (!BP.streams[i]) {
+              BP.streams.push({ charImg: null, emojiImg: null, resultImg: null });
+            }
+            if (type === 'char')   BP.streams[i].charImg = imageObj;
+            if (type === 'emoji')  BP.streams[i].emojiImg = imageObj;
+            if (type === 'result') BP.streams[i].resultImg = imageObj;
+          });
+          renderBpTable();
+          updateBpPreview();
+          toast(`Đã tải lên ${loadedImgs.length} ảnh ${type === 'char' ? 'Nhân vật' : type === 'emoji' ? 'Emoji' : 'Ảnh mới'}! ✨`);
+        }
+      };
+      img.src = ev.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+// Global drag state for Blend + items (hỗ trợ kéo thả giữa bất kỳ ô/hàng nào)
+const BP_DRAG = {
+  type: null, // 'char' | 'emoji' | 'result'
+  fromIdx: null
+};
+
+function attachBpColDrag(wrap, type, idx, cell) {
+  wrap.draggable = true;
+
+  wrap.addEventListener('dragstart', e => {
+    e.stopPropagation();
+    BP_DRAG.type = type;
+    BP_DRAG.fromIdx = idx;
+    wrap.classList.add('bt-col-dragging');
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setDragImage(new Image(), 0, 0);
+  });
+
+  wrap.addEventListener('dragend', e => {
+    e.stopPropagation();
+    wrap.classList.remove('bt-col-dragging');
+    document.querySelectorAll('.bt-cell-over, .drag-over').forEach(c => c.classList.remove('bt-cell-over', 'drag-over'));
+    BP_DRAG.type = null;
+    BP_DRAG.fromIdx = null;
+  });
+
+  cell.addEventListener('dragover', e => {
+    if (e.dataTransfer.types.includes('Files')) return;
+    if (!BP_DRAG.type || (BP_DRAG.fromIdx === idx && BP_DRAG.type === type)) return;
+    e.preventDefault();
+    e.stopPropagation();
+    document.querySelectorAll('.bt-cell-over, .drag-over').forEach(c => c.classList.remove('bt-cell-over', 'drag-over'));
+    cell.classList.add('bt-cell-over');
+    wrap.classList.add('drag-over');
+  });
+
+  cell.addEventListener('dragleave', e => {
+    if (!cell.contains(e.relatedTarget)) {
+      cell.classList.remove('bt-cell-over');
+      wrap.classList.remove('drag-over');
+    }
+  });
+
+  cell.addEventListener('drop', e => {
+    if (e.dataTransfer.types.includes('Files')) return;
+    e.preventDefault();
+    e.stopPropagation();
+    cell.classList.remove('bt-cell-over');
+    wrap.classList.remove('drag-over');
+    const fromIdx = BP_DRAG.fromIdx;
+    const fromType = BP_DRAG.type;
+    if (!fromType || fromIdx === null || (fromIdx === idx && fromType === type)) return;
+
+    // Hoán đổi ảnh giữa ô nguồn (fromIdx, fromType) và ô đích (idx, type)
+    const fromProp = fromType === 'char' ? 'charImg' : fromType === 'emoji' ? 'emojiImg' : 'resultImg';
+    const targetProp = type === 'char' ? 'charImg' : type === 'emoji' ? 'emojiImg' : 'resultImg';
+
+    const temp = BP.streams[fromIdx][fromProp];
+    BP.streams[fromIdx][fromProp] = BP.streams[idx][targetProp];
+    BP.streams[idx][targetProp] = temp;
+
+    BP_DRAG.type = null;
+    BP_DRAG.fromIdx = null;
+    renderBpTable();
+    updateBpPreview();
+  });
+}
+
+function attachBpCellDropTarget(cell, type, idx) {
+  cell.addEventListener('dragover', e => {
+    if (e.dataTransfer.types.includes('Files')) return;
+    if (!BP_DRAG.type || (BP_DRAG.fromIdx === idx && BP_DRAG.type === type)) return;
+    e.preventDefault();
+    e.stopPropagation();
+    document.querySelectorAll('.bt-cell-over').forEach(c => c.classList.remove('bt-cell-over'));
+    cell.classList.add('bt-cell-over');
+  });
+
+  cell.addEventListener('dragleave', e => {
+    if (!cell.contains(e.relatedTarget)) cell.classList.remove('bt-cell-over');
+  });
+
+  cell.addEventListener('drop', e => {
+    if (e.dataTransfer.types.includes('Files')) return;
+    e.preventDefault();
+    e.stopPropagation();
+    cell.classList.remove('bt-cell-over');
+    const fromIdx = BP_DRAG.fromIdx;
+    const fromType = BP_DRAG.type;
+    if (!fromType || fromIdx === null || (fromIdx === idx && fromType === type)) return;
+
+    const fromProp = fromType === 'char' ? 'charImg' : fromType === 'emoji' ? 'emojiImg' : 'resultImg';
+    const targetProp = type === 'char' ? 'charImg' : type === 'emoji' ? 'emojiImg' : 'resultImg';
+
+    const temp = BP.streams[fromIdx][fromProp];
+    BP.streams[fromIdx][fromProp] = BP.streams[idx][targetProp];
+    BP.streams[idx][targetProp] = temp;
+
+    BP_DRAG.type = null;
+    BP_DRAG.fromIdx = null;
+    renderBpTable();
+    updateBpPreview();
+  });
+}
+
+function pickBpFile(streamIdx, type) {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'image/*';
+  input.multiple = true;
+  input.onchange = (e) => {
+    const files = Array.from(e.target.files).filter(f => f.type.startsWith('image/'));
+    if (files.length === 0) return;
+    if (files.length === 1) {
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        const img = new Image();
+        img.onload = () => {
+          if (!BP.streams[streamIdx]) return;
+          if (type === 'char')   BP.streams[streamIdx].charImg = img;
+          if (type === 'emoji')  BP.streams[streamIdx].emojiImg = img;
+          if (type === 'result') BP.streams[streamIdx].resultImg = img;
+          renderBpTable();
+          updateBpPreview();
+        };
+        img.src = ev.target.result;
+      };
+      reader.readAsDataURL(files[0]);
+    } else {
+      // Tải nhiều ảnh: đổ tiếp nối vào các ô (từ ô hiện tại sang ô tiếp theo)
+      let curStream = streamIdx;
+      let curSlot = type;
+
+      files.forEach((file) => {
+        const reader = new FileReader();
+        reader.onload = ev => {
+          const img = new Image();
+          img.onload = () => {
+            while (BP.streams.length <= curStream) {
+              BP.streams.push({ charImg: null, emojiImg: null, resultImg: null });
+            }
+            if (curSlot === 'char') {
+              BP.streams[curStream].charImg = img;
+              curSlot = 'emoji';
+            } else if (curSlot === 'emoji') {
+              BP.streams[curStream].emojiImg = img;
+              curSlot = 'result';
+            } else if (curSlot === 'result') {
+              BP.streams[curStream].resultImg = img;
+              curSlot = 'char';
+              curStream++;
+            }
+            renderBpTable();
+            updateBpPreview();
+          };
+          img.src = ev.target.result;
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+  };
+  input.click();
+}
+
+function clearBpSlot(streamIdx, type) {
+  if (!BP.streams[streamIdx]) return;
+  if (type === 'char')   BP.streams[streamIdx].charImg = null;
+  if (type === 'emoji')  BP.streams[streamIdx].emojiImg = null;
+  if (type === 'result') BP.streams[streamIdx].resultImg = null;
+  renderBpTable();
+  updateBpPreview();
+}
+
+function renderBpTable() {
+  const tbody = document.getElementById('bp-table-body');
+  const countEl = document.getElementById('bp-streams-count');
+  const emptyHint = document.getElementById('bp-empty-hint');
+  if (!tbody) return;
+
+  const total = BP.streams.length;
+  if (countEl) countEl.textContent = total ? `(${total} luồng)` : '';
+  if (emptyHint) emptyHint.style.display = total === 0 ? 'flex' : 'none';
+
+  tbody.innerHTML = '';
+
+  BP.streams.forEach((stream, idx) => {
+    const row = document.createElement('div');
+    row.className = 'bp-stream-row';
+    row.id = `bp-stream-row-${idx}`;
+
+    // Col 1: Character
+    const colChar = document.createElement('div');
+    colChar.className = 'bp-cell bp-cell-char';
+    if (stream.charImg) {
+      const wrap = document.createElement('div');
+      wrap.className = 'bp-img-wrap';
+      wrap.title = 'Kéo để đổi vị trí sang bất kỳ ô/hàng nào';
+      const img = document.createElement('img');
+      img.src = stream.charImg.src;
+      img.draggable = false;
+      const badge = document.createElement('span');
+      badge.className = 'bp-img-badge';
+      badge.textContent = `L${idx + 1}`;
+      const del = document.createElement('button');
+      del.className = 'bt-img-del';
+      del.innerHTML = '<i class="fa-solid fa-xmark"></i>';
+      del.title = 'Xóa ảnh nhân vật';
+      del.onclick = (e) => { e.stopPropagation(); clearBpSlot(idx, 'char'); };
+      wrap.appendChild(img);
+      wrap.appendChild(badge);
+      wrap.appendChild(del);
+      colChar.appendChild(wrap);
+      attachBpColDrag(wrap, 'char', idx, colChar);
+    } else {
+      colChar.innerHTML = `
+        <div class="bp-slot-empty" onclick="pickBpFile(${idx}, 'char')" title="Click chọn 1 hoặc nhiều ảnh">
+          <i class="fa-solid fa-plus"></i><span>Nhân vật</span>
+        </div>
+      `;
+      attachBpCellDropTarget(colChar, 'char', idx);
+    }
+
+    // Col 2: Emoji
+    const colEmoji = document.createElement('div');
+    colEmoji.className = 'bp-cell bp-cell-emoji';
+    if (stream.emojiImg) {
+      const wrap = document.createElement('div');
+      wrap.className = 'bp-img-wrap';
+      wrap.title = 'Kéo để đổi vị trí sang bất kỳ ô/hàng nào';
+      const img = document.createElement('img');
+      img.src = stream.emojiImg.src;
+      img.draggable = false;
+      const del = document.createElement('button');
+      del.className = 'bt-img-del';
+      del.innerHTML = '<i class="fa-solid fa-xmark"></i>';
+      del.title = 'Xóa emoji';
+      del.onclick = (e) => { e.stopPropagation(); clearBpSlot(idx, 'emoji'); };
+      wrap.appendChild(img);
+      wrap.appendChild(del);
+      colEmoji.appendChild(wrap);
+      attachBpColDrag(wrap, 'emoji', idx, colEmoji);
+    } else {
+      colEmoji.innerHTML = `
+        <div class="bp-slot-empty" onclick="pickBpFile(${idx}, 'emoji')" title="Click chọn 1 hoặc nhiều ảnh">
+          <i class="fa-solid fa-plus"></i><span>Emoji</span>
+        </div>
+      `;
+      attachBpCellDropTarget(colEmoji, 'emoji', idx);
+    }
+
+    // Col 3: New Result Image
+    const colResult = document.createElement('div');
+    colResult.className = 'bp-cell bp-cell-result';
+    if (stream.resultImg) {
+      const wrap = document.createElement('div');
+      wrap.className = 'bp-img-wrap bp-img-result';
+      wrap.title = 'Kéo để đổi vị trí sang bất kỳ ô/hàng nào';
+      const img = document.createElement('img');
+      img.src = stream.resultImg.src;
+      img.draggable = false;
+      const del = document.createElement('button');
+      del.className = 'bt-img-del';
+      del.innerHTML = '<i class="fa-solid fa-xmark"></i>';
+      del.title = 'Xóa ảnh mới';
+      del.onclick = (e) => { e.stopPropagation(); clearBpSlot(idx, 'result'); };
+      wrap.appendChild(img);
+      wrap.appendChild(del);
+      colResult.appendChild(wrap);
+      attachBpColDrag(wrap, 'result', idx, colResult);
+    } else {
+      colResult.innerHTML = `
+        <div class="bp-slot-empty" onclick="pickBpFile(${idx}, 'result')" title="Click chọn 1 hoặc nhiều ảnh">
+          <i class="fa-solid fa-plus"></i><span>Ảnh mới</span>
+        </div>
+      `;
+      attachBpCellDropTarget(colResult, 'result', idx);
+    }
+
+    // Col 4: Action (Delete stream row)
+    const colAction = document.createElement('div');
+    colAction.className = 'bp-cell bp-cell-action';
+    colAction.innerHTML = `
+      <button type="button" class="bp-del-btn" title="Xóa luồng này" onclick="removeBpStream(${idx})">
+        <i class="fa-solid fa-trash-can"></i>
+      </button>
+    `;
+
+    row.appendChild(colChar);
+    row.appendChild(colEmoji);
+    row.appendChild(colResult);
+    row.appendChild(colAction);
+    tbody.appendChild(row);
+  });
+}
+
+// Lắng nghe sự kiện tải nhiều ảnh từ các input ẩn của Blend +
+(function initBpMultiInputs() {
+  const allInput = document.getElementById('bp-all-multi-input');
+  const charInput = document.getElementById('bp-char-multi-input');
+  const emojiInput = document.getElementById('bp-emoji-multi-input');
+  const resultInput = document.getElementById('bp-result-multi-input');
+
+  if (allInput) {
+    allInput.addEventListener('change', e => {
+      loadBpFilesIntoAllSlots(e.target.files);
+      e.target.value = '';
+    });
+  }
+  if (charInput) {
+    charInput.addEventListener('change', e => {
+      loadBpFilesIntoColumn('char', e.target.files);
+      e.target.value = '';
+    });
+  }
+  if (emojiInput) {
+    emojiInput.addEventListener('change', e => {
+      loadBpFilesIntoColumn('emoji', e.target.files);
+      e.target.value = '';
+    });
+  }
+  if (resultInput) {
+    resultInput.addEventListener('change', e => {
+      loadBpFilesIntoColumn('result', e.target.files);
+      e.target.value = '';
+    });
+  }
+
+  const btnAll = document.getElementById('bp-btn-upload-all');
+  const btnChar = document.getElementById('bp-btn-upload-chars');
+  const btnEmoji = document.getElementById('bp-btn-upload-emojis');
+  const btnResult = document.getElementById('bp-btn-upload-results');
+
+  if (btnAll) btnAll.addEventListener('click', () => allInput?.click());
+  if (btnChar) btnChar.addEventListener('click', () => charInput?.click());
+  if (btnEmoji) btnEmoji.addEventListener('click', () => emojiInput?.click());
+  if (btnResult) btnResult.addEventListener('click', () => resultInput?.click());
+})();
+
+function updateBpPreview() {
+  if (activeTab !== 'blendplus' || BP.running) return;
+  // If first stream has charImg, display as theater background
+  const firstChar = BP.streams[0]?.charImg;
+  if (firstChar) {
+    bgCharImg.src = firstChar.src;
+    bgCharWrap.classList.add('show');
+  } else {
+    bgCharWrap.classList.remove('show');
+  }
+}
+
+/* ── RUN BLEND + FLOW ── */
+function runBlendPlus() {
+  if (BP.running) {
+    resetAll();
+    return;
+  }
+
+  // Validate streams: only consider fully filled streams
+  const validStreams = BP.streams.filter(s => s.charImg && s.emojiImg && s.resultImg);
+  if (validStreams.length === 0) {
+    toast('Cần ít nhất 1 luồng có đủ: Nhân vật + Emoji + Ảnh mới! ✨');
+    return;
+  }
+
+  BP.running = true;
+  BP.streamIdx = 0;
+
+  const btn = document.getElementById('btn-bp-blend');
+  if (btn) btn.innerHTML = '<i class="fa-solid fa-square"></i> Dừng Blend +';
+
+  const finalGridWrap = document.getElementById('final-grid-wrap');
+  if (finalGridWrap) finalGridWrap.classList.remove('show');
+
+  const emojiHeaderBar = document.getElementById('emoji-header-bar');
+  if (emojiHeaderBar) emojiHeaderBar.classList.remove('hidden');
+
+  buildPhaseBar(validStreams.length);
+
+  // Desktop recording mode or mobile theater
+  if (window.innerWidth < 1024) {
+    openMobileTheater();
+    startBpStreamSequence(validStreams, 0);
+  } else {
+    enterRecordingMode();
+    setTimeout(() => {
+      if (BP.running) startBpStreamSequence(validStreams, 0);
+    }, 1200);
+  }
+}
+
+function startBpStreamSequence(validStreams, sIdx) {
+  if (!BP.running) return;
+  if (sIdx >= validStreams.length) {
+    finishBlendPlus();
+    return;
+  }
+
+  const stream = validStreams[sIdx];
+  BP.streamIdx = sIdx;
+
+  // Highlight active row in UI
+  document.querySelectorAll('.bp-stream-row').forEach((row, i) => {
+    row.classList.remove('active-blend', 'done-blend');
+    if (BP.streams[i] === stream) {
+      row.classList.add('active-blend');
+    } else if (BP.streams[i] && validStreams.indexOf(BP.streams[i]) >= 0 && validStreams.indexOf(BP.streams[i]) < sIdx) {
+      row.classList.add('done-blend');
+    }
+  });
+
+  setPhase(sIdx, validStreams.length);
+
+  syncCanvasSize();
+  resultWrap.classList.remove('show', 'reveal-eraser', 'reveal-classic');
+  canvas.classList.remove('visible');
+  canvas.style.opacity = '';
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  const resBadge = document.getElementById('result-badge');
+  if (resBadge) resBadge.classList.remove('show');
+
+  // Set theater layers for this stream
+  bgCharImg.src = stream.charImg.src;
+  bgCharWrap.classList.add('show');
+
+  flyImg1.src = stream.charImg.src;
+  flyImg2.src = stream.emojiImg.src;
+
+  setFlyStyle(fly1, { top: '-60%', left: '50%', transform: 'translateX(-50%)', opacity: '0', bottom: 'auto', right: 'auto' });
+  setFlyStyle(fly2, { bottom: '-60%', left: '50%', transform: 'translateX(-50%)', opacity: '0', top: 'auto', right: 'auto' });
+
+  // Store runtime refs
+  S._currentCharImg = stream.charImg;
+  S._currentEmojiImg = stream.emojiImg;
+  S._currentResultImg = stream.resultImg;
+  S._currentStepStyle = 'fusion';
+
+  // Ảnh đầu tiên (nhân vật) xuất hiện, đợi khoảng 2s (tùy chỉnh) thì mới tới lượt emoji bay vào
+  const charWaitSec = parseFloat(document.getElementById('bp-char-wait-sec')?.value || '2.0');
+  const charWaitMs = Math.max(300, charWaitSec * 1000);
+
+  BP.timer = setTimeout(() => {
+    if (!BP.running) return;
+    phaseBpFlyEmoji(validStreams, sIdx);
+  }, charWaitMs);
+}
+
+function phaseBpFlyEmoji(validStreams, sIdx) {
+  if (!BP.running) return;
+  fly2.style.opacity = '1';
+  playSfxSwoosh(true);
+
+  const directions = ['bottom', 'top', 'left', 'right'];
+  currentDir = directions[Math.floor(Math.random() * directions.length)];
+
+  setFlyStyle(fly2, { top: 'auto', bottom: 'auto', left: 'auto', right: 'auto', transform: 'none' });
+
+  if (currentDir === 'bottom') {
+    setFlyStyle(fly2, { left: '50%', transform: 'translateX(-50%)', bottom: '-60%' });
+    animateDir(fly2, 'bottom', -60, 38, 750, () => setTimeout(() => phaseBpCollision(validStreams, sIdx), 150));
+  } else if (currentDir === 'top') {
+    setFlyStyle(fly2, { left: '50%', transform: 'translateX(-50%)', top: '-60%' });
+    animateDir(fly2, 'top', -60, 38, 750, () => setTimeout(() => phaseBpCollision(validStreams, sIdx), 150));
+  } else if (currentDir === 'left') {
+    setFlyStyle(fly2, { top: '50%', transform: 'translateY(-50%)', left: '-60%' });
+    animateDir(fly2, 'left', -60, 22.5, 750, () => setTimeout(() => phaseBpCollision(validStreams, sIdx), 150));
+  } else if (currentDir === 'right') {
+    setFlyStyle(fly2, { top: '50%', transform: 'translateY(-50%)', right: '-60%' });
+    animateDir(fly2, 'right', -60, 22.5, 750, () => setTimeout(() => phaseBpCollision(validStreams, sIdx), 150));
+  }
+}
+
+function phaseBpCollision(validStreams, sIdx) {
+  if (!BP.running) return;
+
+  const flash = document.createElement('div');
+  flash.style.cssText = [
+    'position:absolute', 'inset:0', 'z-index:20',
+    'background:radial-gradient(ellipse 80% 60% at 50% 50%,',
+    '  rgba(255,255,255,1) 0%, rgba(255,240,255,.8) 40%, transparent 80%)',
+    'border-radius:inherit', 'pointer-events:none',
+    'animation:flashOut .55s ease forwards',
+  ].join(';');
+
+  if (!document.getElementById('flash-kf')) {
+    const st = document.createElement('style');
+    st.id = 'flash-kf';
+    st.textContent = '@keyframes flashOut{0%{opacity:1}100%{opacity:0}}';
+    document.head.appendChild(st);
+  }
+
+  theater.appendChild(flash);
+
+  syncCanvasSize();
+  renderFrame(0);
+
+  bgCharWrap.classList.remove('show');
+  canvas.classList.add('visible');
+
+  // Dynamic fusion absorb spin
+  const baseTr = (currentDir === 'left' || currentDir === 'right') ? 'translateY(-50%)' : 'translateX(-50%)';
+  let st = document.getElementById('fusion-absorb-kf');
+  if (!st) {
+    st = document.createElement('style');
+    st.id = 'fusion-absorb-kf';
+    document.head.appendChild(st);
+  }
+  st.textContent = `
+    @keyframes fusionAbsorb {
+      0%   { opacity: 1;   transform: ${baseTr} scale(1)    rotate(0deg);   filter: blur(0px); }
+      30%  { opacity: 0.95; transform: ${baseTr} scale(1.1)  rotate(240deg); filter: blur(0px); }
+      100% { opacity: 0;   transform: ${baseTr} scale(0.05) rotate(720deg); filter: blur(8px); }
+    }
+  `;
+
+  fly2.style.zIndex = '15';
+  fly2.style.transition = 'none';
+  fly2.style.animation = 'fusionAbsorb 0.7s cubic-bezier(.4,0,.2,1) forwards';
+
+  setTimeout(() => {
+    fly2.style.animation = '';
+    fly2.style.opacity = '0';
+    fly2.style.zIndex = '';
+    fly2.style.transition = '';
+  }, 710);
+
+  setTimeout(() => flash.remove(), 580);
+
+  startBpSwirlLoop(() => {
+    phaseBpShowResult(validStreams, sIdx);
+  });
+}
+
+function startBpSwirlLoop(onDone) {
+  S.time = 0;
+  let elapsed = 0;
+  const totalMs = 1600; // Fast smooth fusion vortex
+  const speed = parseFloat(document.getElementById('sl-bp-speed')?.value || '7');
+  const swirlVal = parseFloat(document.getElementById('sl-bp-swirl')?.value || '100') / 100;
+
+  function loop() {
+    if (!BP.running) return;
+    const progress = Math.min(1, elapsed / totalMs);
+    renderBpFrame(progress, swirlVal);
+    S.time += speed * 0.14;
+    elapsed += 16 * (speed / 3.5);
+    if (elapsed < totalMs) {
+      S.animId = requestAnimationFrame(loop);
+    } else {
+      onDone();
+    }
+  }
+  S.animId = requestAnimationFrame(loop);
+}
+
+function renderBpFrame(progress, swirl) {
+  const W = canvas.width, H = canvas.height;
+  const offA = drawToOff(S._currentCharImg, W, H);
+  const offB = drawToOff(S._currentResultImg, W, H);
+  const pxA = offA.getImageData(0, 0, W, H).data;
+  const pxB = offB.getImageData(0, 0, W, H).data;
+  const out = ctx.createImageData(W, H);
+
+  // Blend char -> result with Fusion effect
+  fxFusion(pxA, pxB, out.data, W, H, S.time, progress, swirl);
+  ctx.putImageData(out, 0, 0);
+}
+
+function phaseBpShowResult(validStreams, sIdx) {
+  if (!BP.running) return;
+
+  fly1.style.opacity = '0';
+  fly2.style.opacity = '0';
+
+  // Hiệu ứng blend sử dụng Fusion, không dùng hiệu ứng xuất hiện kết quả (none)
+  resultWrap.classList.remove('reveal-eraser', 'reveal-classic');
+  resultImg.src = S._currentResultImg.src;
+  resultWrap.classList.add('show');
+
+  canvas.classList.remove('visible');
+  canvas.style.transition = '';
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  canvas.style.opacity = '';
+
+  playSfxReveal();
+
+  const pauseSec = parseFloat(document.getElementById('bp-pause-sec')?.value || '2.5');
+  const pauseMs = Math.max(500, pauseSec * 1000);
+
+  // Giữ kết quả trên màn hình theo thời gian cài đặt (~2.5s) rồi chuyển sang luồng tiếp theo
+  BP.timer = setTimeout(() => {
+    if (!BP.running) return;
+    startBpStreamSequence(validStreams, sIdx + 1);
+  }, pauseMs);
+}
+
+function finishBlendPlus() {
+  BP.running = false;
+  const btn = document.getElementById('btn-bp-blend');
+  if (btn) btn.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles"></i> Bắt đầu Blend +';
+
+  document.querySelectorAll('.bp-stream-row').forEach(row => {
+    row.classList.remove('active-blend');
+    row.classList.add('done-blend');
+  });
+
+  setPhase(BP.streams.length, BP.streams.length);
+  toast('Đã hoàn thành tất cả các luồng Blend +! 🎉');
 }

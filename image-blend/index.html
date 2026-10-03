@@ -36,6 +36,9 @@
         <button class="tab-btn active" id="tab-btn-blend" onclick="switchTab('blend')">
           <i class="fa-solid fa-wand-magic-sparkles"></i> Blend
         </button>
+        <button class="tab-btn" id="tab-btn-blendplus" onclick="switchTab('blendplus')">
+          <i class="fa-solid fa-wand-magic-sparkles"></i> Blend +
+        </button>
         <button class="tab-btn" id="tab-btn-pokemon" onclick="switchTab('pokemon')">
           <i class="fa-solid fa-bolt"></i> Pokemon
         </button>
@@ -109,6 +112,57 @@
           </div>
         </div>
       </div> <!-- /#tab-content-blend -->
+
+      <!-- TAB 1.5: BLEND + (ĐA LUỒNG: NHÂN VẬT + EMOJI + ẢNH MỚI) -->
+      <div class="tab-content" id="tab-content-blendplus" style="display:none">
+        <div class="section-label">
+          <i class="fa-solid fa-layer-group"></i> Danh sách luồng Blend +
+          <span class="gallery-count" id="bp-streams-count"></span>
+        </div>
+
+        <!-- Hidden multi-file inputs for Blend + -->
+        <input type="file" id="bp-all-multi-input" accept="image/*" multiple hidden />
+        <input type="file" id="bp-char-multi-input" accept="image/*" multiple hidden />
+        <input type="file" id="bp-emoji-multi-input" accept="image/*" multiple hidden />
+        <input type="file" id="bp-result-multi-input" accept="image/*" multiple hidden />
+
+        <div class="bt-wrap">
+          <div class="bt-header" style="grid-template-columns: 1fr 1fr 1fr 34px;">
+            <div class="bt-hcol" style="justify-content:center;"><i class="fa-solid fa-user"></i> Nhân vật</div>
+            <div class="bt-hcol" style="justify-content:center; border-left:1px solid var(--border); border-right:1px solid var(--border);"><i class="fa-solid fa-face-smile"></i> Emoji</div>
+            <div class="bt-hcol" style="justify-content:center;"><i class="fa-solid fa-sparkles"></i> Ảnh mới</div>
+            <div class="bt-hcol" style="justify-content:center; border-left:1px solid var(--border); padding:0;"><i class="fa-solid fa-gear"></i></div>
+          </div>
+          <div id="bp-table-body"></div>
+          <div class="bt-empty-hint" id="bp-empty-hint">
+            <i class="fa-solid fa-arrow-up-from-bracket"></i>
+            <span>Nhấn <b>Tải tất cả</b> hoặc <b>+</b> để chọn nhiều ảnh đổ vào các ô</span>
+          </div>
+
+          <!-- Bottom upload action bar -->
+          <div class="bp-action-top-bar" style="padding: 6px 8px; background: rgba(124, 58, 237, 0.05); border-top: 1.5px solid var(--border); display: flex; gap: 6px;">
+            <button type="button" class="act-btn" id="bp-btn-upload-all" title="Tải nhiều ảnh đổ lần lượt vào tất cả các ô (Nhân vật -> Emoji -> Ảnh mới)" style="flex: 1; padding: 7px 10px; font-size: 0.78rem; gap: 6px; background: var(--grad-v); color: #ffffff; font-weight: 700; border-radius: 8px; border: none; justify-content: center; box-shadow: 0 2px 8px rgba(124, 58, 237, 0.25);">
+              <i class="fa-solid fa-images"></i> Tải nhiều ảnh (Đổ vào tất cả ô)
+            </button>
+            <button type="button" class="bp-del-btn" id="bp-btn-add-stream" title="Thêm 1 luồng trống" onclick="addBpStream()" style="width: 32px; height: 32px; background: #ffffff; border: 1.5px solid var(--border); color: var(--p1); border-radius: 8px; flex-shrink: 0;">
+              <i class="fa-solid fa-plus"></i>
+            </button>
+          </div>
+
+          <!-- Column-specific upload bar -->
+          <div class="bp-add-row" style="display: grid; grid-template-columns: 1fr 1fr 1fr; padding: 4px 6px 6px; gap: 4px; background: rgba(124, 58, 237, 0.02); border-top: 1px dashed var(--border); align-items: center;">
+            <button type="button" class="act-btn" id="bp-btn-upload-chars" title="Tải lên nhiều ảnh cho cột Nhân vật" style="padding: 5px 2px; font-size: 0.68rem; gap: 3px; background: #ffffff; border: 1px solid var(--border); color: var(--txt2); font-weight: 600; border-radius: 6px; justify-content: center;">
+              <i class="fa-solid fa-cloud-arrow-up" style="color:var(--p1);"></i> + Cột Nhân vật
+            </button>
+            <button type="button" class="act-btn" id="bp-btn-upload-emojis" title="Tải lên nhiều ảnh cho cột Emoji" style="padding: 5px 2px; font-size: 0.68rem; gap: 3px; background: #ffffff; border: 1px solid var(--border); color: var(--txt2); font-weight: 600; border-radius: 6px; justify-content: center;">
+              <i class="fa-solid fa-cloud-arrow-up" style="color:var(--p2);"></i> + Cột Emoji
+            </button>
+            <button type="button" class="act-btn" id="bp-btn-upload-results" title="Tải lên nhiều ảnh cho cột Ảnh mới" style="padding: 5px 2px; font-size: 0.68rem; gap: 3px; background: #ffffff; border: 1px solid var(--border); color: var(--txt2); font-weight: 600; border-radius: 6px; justify-content: center;">
+              <i class="fa-solid fa-cloud-arrow-up" style="color:var(--p3);"></i> + Cột Ảnh mới
+            </button>
+          </div>
+        </div>
+      </div> <!-- /#tab-content-blendplus -->
 
       <!-- TAB 2: POKEMON FUSION CONTENT -->
       <div class="tab-content" id="tab-content-pokemon" style="display:none">
@@ -877,6 +931,46 @@
           </div>
         </div>
       </div> <!-- /#right-tab-content-blend -->
+
+      <!-- RIGHT SIDEBAR CONTENT: TAB 1.5 (BLEND +) -->
+      <div class="right-tab-content" id="right-tab-content-blendplus" style="display:none">
+        <div class="section-label"><i class="fa-solid fa-wand-magic-sparkles"></i> Cài đặt Blend +</div>
+        <div class="ctrl-card">
+          <div class="ctrl-item">
+            <label class="ctrl-lbl"><i class="fa-solid fa-hurricane"></i> Cường độ xoáy Fusion <span class="ctrl-num"
+                id="val-bp-swirl">100</span></label>
+            <input type="range" class="ctrl-range" id="sl-bp-swirl" min="10" max="100" value="100"
+              oninput="syncBpVal('swirl')" />
+          </div>
+          <div class="ctrl-item">
+            <label class="ctrl-lbl"><i class="fa-solid fa-bolt"></i> Tốc độ Fusion <span class="ctrl-num"
+                id="val-bp-speed">7</span></label>
+            <input type="range" class="ctrl-range" id="sl-bp-speed" min="1" max="10" value="7"
+              oninput="syncBpVal('speed')" />
+          </div>
+          <div class="ctrl-item">
+            <label class="ctrl-lbl"><i class="fa-solid fa-clock"></i> Thời gian chờ ảnh đầu (giây)</label>
+            <input type="number" class="ctrl-input" id="bp-char-wait-sec" value="2.0" step="0.5" min="0.5" max="10" />
+          </div>
+          <div class="ctrl-item">
+            <label class="ctrl-lbl"><i class="fa-solid fa-hourglass-half"></i> Thời gian giữ ảnh mới (giây)</label>
+            <input type="number" class="ctrl-input" id="bp-pause-sec" value="2.5" step="0.5" min="1" max="10" />
+          </div>
+        </div>
+
+        <div class="section-label" style="margin-top:6px;"><i class="fa-solid fa-play"></i> Điều khiển</div>
+        <div class="action-col">
+          <button class="act-btn act-blend" id="btn-bp-blend" onclick="runBlendPlus()"><i
+              class="fa-solid fa-wand-magic-sparkles"></i> Bắt đầu Blend +</button>
+          <div class="action-row-sm">
+            <button class="act-btn act-reset" onclick="resetAll()"><i class="fa-solid fa-rotate-left"></i>
+              Reset</button>
+            <button class="act-btn act-clear" onclick="clearAllBpStreams()"
+              title="Xóa tất cả các luồng Blend +"><i class="fa-solid fa-trash-can"></i> Dọn
+              dẹp</button>
+          </div>
+        </div>
+      </div> <!-- /#right-tab-content-blendplus -->
 
       <!-- RIGHT SIDEBAR CONTENT: TAB 2 (POKEMON) -->
       <div class="right-tab-content" id="right-tab-content-pokemon" style="display:none">

@@ -2815,6 +2815,188 @@ body.recording-mode .theater {
 }
 
 /* ============================
+   BLEND + STYLING
+   ============================ */
+.bp-stream-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 34px;
+  border-bottom: 1px solid var(--border);
+  transition: background .15s;
+  align-items: center;
+}
+
+.bp-stream-row:last-child {
+  border-bottom: none;
+}
+
+.bp-stream-row:hover {
+  background: rgba(124, 58, 237, .03);
+}
+
+.bp-stream-row.active-blend {
+  background: rgba(124, 58, 237, 0.12) !important;
+  box-shadow: inset 3px 0 0 var(--p1);
+}
+
+.bp-stream-row.done-blend {
+  opacity: 0.8;
+  background: rgba(16, 185, 129, 0.05);
+}
+
+.bp-cell {
+  padding: 6px 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 80px;
+}
+
+.bp-cell-char,
+.bp-cell-emoji,
+.bp-cell-result {
+  flex: 1;
+}
+
+.bp-cell-action {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-left: 1px solid var(--border);
+  padding: 4px;
+}
+
+.bp-del-btn {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  background: transparent;
+  border: 1px solid transparent;
+  color: #ef4444;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  transition: all 0.15s;
+}
+
+.bp-del-btn:hover {
+  background: #fee2e2;
+  border-color: #fca5a5;
+  transform: scale(1.08);
+}
+
+.bp-slot-empty {
+  width: 54px;
+  height: 54px;
+  border: 1.5px dashed var(--border);
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  cursor: pointer;
+  color: var(--txt3);
+  font-size: 0.65rem;
+  font-weight: 600;
+  transition: all 0.15s;
+  background: rgba(124, 58, 237, 0.02);
+}
+
+.bp-slot-empty:hover {
+  border-color: var(--p1);
+  color: var(--p1);
+  background: rgba(124, 58, 237, 0.06);
+  transform: translateY(-1px);
+}
+
+.bp-img-wrap {
+  position: relative;
+  width: 54px;
+  height: 54px;
+  border-radius: 8px;
+  overflow: visible;
+  border: 2px solid var(--border);
+  box-shadow: var(--card-sh);
+  transition: all 0.15s;
+  flex-shrink: 0;
+  cursor: grab;
+}
+
+.bp-img-wrap:active {
+  cursor: grabbing;
+}
+
+.bp-img-wrap.bt-col-dragging {
+  opacity: 0.35;
+  box-shadow: none;
+}
+
+.bp-img-wrap.drag-over {
+  border-color: #10b981 !important;
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.6) !important;
+  transform: scale(1.08);
+}
+
+.bp-cell.bt-cell-over {
+  background: rgba(16, 185, 129, 0.08) !important;
+}
+
+.bp-img-wrap.bp-img-result {
+  width: 48px;
+  height: 68px; /* Slightly taller for result preview */
+}
+
+.bp-img-wrap:hover {
+  border-color: var(--p1);
+  box-shadow: var(--card-sh-h);
+}
+
+.bp-img-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  border-radius: 6px;
+}
+
+.bp-img-wrap .bt-img-del {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #ef4444;
+  border: 2px solid #ffffff;
+  color: #fff;
+  font-size: .6rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  transition: all .12s;
+  z-index: 10;
+  padding: 0;
+}
+
+.bp-img-badge {
+  position: absolute;
+  bottom: 2px;
+  left: 2px;
+  background: rgba(15, 23, 42, 0.75);
+  color: #fff;
+  font-size: 0.6rem;
+  font-weight: 800;
+  padding: 1px 4px;
+  border-radius: 4px;
+  backdrop-filter: blur(4px);
+  pointer-events: none;
+}
+
+/* ============================
    POKEMON HOLOGRAPHIC CARD OVERLAY
    ============================ */
 .poke-card-overlay {
