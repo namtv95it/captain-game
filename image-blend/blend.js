@@ -5094,7 +5094,6 @@ function clearAllBpStreams() {
   resetAll();
   renderBpTable();
   updateBpPreview();
-  toast('Đã dọn dẹp tất cả các luồng Blend +! 🧹');
 }
 
 // Tải nhiều ảnh và đổ lần lượt vào tất cả các ô trống (Nhân vật -> Emoji -> Ảnh mới) theo thứ tự
@@ -5155,7 +5154,6 @@ function loadBpFilesIntoAllSlots(files) {
 
           renderBpTable();
           updateBpPreview();
-          toast(`Đã đổ ${loadedImgs.length} ảnh vào các ô của Blend +! ✨`);
         }
       };
       img.src = ev.target.result;
@@ -5190,7 +5188,6 @@ function loadBpFilesIntoColumn(type, files) {
           });
           renderBpTable();
           updateBpPreview();
-          toast(`Đã tải lên ${loadedImgs.length} ảnh ${type === 'char' ? 'Nhân vật' : type === 'emoji' ? 'Emoji' : 'Ảnh mới'}! ✨`);
         }
       };
       img.src = ev.target.result;
@@ -5818,5 +5815,4 @@ function finishBlendPlus() {
 
   setPhase(BP.streams.length, BP.streams.length);
   updateEmojiHeaderState(-1);
-  toast('Đã hoàn thành tất cả các luồng Blend +! 🎉');
 }
