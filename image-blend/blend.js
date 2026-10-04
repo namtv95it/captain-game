@@ -4329,14 +4329,9 @@ function setupFlashlightSpotlightEvents(stageEl, maskCvs, colorCvs, W, H) {
       mCtx.arc(torchHeadX, torchHeadY, rStart * 1.8, 0, Math.PI * 2);
       mCtx.fill();
     } else {
-      // Mode 1: Circle Spotlight (Quầng sáng điểm tròn - Không dùng đèn pin)
-      const radGrad = mCtx.createRadialGradient(x, y, rCanvas * 0.35, x, y, rCanvas);
-      radGrad.addColorStop(0, 'rgba(0, 0, 0, 1)');
-      radGrad.addColorStop(0.7, 'rgba(0, 0, 0, 0.85)');
-      radGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
-
+      // Mode 1: Circle Spotlight (viền tròn rõ nét, không nhòe)
       mCtx.globalCompositeOperation = 'destination-out';
-      mCtx.fillStyle = radGrad;
+      mCtx.fillStyle = '#000000';
       mCtx.beginPath();
       mCtx.arc(x, y, rCanvas, 0, Math.PI * 2);
       mCtx.fill();
@@ -4368,6 +4363,34 @@ function setupFlashlightSpotlightEvents(stageEl, maskCvs, colorCvs, W, H) {
       };
     }
   };
+
+  // Custom cursor living INSIDE the stage so it rotates together with the landscape theater
+  let cursorEl = stageEl.querySelector('#fl-custom-cursor');
+  if (!cursorEl) {
+    cursorEl = document.createElement('div');
+    cursorEl.id = 'fl-custom-cursor';
+    cursorEl.textContent = '\uD83D\uDC46';
+    cursorEl.style.cssText = 'position:absolute;left:0;top:0;font-size:44px;line-height:1;pointer-events:none;z-index:10;display:none;transform:translate(-50%,-8%);filter:drop-shadow(0 2px 4px rgba(0,0,0,.5));';
+    stageEl.appendChild(cursorEl);
+  }
+  stageEl.style.cursor = 'none';
+  stageEl.querySelectorAll('canvas').forEach(c => { c.style.cursor = 'none'; });
+
+  const moveCursor = (e) => {
+    const { cssX, cssY } = getStageLocalCSS(e);
+    const isRotated = document.body.classList.contains('recording-mode');
+    const rect = maskCvs.getBoundingClientRect();
+    const s = (isRotated ? rect.height : rect.width) / (maskCvs.offsetWidth || 1) || 1;
+    cursorEl.style.left = (cssX / s) + 'px';
+    cursorEl.style.top = (cssY / s) + 'px';
+    cursorEl.style.display = 'block';
+  };
+  if (!stageEl.dataset.flCursorBound) {
+    stageEl.dataset.flCursorBound = '1';
+    stageEl.addEventListener('pointermove', moveCursor);
+    stageEl.addEventListener('pointerdown', moveCursor);
+    stageEl.addEventListener('pointerleave', () => { cursorEl.style.display = 'none'; });
+  }
 
   // Drag / Touch Handlers
   const onPointerDown = (e) => {
