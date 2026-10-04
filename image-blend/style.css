@@ -1091,8 +1091,13 @@ body.recording-mode .theater {
 }
 
 @keyframes flashOut {
-  0% { opacity: 1; }
-  100% { opacity: 0; }
+  0% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+  }
 }
 
 /* ── Result reveal (Morph Transformation) ── */
@@ -2950,7 +2955,8 @@ body.recording-mode .theater {
 
 .bp-img-wrap.bp-img-result {
   width: 48px;
-  height: 68px; /* Slightly taller for result preview */
+  height: 68px;
+  /* Slightly taller for result preview */
 }
 
 .bp-img-wrap:hover {
@@ -3017,7 +3023,8 @@ body.recording-mode .theater {
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.5s ease;
-  background: transparent; /* Clean transparent overlay to reveal theater grid background */
+  background: transparent;
+  /* Clean transparent overlay to reveal theater grid background */
 }
 
 .poke-card-overlay.show {
@@ -3050,9 +3057,17 @@ body.recording-mode .theater {
 }
 
 @keyframes pokeCardFloat {
-  0% { transform: translateY(0) rotate(0deg); }
-  50% { transform: translateY(-8px) rotate(1.2deg); }
-  100% { transform: translateY(0) rotate(-1.2deg); }
+  0% {
+    transform: translateY(0) rotate(0deg);
+  }
+
+  50% {
+    transform: translateY(-8px) rotate(1.2deg);
+  }
+
+  100% {
+    transform: translateY(0) rotate(-1.2deg);
+  }
 }
 
 .poke-card-full-img {
@@ -3062,7 +3077,7 @@ body.recording-mode .theater {
   object-fit: contain;
   border-radius: 18px;
   display: block;
-  box-shadow: 0 12px 35px rgba(0,0,0,0.35);
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.35);
 }
 
 /* Holographic Shine Sweep Effect */
@@ -3070,21 +3085,25 @@ body.recording-mode .theater {
   position: absolute;
   inset: 0;
   border-radius: 16px;
-  background: linear-gradient(
-    115deg,
-    transparent 20%,
-    rgba(255, 255, 255, 0.3) 45%,
-    rgba(255, 255, 255, 0.65) 50%,
-    rgba(255, 255, 255, 0.3) 55%,
-    transparent 80%
-  );
+  background: linear-gradient(115deg,
+      transparent 20%,
+      rgba(255, 255, 255, 0.3) 45%,
+      rgba(255, 255, 255, 0.65) 50%,
+      rgba(255, 255, 255, 0.3) 55%,
+      transparent 80%);
   pointer-events: none;
   animation: holoShine 3.2s infinite;
 }
 
 @keyframes holoShine {
-  0% { transform: translateX(-150%) translateY(-150%); }
-  30%, 100% { transform: translateX(150%) translateY(150%); }
+  0% {
+    transform: translateX(-150%) translateY(-150%);
+  }
+
+  30%,
+  100% {
+    transform: translateX(150%) translateY(150%);
+  }
 }
 
 /* Interactive Question Overlay Box outside below the card */
@@ -3103,7 +3122,7 @@ body.recording-mode .theater {
   text-transform: uppercase;
   word-break: break-word;
   box-shadow: 0 12px 30px rgba(30, 27, 75, 0.45);
-  text-shadow: 0 2px 4px rgba(0,0,0,0.6);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
   border: 2px solid rgba(129, 140, 248, 0.5);
   opacity: 0;
   transform: translateY(20px);
@@ -3119,8 +3138,13 @@ body.recording-mode .theater {
 }
 
 @keyframes pulseQuestion {
-  0% { transform: scale(0.98); }
-  100% { transform: scale(1.02); }
+  0% {
+    transform: scale(0.98);
+  }
+
+  100% {
+    transform: scale(1.02);
+  }
 }
 
 /* Single Card Hide Transition (shrink to center & fade out) */
@@ -3140,6 +3164,7 @@ body.recording-mode .theater {
     transform: scale(0.3);
     opacity: 0;
   }
+
   100% {
     transform: scale(1);
     opacity: 1;
@@ -3220,7 +3245,7 @@ body.recording-mode .theater {
   font-weight: 800;
   padding: 4px 9px;
   border-radius: 20px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
   display: flex;
   align-items: center;
   gap: 5px;
@@ -3303,7 +3328,7 @@ body.recording-mode .theater {
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  background: rgba(0,0,0,0.7);
+  background: rgba(0, 0, 0, 0.7);
   color: #fff;
   display: flex;
   align-items: center;
@@ -3367,19 +3392,27 @@ body.recording-mode .theater {
   max-width: 100%;
   max-height: 100%;
   object-fit: contain;
-  filter: drop-shadow(0 10px 25px rgba(0,0,0,0.6));
+  filter: drop-shadow(0 10px 25px rgba(0, 0, 0, 0.6));
   transition: filter 0.4s ease;
   animation: opponentSway 2.2s ease-in-out infinite alternate;
 }
 
 @keyframes opponentSway {
-  0% { transform: translateY(0) rotate(0deg); }
-  50% { transform: translateY(-14px) rotate(-2deg) scale(1.03); }
-  100% { transform: translateY(-4px) rotate(1.5deg) scale(1); }
+  0% {
+    transform: translateY(0) rotate(0deg);
+  }
+
+  50% {
+    transform: translateY(-14px) rotate(-2deg) scale(1.03);
+  }
+
+  100% {
+    transform: translateY(-4px) rotate(1.5deg) scale(1);
+  }
 }
 
 .battle-opponent-wrap.grayscale #battle-opponent-img {
-  filter: grayscale(1) contrast(1.2) brightness(0.85) drop-shadow(0 10px 25px rgba(0,0,0,0.8));
+  filter: grayscale(1) contrast(1.2) brightness(0.85) drop-shadow(0 10px 25px rgba(0, 0, 0, 0.8));
 }
 
 .battle-opponent-wrap.hit {
@@ -3387,11 +3420,25 @@ body.recording-mode .theater {
 }
 
 @keyframes opponentHit {
-  0% { transform: translateX(0) scale(1); }
-  25% { transform: translateX(15px) scale(0.95); }
-  50% { transform: translateX(-15px) scale(1.02); }
-  75% { transform: translateX(8px) scale(0.98); }
-  100% { transform: translateX(0) scale(1); }
+  0% {
+    transform: translateX(0) scale(1);
+  }
+
+  25% {
+    transform: translateX(15px) scale(0.95);
+  }
+
+  50% {
+    transform: translateX(-15px) scale(1.02);
+  }
+
+  75% {
+    transform: translateX(8px) scale(0.98);
+  }
+
+  100% {
+    transform: translateX(0) scale(1);
+  }
 }
 
 .battle-opponent-wrap.slide-in {
@@ -3399,8 +3446,15 @@ body.recording-mode .theater {
 }
 
 @keyframes opponentSlideIn {
-  0% { transform: translateX(120%) scale(0.8); opacity: 0; }
-  100% { transform: translateX(0) scale(1); opacity: 1; }
+  0% {
+    transform: translateX(120%) scale(0.8);
+    opacity: 0;
+  }
+
+  100% {
+    transform: translateX(0) scale(1);
+    opacity: 1;
+  }
 }
 
 /* Layer 3: Slash / Claw FX Overlay */
@@ -3435,7 +3489,7 @@ body.recording-mode .theater {
 .fallback-slash-svg {
   width: 100%;
   height: 100%;
-  filter: drop-shadow(0 0 15px rgba(255,255,255,0.9));
+  filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.9));
 }
 
 /* Layer 4: Jesus Sprite */
@@ -3456,15 +3510,23 @@ body.recording-mode .theater {
   max-width: 100%;
   max-height: 100%;
   object-fit: contain;
-  filter: drop-shadow(0 12px 30px rgba(0,0,0,0.7));
+  filter: drop-shadow(0 12px 30px rgba(0, 0, 0, 0.7));
   transform-origin: bottom left;
   animation: jesusSway 1.8s ease-in-out infinite alternate;
 }
 
 @keyframes jesusSway {
-  0% { transform: translateY(0) rotate(0deg); }
-  50% { transform: translateY(-16px) rotate(2.5deg) scale(1.02); }
-  100% { transform: translateY(-6px) rotate(-1.5deg) scale(0.99); }
+  0% {
+    transform: translateY(0) rotate(0deg);
+  }
+
+  50% {
+    transform: translateY(-16px) rotate(2.5deg) scale(1.02);
+  }
+
+  100% {
+    transform: translateY(-6px) rotate(-1.5deg) scale(0.99);
+  }
 }
 
 .battle-jesus-wrap.attack #battle-jesus-img {
@@ -3472,9 +3534,17 @@ body.recording-mode .theater {
 }
 
 @keyframes jesusAttack {
-  0% { transform: scale(1) translateY(0); }
-  40% { transform: scale(1.08) translateY(-15px) translateX(20px); }
-  100% { transform: scale(1) translateY(0); }
+  0% {
+    transform: scale(1) translateY(0);
+  }
+
+  40% {
+    transform: scale(1.08) translateY(-15px) translateX(20px);
+  }
+
+  100% {
+    transform: scale(1) translateY(0);
+  }
 }
 
 /* Layer 4 Top: Health Bars & Names */
@@ -3505,7 +3575,7 @@ body.recording-mode .theater {
   font-size: 1.15rem;
   font-weight: 900;
   color: #ffffff;
-  text-shadow: 0 2px 8px rgba(0,0,0,0.95), 0 0 12px rgba(0,0,0,0.8);
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.95), 0 0 12px rgba(0, 0, 0, 0.8);
   font-family: 'Inter', sans-serif;
   letter-spacing: 1.5px;
   text-transform: uppercase;
@@ -3522,13 +3592,18 @@ body.recording-mode .theater {
 .hp-heart {
   font-size: 1.25rem;
   color: #ef4444;
-  filter: drop-shadow(0 2px 6px rgba(0,0,0,0.9));
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.9));
   animation: heartPulse 1.5s ease-in-out infinite alternate;
 }
 
 @keyframes heartPulse {
-  0% { transform: scale(1); }
-  100% { transform: scale(1.15); }
+  0% {
+    transform: scale(1);
+  }
+
+  100% {
+    transform: scale(1.15);
+  }
 }
 
 .hp-bar-track {
@@ -3538,7 +3613,7 @@ body.recording-mode .theater {
   border: 2px solid #ffffff;
   border-radius: 6px;
   overflow: hidden;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.7);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.7);
   position: relative;
 }
 
@@ -3546,7 +3621,7 @@ body.recording-mode .theater {
   height: 100%;
   background: linear-gradient(90deg, #dc2626, #ef4444);
   transition: width 0.7s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: inset 0 2px 4px rgba(255,255,255,0.4);
+  box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.4);
 }
 
 .hp-bar-fill.jesus-hp {
@@ -3613,13 +3688,21 @@ body.recording-mode .theater {
   object-fit: contain;
   transform-origin: bottom center;
   animation: victorySway 2.0s ease-in-out infinite alternate;
-  filter: drop-shadow(0 15px 35px rgba(255,215,0,0.7));
+  filter: drop-shadow(0 15px 35px rgba(255, 215, 0, 0.7));
 }
 
 @keyframes victorySway {
-  0% { transform: translateY(0) scale(1) rotate(0deg); }
-  50% { transform: translateY(-10px) scale(1.03) rotate(1.5deg); }
-  100% { transform: translateY(-4px) scale(1.01) rotate(-1.5deg); }
+  0% {
+    transform: translateY(0) scale(1) rotate(0deg);
+  }
+
+  50% {
+    transform: translateY(-10px) scale(1.03) rotate(1.5deg);
+  }
+
+  100% {
+    transform: translateY(-4px) scale(1.01) rotate(-1.5deg);
+  }
 }
 
 .battle-victory-title {
@@ -3628,7 +3711,7 @@ body.recording-mode .theater {
   color: #ffffff;
   text-transform: uppercase;
   letter-spacing: 3px;
-  text-shadow: 0 4px 14px rgba(0,0,0,0.95), 0 0 25px rgba(255,215,0,0.9);
+  text-shadow: 0 4px 14px rgba(0, 0, 0, 0.95), 0 0 25px rgba(255, 215, 0, 0.9);
   margin-top: 15px;
   text-align: center;
 }
@@ -3697,7 +3780,7 @@ body.recording-mode .theater {
 .puzzle-heart-badge {
   font-size: 1.8rem;
   line-height: 1;
-  filter: drop-shadow(0 2px 5px rgba(0,0,0,0.2));
+  filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.2));
   transition: transform 0.2s ease;
 }
 
@@ -3765,7 +3848,8 @@ body.recording-mode .theater {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
-.ctrl-select:hover, .ctrl-select:focus {
+.ctrl-select:hover,
+.ctrl-select:focus {
   border-color: #6366f1;
   box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
 }
@@ -3812,7 +3896,7 @@ body.recording-mode .theater {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: center;
   padding: 16px 12px 20px;
   background: transparent;
   z-index: 50;
@@ -3831,7 +3915,7 @@ body.recording-mode .theater {
 }
 
 /* Always hide emoji header bar in Flashlight mode */
-.flashlight-theater-overlay.show ~ .emoji-header-bar,
+.flashlight-theater-overlay.show~.emoji-header-bar,
 #theater:has(.flashlight-theater-overlay.show) #emoji-header-bar {
   display: none !important;
 }
@@ -3895,10 +3979,10 @@ body.recording-mode .theater {
 /* Bottom Stage: Main Image with Mask (Vừa vặn trong khung quay 9:16) */
 .flashlight-bottom-stage {
   position: relative;
-  width: 340px;
+  width: 100%;
+  margin-top: 30%;
   aspect-ratio: 360 / 420;
-  max-width: 95%;
-  max-height: 52vh;
+  max-height: none;
   margin-bottom: 0;
   overflow: visible;
   background: transparent !important;
@@ -4069,13 +4153,18 @@ body.climax-active-mode .theater {
   max-width: 100%;
   max-height: 100%;
   object-fit: contain;
-  filter: drop-shadow(0 10px 25px rgba(0,0,0,0.7));
+  filter: drop-shadow(0 10px 25px rgba(0, 0, 0, 0.7));
   animation: climaxOpponentIdle 2s ease-in-out infinite alternate;
 }
 
 @keyframes climaxOpponentIdle {
-  0% { transform: translateY(0) scale(1); }
-  100% { transform: translateY(-10px) scale(1.04); }
+  0% {
+    transform: translateY(0) scale(1);
+  }
+
+  100% {
+    transform: translateY(-10px) scale(1.04);
+  }
 }
 
 /* Opponent blown away animation in Phase 3 */
@@ -4084,9 +4173,20 @@ body.climax-active-mode .theater {
 }
 
 @keyframes opponentBlowAway {
-  0% { transform: translateX(0) rotate(0deg) scale(1); opacity: 1; }
-  30% { transform: translateX(-40px) rotate(-25deg) scale(1.1); opacity: 0.9; }
-  100% { transform: translateX(180%) rotate(180deg) scale(0.3); opacity: 0; }
+  0% {
+    transform: translateX(0) rotate(0deg) scale(1);
+    opacity: 1;
+  }
+
+  30% {
+    transform: translateX(-40px) rotate(-25deg) scale(1.1);
+    opacity: 0.9;
+  }
+
+  100% {
+    transform: translateX(180%) rotate(180deg) scale(0.3);
+    opacity: 0;
+  }
 }
 
 /* Layer 3: Hero Sprite */
@@ -4107,7 +4207,7 @@ body.climax-active-mode .theater {
   max-width: 100%;
   max-height: 100%;
   object-fit: contain;
-  filter: drop-shadow(0 10px 25px rgba(0,0,0,0.7));
+  filter: drop-shadow(0 10px 25px rgba(0, 0, 0, 0.7));
   transform-origin: bottom left;
   transition: filter 0.4s ease, transform 0.4s ease;
 }
@@ -4115,18 +4215,23 @@ body.climax-active-mode .theater {
 /* Phase 1: Hero weak & trembling */
 .climax-hero-wrap.weak #climax-hero-img {
   animation: heroWeakTremble 0.15s ease-in-out infinite alternate;
-  filter: drop-shadow(0 10px 25px rgba(0,0,0,0.9)) brightness(0.7) contrast(1.1);
+  filter: drop-shadow(0 10px 25px rgba(0, 0, 0, 0.9)) brightness(0.7) contrast(1.1);
 }
 
 @keyframes heroWeakTremble {
-  0% { transform: translate(0, 0) rotate(0deg); }
-  100% { transform: translate(-3px, 4px) rotate(-1.5deg); }
+  0% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+
+  100% {
+    transform: translate(-3px, 4px) rotate(-1.5deg);
+  }
 }
 
 /* Phase 3: Corrupted / Awaken Super Form */
 .climax-hero-wrap.awaken #climax-hero-img {
   animation: heroAwakenSway 1.5s ease-in-out infinite alternate;
-  filter: drop-shadow(0 0 35px rgba(239, 68, 68, 0.95)) drop-shadow(0 0 60px rgba(0,0,0,0.9)) brightness(1.2) contrast(1.2);
+  filter: drop-shadow(0 0 35px rgba(239, 68, 68, 0.95)) drop-shadow(0 0 60px rgba(0, 0, 0, 0.9)) brightness(1.2) contrast(1.2);
 }
 
 /* Phase 2.5: Super Saiyan Power Charge / Gồng sức mạnh nhận năng lượng (Goku Style) */
@@ -4135,18 +4240,33 @@ body.climax-active-mode .theater {
 }
 
 @keyframes heroSaiyanCharge {
-  0% { transform: scale(1.08) translate(-2px, -2px) rotate(-1deg); }
-  100% { transform: scale(1.16) translate(3px, -8px) rotate(1deg); }
+  0% {
+    transform: scale(1.08) translate(-2px, -2px) rotate(-1deg);
+  }
+
+  100% {
+    transform: scale(1.16) translate(3px, -8px) rotate(1deg);
+  }
 }
 
 @keyframes heroSaiyanGlow {
-  0% { filter: drop-shadow(0 0 25px #f59e0b) drop-shadow(0 0 45px #ef4444) brightness(1.25); }
-  100% { filter: drop-shadow(0 0 55px #fef08a) drop-shadow(0 0 80px #f59e0b) brightness(1.5) contrast(1.2); }
+  0% {
+    filter: drop-shadow(0 0 25px #f59e0b) drop-shadow(0 0 45px #ef4444) brightness(1.25);
+  }
+
+  100% {
+    filter: drop-shadow(0 0 55px #fef08a) drop-shadow(0 0 80px #f59e0b) brightness(1.5) contrast(1.2);
+  }
 }
 
 @keyframes heroAwakenSway {
-  0% { transform: scale(1.15) translateY(-10px) rotate(0deg); }
-  100% { transform: scale(1.22) translateY(-25px) rotate(2deg); }
+  0% {
+    transform: scale(1.15) translateY(-10px) rotate(0deg);
+  }
+
+  100% {
+    transform: scale(1.22) translateY(-25px) rotate(2deg);
+  }
 }
 
 /* Split screen vertical divider */
@@ -4156,7 +4276,7 @@ body.climax-active-mode .theater {
   bottom: 0;
   left: 50%;
   width: 4px;
-  background: linear-gradient(180deg, rgba(239,68,68,0.8), rgba(245,158,11,0.9), rgba(59,130,246,0.8));
+  background: linear-gradient(180deg, rgba(239, 68, 68, 0.8), rgba(245, 158, 11, 0.9), rgba(59, 130, 246, 0.8));
   box-shadow: 0 0 15px rgba(245, 158, 11, 0.9);
   transform: translateX(-50%);
   z-index: 3;
@@ -4172,6 +4292,7 @@ body.climax-active-mode .theater {
 body.climax-active-mode .climax-hero-wrap {
   opacity: 0;
 }
+
 body.climax-active-mode .climax-hero-wrap.enter-left,
 body.climax-active-mode .climax-hero-wrap.clash-left,
 body.climax-active-mode .climax-hero-wrap.weak,
@@ -4183,6 +4304,7 @@ body.climax-active-mode .climax-hero-wrap.awaken {
 body.climax-active-mode .climax-opponent-wrap {
   opacity: 0;
 }
+
 body.climax-active-mode .climax-opponent-wrap.entered,
 body.climax-active-mode .climax-opponent-wrap.enter-right,
 body.climax-active-mode .climax-opponent-wrap.clash-right,
@@ -4195,8 +4317,15 @@ body.climax-active-mode .climax-opponent-wrap.blow-away {
 }
 
 @keyframes heroEnterLeft {
-  0% { transform: translateX(-120%); opacity: 0; }
-  100% { transform: translateX(0); opacity: 1; }
+  0% {
+    transform: translateX(-120%);
+    opacity: 0;
+  }
+
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
 }
 
 .climax-opponent-wrap.enter-right {
@@ -4204,8 +4333,15 @@ body.climax-active-mode .climax-opponent-wrap.blow-away {
 }
 
 @keyframes oppEnterRight {
-  0% { transform: translateX(120%); opacity: 0; }
-  100% { transform: translateX(0); opacity: 1; }
+  0% {
+    transform: translateX(120%);
+    opacity: 0;
+  }
+
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
 }
 
 /* Battle Collision FX (Pha 2 Giao chiến) */
@@ -4227,8 +4363,13 @@ body.climax-active-mode .climax-opponent-wrap.blow-away {
 }
 
 @keyframes clashBoom {
-  0% { transform: translate(-50%, -50%) scale(1.4) rotate(-10deg); }
-  100% { transform: translate(-50%, -50%) scale(2.2) rotate(10deg); }
+  0% {
+    transform: translate(-50%, -50%) scale(1.4) rotate(-10deg);
+  }
+
+  100% {
+    transform: translate(-50%, -50%) scale(2.2) rotate(10deg);
+  }
 }
 
 .clash-spark-center {
@@ -4241,8 +4382,13 @@ body.climax-active-mode .climax-opponent-wrap.blow-away {
 }
 
 @keyframes heroClash {
-  0% { transform: translate(0, 0); }
-  100% { transform: translate(35px, -15px) rotate(4deg); }
+  0% {
+    transform: translate(0, 0);
+  }
+
+  100% {
+    transform: translate(35px, -15px) rotate(4deg);
+  }
 }
 
 .climax-opponent-wrap.clash-right {
@@ -4250,8 +4396,13 @@ body.climax-active-mode .climax-opponent-wrap.blow-away {
 }
 
 @keyframes oppClash {
-  0% { transform: translate(0, 0); }
-  100% { transform: translate(-35px, 15px) rotate(-4deg); }
+  0% {
+    transform: translate(0, 0);
+  }
+
+  100% {
+    transform: translate(-35px, 15px) rotate(-4deg);
+  }
 }
 
 /* Dual Top HP Bars UI */
@@ -4275,7 +4426,7 @@ body.climax-active-mode .climax-opponent-wrap.blow-away {
   border: 2.5px solid rgba(255, 255, 255, 0.35);
   border-radius: 14px;
   padding: 8px 12px;
-  box-shadow: 0 8px 22px rgba(0,0,0,0.7);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.7);
 }
 
 .climax-hp-head {
@@ -4291,9 +4442,10 @@ body.climax-active-mode .climax-opponent-wrap.blow-away {
 .hp-hero-name {
   font-size: 1.15rem;
   color: #60a5fa;
-  text-shadow: 0 2px 6px rgba(0,0,0,0.95);
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.95);
   letter-spacing: 0.5px;
 }
+
 .hp-hero-lv {
   color: #fef08a;
   background: #2563eb;
@@ -4302,16 +4454,17 @@ body.climax-active-mode .climax-opponent-wrap.blow-away {
   font-size: 0.95rem;
   font-weight: 900;
   letter-spacing: 0.5px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.5);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
   transition: all 0.2s ease;
 }
 
 .hp-opp-name {
   font-size: 1.15rem;
   color: #f87171;
-  text-shadow: 0 2px 6px rgba(0,0,0,0.95);
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.95);
   letter-spacing: 0.5px;
 }
+
 .hp-opp-lv {
   color: #fef08a;
   background: #dc2626;
@@ -4320,7 +4473,7 @@ body.climax-active-mode .climax-opponent-wrap.blow-away {
   font-size: 0.95rem;
   font-weight: 900;
   letter-spacing: 0.5px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.5);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
 }
 
 .climax-vs-badge {
@@ -4343,7 +4496,7 @@ body.climax-active-mode .climax-opponent-wrap.blow-away {
   border-radius: 9px;
   overflow: hidden;
   border: 1.5px solid rgba(255, 255, 255, 0.5);
-  box-shadow: inset 0 2px 4px rgba(0,0,0,0.8);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.8);
 }
 
 .hero-hp-fill {
@@ -4386,8 +4539,15 @@ body.climax-active-mode .climax-opponent-wrap.blow-away {
 }
 
 @keyframes warningFlash {
-  0% { opacity: 0.7; transform: translateX(-50%) scale(0.95); }
-  100% { opacity: 1; transform: translateX(-50%) scale(1.05); }
+  0% {
+    opacity: 0.7;
+    transform: translateX(-50%) scale(0.95);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateX(-50%) scale(1.05);
+  }
 }
 
 /* Layer 5: Phase 2 CTA Emergency Overlay */
@@ -4423,16 +4583,31 @@ body.climax-active-mode .climax-opponent-wrap.blow-away {
   text-shadow:
     0 0 25px rgba(234, 179, 8, 0.95),
     0 0 50px rgba(239, 68, 68, 0.95),
-    0 4px 12px rgba(0,0,0,0.9);
+    0 4px 12px rgba(0, 0, 0, 0.9);
   animation: countdownPop 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) infinite;
   line-height: 1;
 }
 
 @keyframes countdownPop {
-  0% { transform: scale(1.4); opacity: 0.2; }
-  30% { transform: scale(1); opacity: 1; }
-  80% { transform: scale(0.95); opacity: 1; }
-  100% { transform: scale(0.9); opacity: 0.7; }
+  0% {
+    transform: scale(1.4);
+    opacity: 0.2;
+  }
+
+  30% {
+    transform: scale(1);
+    opacity: 1;
+  }
+
+  80% {
+    transform: scale(0.95);
+    opacity: 1;
+  }
+
+  100% {
+    transform: scale(0.9);
+    opacity: 0.7;
+  }
 }
 
 /* Giant Flashing CTA Text Banner */
@@ -4453,8 +4628,17 @@ body.climax-active-mode .climax-opponent-wrap.blow-away {
 }
 
 @keyframes ctaBannerPulse {
-  0% { transform: scale(0.97); border-color: #f59e0b; box-shadow: 0 0 25px rgba(245, 158, 11, 0.6); }
-  100% { transform: scale(1.04); border-color: #ef4444; box-shadow: 0 0 50px rgba(239, 68, 68, 0.95); }
+  0% {
+    transform: scale(0.97);
+    border-color: #f59e0b;
+    box-shadow: 0 0 25px rgba(245, 158, 11, 0.6);
+  }
+
+  100% {
+    transform: scale(1.04);
+    border-color: #ef4444;
+    box-shadow: 0 0 50px rgba(239, 68, 68, 0.95);
+  }
 }
 
 #climax-cta-text-line1 {
@@ -4463,7 +4647,7 @@ body.climax-active-mode .climax-opponent-wrap.blow-away {
   color: #fef08a;
   text-transform: uppercase;
   letter-spacing: 2px;
-  text-shadow: 0 3px 10px rgba(0,0,0,0.9);
+  text-shadow: 0 3px 10px rgba(0, 0, 0, 0.9);
   line-height: 1.25;
 }
 
@@ -4473,7 +4657,7 @@ body.climax-active-mode .climax-opponent-wrap.blow-away {
   color: #38bdf8;
   text-transform: uppercase;
   letter-spacing: 1.2px;
-  text-shadow: 0 2px 8px rgba(0,0,0,0.9);
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.9);
   line-height: 1.25;
 }
 
@@ -4492,7 +4676,7 @@ body.climax-active-mode .climax-opponent-wrap.blow-away {
   color: #34d399;
   text-transform: uppercase;
   letter-spacing: 1.2px;
-  text-shadow: 0 2px 6px rgba(0,0,0,0.9);
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.9);
   display: flex;
   justify-content: space-between;
 }
@@ -4535,10 +4719,27 @@ body.climax-active-mode .climax-opponent-wrap.blow-away {
 }
 
 @keyframes climaxScreenShake {
-  10%, 90% { transform: translate3d(-4px, 2px, 0); }
-  20%, 80% { transform: translate3d(6px, -4px, 0); }
-  30%, 50%, 70% { transform: translate3d(-8px, 6px, 0); }
-  40%, 60% { transform: translate3d(8px, -6px, 0); }
+
+  10%,
+  90% {
+    transform: translate3d(-4px, 2px, 0);
+  }
+
+  20%,
+  80% {
+    transform: translate3d(6px, -4px, 0);
+  }
+
+  30%,
+  50%,
+  70% {
+    transform: translate3d(-8px, 6px, 0);
+  }
+
+  40%,
+  60% {
+    transform: translate3d(8px, -6px, 0);
+  }
 }
 
 /* Layer 3.5: Dragon / Super Saiyan Energy Charge Aura FX */
@@ -4575,8 +4776,16 @@ body.climax-active-mode .climax-opponent-wrap.blow-away {
 }
 
 @keyframes saiyanFlameRise {
-  0% { transform: scaleY(0.9) scaleX(0.95); opacity: 0.85; }
-  100% { transform: scaleY(1.25) scaleX(1.1); opacity: 1; filter: blur(3px); }
+  0% {
+    transform: scaleY(0.9) scaleX(0.95);
+    opacity: 0.85;
+  }
+
+  100% {
+    transform: scaleY(1.25) scaleX(1.1);
+    opacity: 1;
+    filter: blur(3px);
+  }
 }
 
 .aura-fire-ring {
@@ -4584,14 +4793,21 @@ body.climax-active-mode .climax-opponent-wrap.blow-away {
   width: 200px;
   height: 200px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(239,68,68,0.6) 0%, rgba(245,158,11,0.4) 50%, transparent 75%);
+  background: radial-gradient(circle, rgba(239, 68, 68, 0.6) 0%, rgba(245, 158, 11, 0.4) 50%, transparent 75%);
   box-shadow: 0 0 50px rgba(239, 68, 68, 0.9), inset 0 0 40px rgba(251, 191, 36, 0.8);
   animation: auraPulseRing 0.6s infinite alternate ease-in-out;
 }
 
 @keyframes auraPulseRing {
-  0% { transform: scale(0.85) rotate(0deg); opacity: 0.7; }
-  100% { transform: scale(1.25) rotate(180deg); opacity: 1; }
+  0% {
+    transform: scale(0.85) rotate(0deg);
+    opacity: 0.7;
+  }
+
+  100% {
+    transform: scale(1.25) rotate(180deg);
+    opacity: 1;
+  }
 }
 
 .saiyan-sparks {
@@ -4603,8 +4819,15 @@ body.climax-active-mode .climax-opponent-wrap.blow-away {
 }
 
 @keyframes saiyanSparksFly {
-  0% { transform: translateY(15px) scale(0.8); opacity: 0.7; }
-  100% { transform: translateY(-30px) scale(1.4); opacity: 1; }
+  0% {
+    transform: translateY(15px) scale(0.8);
+    opacity: 0.7;
+  }
+
+  100% {
+    transform: translateY(-30px) scale(1.4);
+    opacity: 1;
+  }
 }
 
 /* Hero Level Burst Animation (Rapid Count to Lv 999) */
@@ -4620,8 +4843,13 @@ body.climax-active-mode .climax-opponent-wrap.blow-away {
 }
 
 @keyframes lvBurstPulse {
-  0% { transform: scale(1); }
-  100% { transform: scale(1.35) rotate(-3deg); }
+  0% {
+    transform: scale(1);
+  }
+
+  100% {
+    transform: scale(1.35) rotate(-3deg);
+  }
 }
 
 /* Layer 7: Final Victory KO Banner */
@@ -4633,7 +4861,7 @@ body.climax-active-mode .climax-opponent-wrap.blow-away {
   z-index: 35;
   background: linear-gradient(135deg, rgba(220, 38, 38, 0.96), rgba(185, 28, 28, 0.96));
   border: 4.5px solid #fef08a;
-  box-shadow: 0 12px 50px rgba(0,0,0,0.95), 0 0 45px rgba(239, 68, 68, 0.95);
+  box-shadow: 0 12px 50px rgba(0, 0, 0, 0.95), 0 0 45px rgba(239, 68, 68, 0.95);
   border-radius: 24px;
   padding: 24px 36px;
   width: 90%;
@@ -4655,7 +4883,7 @@ body.climax-active-mode .climax-opponent-wrap.blow-away {
   color: #fef08a;
   text-transform: uppercase;
   letter-spacing: 3px;
-  text-shadow: 0 4px 14px rgba(0,0,0,0.95), 0 0 25px rgba(254, 240, 138, 0.9);
+  text-shadow: 0 4px 14px rgba(0, 0, 0, 0.95), 0 0 25px rgba(254, 240, 138, 0.9);
   line-height: 1.1;
 }
 
@@ -4664,7 +4892,7 @@ body.climax-active-mode .climax-opponent-wrap.blow-away {
   font-weight: 800;
   color: #ffffff;
   margin-top: 8px;
-  text-shadow: 0 2px 8px rgba(0,0,0,0.9);
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.9);
   line-height: 1.25;
 }
 
@@ -4674,5 +4902,3 @@ body.climax-active-mode #toast {
   opacity: 0 !important;
   pointer-events: none !important;
 }
-
-

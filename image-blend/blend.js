@@ -4069,10 +4069,12 @@ function updateFlashlightMode(val) {
   renderFlashlightTab();
 }
 
-function updateFlashlightRadius(val) {
-  FLASHLIGHT.radius = parseInt(val) || 65;
+function updateFlashlightRadius(val, fromInput) {
+  FLASHLIGHT.radius = Math.max(1, parseInt(val) || 65);
   const valEl = document.getElementById('fl-radius-val');
-  if (valEl) valEl.textContent = FLASHLIGHT.radius + 'px';
+  if (valEl && !fromInput) valEl.value = FLASHLIGHT.radius;
+  const rangeEl = document.getElementById('fl-radius-range');
+  if (rangeEl) rangeEl.value = FLASHLIGHT.radius;
   renderFlashlightTab();
 }
 
@@ -4092,18 +4094,7 @@ function updateBeamAngle(val) {
       const files = Array.from(e.target.files).filter(f => f.type.startsWith('image/'));
       if (files.length === 0) return;
 
-      if (files.length >= 2) {
-        // Load first two images
-        loadFlashlightImage(1, files[0]);
-        loadFlashlightImage(2, files[1]);
-      } else if (files.length === 1) {
-        // If 1 image selected, fill empty slot or slot 1
-        if (!FLASHLIGHT.img1) {
-          loadFlashlightImage(1, files[0]);
-        } else {
-          loadFlashlightImage(2, files[0]);
-        }
-      }
+      loadFlashlightImage(1, files[0]);
       e.target.value = '';
     });
   }
@@ -4130,11 +4121,10 @@ function updateFlashlightMultiPreview() {
   const pimg1 = document.getElementById('pimg-fl-1');
   const pimg2 = document.getElementById('pimg-fl-2');
 
-  if (FLASHLIGHT.img1 || FLASHLIGHT.img2) {
+  if (FLASHLIGHT.img1) {
     if (body) body.style.display = 'none';
     if (prev) prev.style.display = 'block';
-    if (pimg1) pimg1.src = FLASHLIGHT.img1 ? FLASHLIGHT.img1.src : '';
-    if (pimg2) pimg2.src = FLASHLIGHT.img2 ? FLASHLIGHT.img2.src : '';
+    if (pimg1) pimg1.src = FLASHLIGHT.img1.src;
   } else {
     if (body) body.style.display = 'flex';
     if (prev) prev.style.display = 'none';
@@ -4148,10 +4138,12 @@ function clearFlashlightMulti() {
   renderFlashlightTab();
 }
 
-function updateFlashlightRadius(val) {
-  FLASHLIGHT.radius = parseInt(val) || 65;
+function updateFlashlightRadius(val, fromInput) {
+  FLASHLIGHT.radius = Math.max(1, parseInt(val) || 65);
   const valEl = document.getElementById('fl-radius-val');
-  if (valEl) valEl.textContent = FLASHLIGHT.radius + 'px';
+  if (valEl && !fromInput) valEl.value = FLASHLIGHT.radius;
+  const rangeEl = document.getElementById('fl-radius-range');
+  if (rangeEl) rangeEl.value = FLASHLIGHT.radius;
 
   const ring = document.getElementById('fl-beam-ring');
   if (ring) {

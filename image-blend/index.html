@@ -129,9 +129,13 @@
         <div class="bt-wrap">
           <div class="bt-header" style="grid-template-columns: 1fr 1fr 1fr 34px;">
             <div class="bt-hcol" style="justify-content:center;"><i class="fa-solid fa-user"></i> Nhân vật</div>
-            <div class="bt-hcol" style="justify-content:center; border-left:1px solid var(--border); border-right:1px solid var(--border);"><i class="fa-solid fa-face-smile"></i> Emoji</div>
+            <div class="bt-hcol"
+              style="justify-content:center; border-left:1px solid var(--border); border-right:1px solid var(--border);">
+              <i class="fa-solid fa-face-smile"></i> Emoji
+            </div>
             <div class="bt-hcol" style="justify-content:center;"><i class="fa-solid fa-sparkles"></i> Ảnh mới</div>
-            <div class="bt-hcol" style="justify-content:center; border-left:1px solid var(--border); padding:0;"><i class="fa-solid fa-gear"></i></div>
+            <div class="bt-hcol" style="justify-content:center; border-left:1px solid var(--border); padding:0;"><i
+                class="fa-solid fa-gear"></i></div>
           </div>
           <div id="bp-table-body"></div>
           <div class="bt-empty-hint" id="bp-empty-hint">
@@ -140,24 +144,33 @@
           </div>
 
           <!-- Bottom upload action bar -->
-          <div class="bp-action-top-bar" style="padding: 6px 8px; background: rgba(124, 58, 237, 0.05); border-top: 1.5px solid var(--border); display: flex; gap: 6px;">
-            <button type="button" class="act-btn" id="bp-btn-upload-all" title="Tải nhiều ảnh đổ lần lượt vào tất cả các ô (Nhân vật -> Emoji -> Ảnh mới)" style="flex: 1; padding: 7px 10px; font-size: 0.78rem; gap: 6px; background: var(--grad-v); color: #ffffff; font-weight: 700; border-radius: 8px; border: none; justify-content: center; box-shadow: 0 2px 8px rgba(124, 58, 237, 0.25);">
+          <div class="bp-action-top-bar"
+            style="padding: 6px 8px; background: rgba(124, 58, 237, 0.05); border-top: 1.5px solid var(--border); display: flex; gap: 6px;">
+            <button type="button" class="act-btn" id="bp-btn-upload-all"
+              title="Tải nhiều ảnh đổ lần lượt vào tất cả các ô (Nhân vật -> Emoji -> Ảnh mới)"
+              style="flex: 1; padding: 7px 10px; font-size: 0.78rem; gap: 6px; background: var(--grad-v); color: #ffffff; font-weight: 700; border-radius: 8px; border: none; justify-content: center; box-shadow: 0 2px 8px rgba(124, 58, 237, 0.25);">
               <i class="fa-solid fa-images"></i> Tải nhiều ảnh (Đổ vào tất cả ô)
             </button>
-            <button type="button" class="bp-del-btn" id="bp-btn-add-stream" title="Thêm 1 luồng trống" onclick="addBpStream()" style="width: 32px; height: 32px; background: #ffffff; border: 1.5px solid var(--border); color: var(--p1); border-radius: 8px; flex-shrink: 0;">
+            <button type="button" class="bp-del-btn" id="bp-btn-add-stream" title="Thêm 1 luồng trống"
+              onclick="addBpStream()"
+              style="width: 32px; height: 32px; background: #ffffff; border: 1.5px solid var(--border); color: var(--p1); border-radius: 8px; flex-shrink: 0;">
               <i class="fa-solid fa-plus"></i>
             </button>
           </div>
 
           <!-- Column-specific upload bar -->
-          <div class="bp-add-row" style="display: grid; grid-template-columns: 1fr 1fr 1fr; padding: 4px 6px 6px; gap: 4px; background: rgba(124, 58, 237, 0.02); border-top: 1px dashed var(--border); align-items: center;">
-            <button type="button" class="act-btn" id="bp-btn-upload-chars" title="Tải lên nhiều ảnh cho cột Nhân vật" style="padding: 5px 2px; font-size: 0.68rem; gap: 3px; background: #ffffff; border: 1px solid var(--border); color: var(--txt2); font-weight: 600; border-radius: 6px; justify-content: center;">
+          <div class="bp-add-row"
+            style="display: grid; grid-template-columns: 1fr 1fr 1fr; padding: 4px 6px 6px; gap: 4px; background: rgba(124, 58, 237, 0.02); border-top: 1px dashed var(--border); align-items: center;">
+            <button type="button" class="act-btn" id="bp-btn-upload-chars" title="Tải lên nhiều ảnh cho cột Nhân vật"
+              style="padding: 5px 2px; font-size: 0.68rem; gap: 3px; background: #ffffff; border: 1px solid var(--border); color: var(--txt2); font-weight: 600; border-radius: 6px; justify-content: center;">
               <i class="fa-solid fa-cloud-arrow-up" style="color:var(--p1);"></i> + Cột Nhân vật
             </button>
-            <button type="button" class="act-btn" id="bp-btn-upload-emojis" title="Tải lên nhiều ảnh cho cột Emoji" style="padding: 5px 2px; font-size: 0.68rem; gap: 3px; background: #ffffff; border: 1px solid var(--border); color: var(--txt2); font-weight: 600; border-radius: 6px; justify-content: center;">
+            <button type="button" class="act-btn" id="bp-btn-upload-emojis" title="Tải lên nhiều ảnh cho cột Emoji"
+              style="padding: 5px 2px; font-size: 0.68rem; gap: 3px; background: #ffffff; border: 1px solid var(--border); color: var(--txt2); font-weight: 600; border-radius: 6px; justify-content: center;">
               <i class="fa-solid fa-cloud-arrow-up" style="color:var(--p2);"></i> + Cột Emoji
             </button>
-            <button type="button" class="act-btn" id="bp-btn-upload-results" title="Tải lên nhiều ảnh cho cột Ảnh mới" style="padding: 5px 2px; font-size: 0.68rem; gap: 3px; background: #ffffff; border: 1px solid var(--border); color: var(--txt2); font-weight: 600; border-radius: 6px; justify-content: center;">
+            <button type="button" class="act-btn" id="bp-btn-upload-results" title="Tải lên nhiều ảnh cho cột Ảnh mới"
+              style="padding: 5px 2px; font-size: 0.68rem; gap: 3px; background: #ffffff; border: 1px solid var(--border); color: var(--txt2); font-weight: 600; border-radius: 6px; justify-content: center;">
               <i class="fa-solid fa-cloud-arrow-up" style="color:var(--p3);"></i> + Cột Ảnh mới
             </button>
           </div>
@@ -415,45 +428,26 @@
       <!-- TAB 5: FLASHLIGHT / SOI ĐÈN CONTENT -->
       <div class="tab-content" id="tab-content-flashlight" style="display:none;">
 
-        <!-- Multi-image Upload Card -->
-        <div class="section-label"><i class="fa-solid fa-images"></i> Tải lên 2 hình ảnh (Chọn cùng lúc 2 ảnh)</div>
+        <!-- Single Image Upload Card -->
+        <div class="section-label"><i class="fa-solid fa-image"></i> Tải lên hình ảnh</div>
         <div class="upload-card card-1 mb-3" onclick="document.getElementById('file-fl-multi').click()"
           style="cursor:pointer">
-          <input type="file" id="file-fl-multi" accept="image/*" multiple hidden />
-          <div class="card-tag tag-1"><i class="fa-solid fa-cloud-arrow-up"></i> Chọn 2 ảnh PNG/JPG</div>
+          <input type="file" id="file-fl-multi" accept="image/*" hidden />
+          <div class="card-tag tag-1"><i class="fa-solid fa-cloud-arrow-up"></i> Chọn ảnh PNG/JPG</div>
           <div class="card-empty" id="body-fl-multi">
-            <div class="empty-icon"><i class="fa-regular fa-images"></i></div>
-            <div class="empty-hint">Click để chọn cùng lúc 2 hình ảnh</div>
+            <div class="empty-icon"><i class="fa-regular fa-image"></i></div>
+            <div class="empty-hint">Click để chọn hình ảnh</div>
           </div>
           <div class="card-preview" id="prev-fl-multi" style="display:none">
-            <div style="display:flex;gap:8px;justify-content:center;align-items:center;width:100%;">
+            <div style="display:flex;justify-content:center;align-items:center;width:100%;">
               <div
-                style="position:relative;width:45%;height:70px;border-radius:8px;overflow:hidden;background:#0f172a;">
-                <img id="pimg-fl-1" alt="Ảnh 1" style="width:100%;height:100%;object-fit:contain;" />
-                <span
-                  style="position:absolute;bottom:2px;left:4px;font-size:0.65rem;background:rgba(0,0,0,0.7);color:#fff;padding:1px 4px;border-radius:4px;">1.
-                  Trái</span>
-              </div>
-              <div
-                style="position:relative;width:45%;height:70px;border-radius:8px;overflow:hidden;background:#0f172a;">
-                <img id="pimg-fl-2" alt="Ảnh 2" style="width:100%;height:100%;object-fit:contain;" />
-                <span
-                  style="position:absolute;bottom:2px;left:4px;font-size:0.65rem;background:rgba(0,0,0,0.7);color:#fff;padding:1px 4px;border-radius:4px;">2.
-                  Phải</span>
+                style="position:relative;width:70%;height:90px;border-radius:8px;overflow:hidden;background:#0f172a;">
+                <img id="pimg-fl-1" alt="Ảnh" style="width:100%;height:100%;object-fit:contain;" />
               </div>
             </div>
             <button class="x-btn" onclick="event.stopPropagation();clearFlashlightMulti()"><i
                 class="fa-solid fa-xmark"></i></button>
           </div>
-        </div>
-
-        <!-- Target Blackout Selection -->
-        <div class="section-label"><i class="fa-solid fa-eye-slash"></i> Hình bị bôi đen ở dưới</div>
-        <div class="ctrl-card mb-3">
-          <select id="fl-target-select" class="ctrl-select" onchange="renderFlashlightTab()">
-            <option value="1">💙 Ảnh 1 (Bên trái)</option>
-            <option value="2">❤️ Ảnh 2 (Bên phải)</option>
-          </select>
         </div>
 
         <!-- Flashlight Beam Mode Selection -->
@@ -470,37 +464,27 @@
         <div class="ctrl-card mb-3">
           <div class="ctrl-item">
             <label class="ctrl-lbl">Kích thước vệt sáng (Bán kính)</label>
-            <div style="display:flex;align-items:center;gap:8px;">
+            <div style="position:relative;margin-bottom:10px;">
+              <input type="number" id="fl-radius-val" min="10" max="1000" value="150"
+                oninput="updateFlashlightRadius(this.value, true)" class="ctrl-input"
+                style="width:100%;box-sizing:border-box;font-size:1.1rem;font-weight:800;color:#4f46e5;text-align:center;padding:10px 44px 10px 14px;border:2px solid #c7d2fe;border-radius:12px;background:linear-gradient(135deg,#eef2ff,#f5f3ff);box-shadow:0 2px 8px rgba(99,102,241,0.12);outline:none;transition:border-color .2s, box-shadow .2s;"
+                onfocus="this.style.borderColor='#6366f1';this.style.boxShadow='0 0 0 4px rgba(99,102,241,0.2)'"
+                onblur="this.style.borderColor='#c7d2fe';this.style.boxShadow='0 2px 8px rgba(99,102,241,0.12)'" />
+              <span
+                style="position:absolute;right:16px;top:50%;transform:translateY(-50%);font-size:0.85rem;font-weight:700;color:#818cf8;pointer-events:none;">px</span>
+            </div>
+            <div style="display:flex;align-items:center;">
               <input type="range" id="fl-radius-range" min="10" max="350" value="110"
-                oninput="updateFlashlightRadius(this.value)" style="width:110px;" />
-              <span id="fl-radius-val"
-                style="font-size:0.8rem;font-weight:700;color:#6366f1;width:45px;text-align:right;">110px</span>
+                oninput="updateFlashlightRadius(this.value)" style="width:100%;" />
             </div>
           </div>
         </div>
 
-        <!-- Emoji Selection for Flashlight Cards -->
-        <div class="section-label"><i class="fa-solid fa-icons"></i> Chọn Emoji kèm theo cho 2 ảnh</div>
-        <div class="ctrl-card mb-3">
-          <div class="grid grid-cols-2 gap-2">
-            <div>
-              <label class="ctrl-lbl" style="font-size:0.75rem;">Emoji Ảnh 1 (Trái)</label>
-              <input type="text" class="ctrl-input" id="fl-emoji-1-input" value="💙" placeholder="Emoji 1 (VD: 💙, 🔥)"
-                onchange="renderFlashlightTab()" style="text-align:center;font-size:1.1rem;" />
-            </div>
-            <div>
-              <label class="ctrl-lbl" style="font-size:0.75rem;">Emoji Ảnh 2 (Phải)</label>
-              <input type="text" class="ctrl-input" id="fl-emoji-2-input" value="❤️" placeholder="Emoji 2 (VD: ❤️, ⭐)"
-                onchange="renderFlashlightTab()" style="text-align:center;font-size:1.1rem;" />
-            </div>
-          </div>
-        </div>
-
-        <div class="blend-ctrl-bar mt-4">
+        <!-- <div class="blend-ctrl-bar mt-4">
           <button class="btn-blend-run" id="btn-fl-run" onclick="startFlashlightAnimation()">
             <i class="fa-solid fa-rocket"></i> Bắt đầu Khởi chạy
           </button>
-        </div>
+        </div> -->
       </div> <!-- /#tab-content-flashlight -->
 
       <!-- TAB 6: CLIMAX AUTOMATION 15S CONTENT -->
@@ -508,7 +492,8 @@
 
         <!-- ── 1. Hero Normal Form (Pomni Bình thường) ── -->
         <div class="section-label"><i class="fa-solid fa-user"></i> 1. Pomni Bình thường (Giao chiến)</div>
-        <div class="upload-card card-1 mb-2" onclick="pickClimaxFile('hero-normal')" style="cursor:pointer; min-height:75px;">
+        <div class="upload-card card-1 mb-2" onclick="pickClimaxFile('hero-normal')"
+          style="cursor:pointer; min-height:75px;">
           <input type="file" id="file-climax-hero-normal" accept="image/*" hidden />
           <div class="card-empty" id="body-climax-hero-normal">
             <div class="empty-icon" style="font-size:1.1rem"><i class="fa-solid fa-face-smile"></i></div>
@@ -516,13 +501,15 @@
           </div>
           <div class="card-preview" id="prev-climax-hero-normal" style="display:none">
             <img id="pimg-climax-hero-normal" alt="Hero Normal" />
-            <button class="x-btn" onclick="event.stopPropagation();clearClimaxSlot('hero-normal')"><i class="fa-solid fa-xmark"></i></button>
+            <button class="x-btn" onclick="event.stopPropagation();clearClimaxSlot('hero-normal')"><i
+                class="fa-solid fa-xmark"></i></button>
           </div>
         </div>
 
         <!-- ── 2. Hero Weak Form (Pomni Thất bại / Thua cuộc) ── -->
         <div class="section-label"><i class="fa-solid fa-heart-crack"></i> 2. Pomni Thất bại (Nằm run rẩy)</div>
-        <div class="upload-card card-2 mb-2" onclick="pickClimaxFile('hero-weak')" style="cursor:pointer; min-height:75px;">
+        <div class="upload-card card-2 mb-2" onclick="pickClimaxFile('hero-weak')"
+          style="cursor:pointer; min-height:75px;">
           <input type="file" id="file-climax-hero-weak" accept="image/*" hidden />
           <div class="card-empty" id="body-climax-hero-weak">
             <div class="empty-icon" style="font-size:1.1rem"><i class="fa-solid fa-face-frown-open"></i></div>
@@ -530,13 +517,16 @@
           </div>
           <div class="card-preview" id="prev-climax-hero-weak" style="display:none">
             <img id="pimg-climax-hero-weak" alt="Hero Weak" />
-            <button class="x-btn" onclick="event.stopPropagation();clearClimaxSlot('hero-weak')"><i class="fa-solid fa-xmark"></i></button>
+            <button class="x-btn" onclick="event.stopPropagation();clearClimaxSlot('hero-weak')"><i
+                class="fa-solid fa-xmark"></i></button>
           </div>
         </div>
 
         <!-- ── 3. Hero Awaken / Super Form (Pomni Bùng nổ sức mạnh) ── -->
-        <div class="section-label"><i class="fa-solid fa-fire-flame-curved"></i> 3. Pomni Bùng nổ sức mạnh (Thức tỉnh)</div>
-        <div class="upload-card card-3 mb-2" onclick="pickClimaxFile('hero-strong')" style="cursor:pointer; min-height:75px;">
+        <div class="section-label"><i class="fa-solid fa-fire-flame-curved"></i> 3. Pomni Bùng nổ sức mạnh (Thức tỉnh)
+        </div>
+        <div class="upload-card card-3 mb-2" onclick="pickClimaxFile('hero-strong')"
+          style="cursor:pointer; min-height:75px;">
           <input type="file" id="file-climax-hero-strong" accept="image/*" hidden />
           <div class="card-empty" id="body-climax-hero-strong">
             <div class="empty-icon" style="font-size:1.1rem"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
@@ -544,13 +534,15 @@
           </div>
           <div class="card-preview" id="prev-climax-hero-strong" style="display:none">
             <img id="pimg-climax-hero-strong" alt="Hero Strong" />
-            <button class="x-btn" onclick="event.stopPropagation();clearClimaxSlot('hero-strong')"><i class="fa-solid fa-xmark"></i></button>
+            <button class="x-btn" onclick="event.stopPropagation();clearClimaxSlot('hero-strong')"><i
+                class="fa-solid fa-xmark"></i></button>
           </div>
         </div>
 
         <!-- ── 4. Opponent Sprite (Jax 1 ảnh duy nhất) ── -->
         <div class="section-label"><i class="fa-solid fa-skull-crossbones"></i> 4. Jax (Dùng giao chiến & bay đi)</div>
-        <div class="upload-card card-1 mb-2" onclick="pickClimaxFile('opponent')" style="cursor:pointer; min-height:75px;">
+        <div class="upload-card card-1 mb-2" onclick="pickClimaxFile('opponent')"
+          style="cursor:pointer; min-height:75px;">
           <input type="file" id="file-climax-opponent" accept="image/*" hidden />
           <div class="card-empty" id="body-climax-opponent">
             <div class="empty-icon" style="font-size:1.1rem"><i class="fa-solid fa-ghost"></i></div>
@@ -558,7 +550,8 @@
           </div>
           <div class="card-preview" id="prev-climax-opponent" style="display:none">
             <img id="pimg-climax-opponent" alt="Opponent" />
-            <button class="x-btn" onclick="event.stopPropagation();clearClimaxSlot('opponent')"><i class="fa-solid fa-xmark"></i></button>
+            <button class="x-btn" onclick="event.stopPropagation();clearClimaxSlot('opponent')"><i
+                class="fa-solid fa-xmark"></i></button>
           </div>
         </div>
 
@@ -572,7 +565,8 @@
           </div>
           <div class="card-preview" id="prev-climax-bg" style="display:none">
             <img id="pimg-climax-bg" alt="Climax BG" />
-            <button class="x-btn" onclick="event.stopPropagation();clearClimaxSlot('bg')"><i class="fa-solid fa-xmark"></i></button>
+            <button class="x-btn" onclick="event.stopPropagation();clearClimaxSlot('bg')"><i
+                class="fa-solid fa-xmark"></i></button>
           </div>
         </div>
 
@@ -735,20 +729,6 @@
 
           <!-- Flashlight / Soi Đèn Overlay Container (Tab 5) -->
           <div class="flashlight-theater-overlay" id="flashlight-theater-overlay">
-            <!-- Top Row: 2 Un-tinted side-by-side cards -->
-            <div class="flashlight-top-row" id="flashlight-top-row">
-              <div class="fl-card" id="fl-card-1">
-                <div class="fl-card-wrap"><canvas id="fl-cvs-top-1" width="150" height="150"></canvas></div>
-                <div class="fl-badge fl-badge-like" id="fl-badge-1"><i class="fa-solid fa-thumbs-up"></i> LIKE <span
-                    id="fl-badge-emoji-1">💙</span></div>
-              </div>
-              <div class="fl-card" id="fl-card-2">
-                <div class="fl-card-wrap"><canvas id="fl-cvs-top-2" width="150" height="150"></canvas></div>
-                <div class="fl-badge fl-badge-sub" id="fl-badge-2"><i class="fa-solid fa-bell"></i> SUBSCRIBE <span
-                    id="fl-badge-emoji-2">❤️</span></div>
-              </div>
-            </div>
-
             <!-- Bottom Row: Main Blackout Image with Flashlight Reveal Mask -->
             <div class="flashlight-bottom-stage" id="flashlight-bottom-stage">
               <canvas id="fl-color-canvas" class="fl-layer-color" width="360" height="420"></canvas>
@@ -966,8 +946,8 @@
           <div class="action-row-sm">
             <button class="act-btn act-reset" onclick="resetAll()"><i class="fa-solid fa-rotate-left"></i>
               Reset</button>
-            <button class="act-btn act-clear" onclick="clearAllBpStreams()"
-              title="Xóa tất cả các luồng Blend +"><i class="fa-solid fa-trash-can"></i> Dọn
+            <button class="act-btn act-clear" onclick="clearAllBpStreams()" title="Xóa tất cả các luồng Blend +"><i
+                class="fa-solid fa-trash-can"></i> Dọn
               dẹp</button>
           </div>
         </div>
@@ -1047,9 +1027,11 @@ LET ME KNOW IN THE COMMENTS!</textarea>
       <div class="right-tab-content" id="right-tab-content-flashlight" style="display:none;">
         <div class="section-label"><i class="fa-solid fa-play"></i> Điều khiển</div>
         <div class="action-col">
-          <button class="act-btn act-blend" id="btn-fl-side" onclick="startFlashlightAnimation()"><i class="fa-solid fa-rocket"></i> Chạy Soi Đèn Pin</button>
+          <button class="act-btn act-blend" id="btn-fl-side" onclick="startFlashlightAnimation()"><i
+              class="fa-solid fa-rocket"></i> Chạy Soi Đèn Pin</button>
           <div class="action-row-sm">
-            <button class="act-btn act-reset" onclick="resetAll()"><i class="fa-solid fa-rotate-left"></i> Reset</button>
+            <button class="act-btn act-reset" onclick="resetAll()"><i class="fa-solid fa-rotate-left"></i>
+              Reset</button>
           </div>
         </div>
       </div>
@@ -1061,7 +1043,8 @@ LET ME KNOW IN THE COMMENTS!</textarea>
           <div class="grid grid-cols-2 gap-2">
             <div>
               <label class="ctrl-lbl"><i class="fa-solid fa-user-shield"></i> Tên Nhân vật</label>
-              <input type="text" class="ctrl-input" id="climax-hero-name-input" value="POMNI" placeholder="VD: POMNI" onchange="updateClimaxHeroName(this.value)" />
+              <input type="text" class="ctrl-input" id="climax-hero-name-input" value="POMNI" placeholder="VD: POMNI"
+                onchange="updateClimaxHeroName(this.value)" />
             </div>
             <div>
               <label class="ctrl-lbl"><i class="fa-solid fa-arrow-up-right-dots"></i> Level Hero</label>
@@ -1080,19 +1063,23 @@ LET ME KNOW IN THE COMMENTS!</textarea>
           </div>
           <div class="ctrl-item" style="margin-top:8px;">
             <label class="ctrl-lbl"><i class="fa-solid fa-bullhorn"></i> Dòng 1: Lời kêu gọi CTA (Khổng lồ)</label>
-            <input type="text" class="ctrl-input" id="climax-cta-line1-input" value="POMNI NEEDS POWER!" placeholder="Dòng 1 kêu gọi..." />
+            <input type="text" class="ctrl-input" id="climax-cta-line1-input" value="POMNI NEEDS POWER!"
+              placeholder="Dòng 1 kêu gọi..." />
           </div>
           <div class="ctrl-item" style="margin-top:8px;">
             <label class="ctrl-lbl"><i class="fa-solid fa-thumbs-up"></i> Dòng 2: Hướng dẫn Tương tác</label>
-            <input type="text" class="ctrl-input" id="climax-cta-line2-input" value="LIKE & SUBSCRIBE TO SAVE HER!" placeholder="Dòng 2 tương tác..." />
+            <input type="text" class="ctrl-input" id="climax-cta-line2-input" value="LIKE & SUBSCRIBE TO SAVE HER!"
+              placeholder="Dòng 2 tương tác..." />
           </div>
         </div>
 
         <div class="section-label" style="margin-top:6px;"><i class="fa-solid fa-play"></i> Điều khiển Kịch bản</div>
         <div class="action-col">
-          <button class="act-btn act-blend" id="btn-climax-run-side" onclick="runClimaxAutomation()"><i class="fa-solid fa-bolt-lightning"></i> Khởi chạy Kịch bản 22s</button>
+          <button class="act-btn act-blend" id="btn-climax-run-side" onclick="runClimaxAutomation()"><i
+              class="fa-solid fa-bolt-lightning"></i> Khởi chạy Kịch bản 22s</button>
           <div class="action-row-sm">
-            <button class="act-btn act-reset" onclick="resetClimaxAutomation()"><i class="fa-solid fa-rotate-left"></i> Reset</button>
+            <button class="act-btn act-reset" onclick="resetClimaxAutomation()"><i class="fa-solid fa-rotate-left"></i>
+              Reset</button>
           </div>
         </div>
       </div>
