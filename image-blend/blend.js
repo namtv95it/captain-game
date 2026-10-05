@@ -539,7 +539,7 @@ function getHeaderBadgeHTML(idx) {
     badgeType = pokeBadgeSelect?.value || 'numbers';
   } else {
     const badgeTypeSelect = document.getElementById('badge-type-select');
-    badgeType = badgeTypeSelect?.value || 'actions';
+    badgeType = badgeTypeSelect?.value || 'none';
   }
 
   if (badgeType === 'none') {
@@ -572,7 +572,7 @@ function getResultBadgeHTML(idx, isPokeMode = false) {
     badgeType = pokeBadgeSelect?.value || 'numbers';
   } else {
     const badgeTypeSelect = document.getElementById('badge-type-select');
-    badgeType = badgeTypeSelect?.value || 'actions';
+    badgeType = badgeTypeSelect?.value || 'none';
   }
 
   if (badgeType === 'none') {
@@ -694,7 +694,7 @@ function saveSettings() {
   const data = {
     steps: stepsData,
     question: document.getElementById('final-question-input')?.value || 'VOTE FOR YOUR FAVORITE VERSION!',
-    badgeType: document.getElementById('badge-type-select')?.value || 'actions',
+    badgeType: document.getElementById('badge-type-select')?.value || 'none',
     swirl: document.getElementById('sl-swirl')?.value || '100',
     speed: document.getElementById('sl-speed')?.value || '7',
   };
@@ -4059,7 +4059,8 @@ function startPuzzleAnimation() {
 const FLASHLIGHT = {
   img1: null,
   img2: null,
-  radius: 110,
+  radius: 200,
+  handSize: 44,
   mode: 'circle', // 'circle' | 'horizontal'
   beamAngle: -135
 };
@@ -4067,6 +4068,17 @@ const FLASHLIGHT = {
 function updateFlashlightMode(val) {
   FLASHLIGHT.mode = val || 'circle';
   renderFlashlightTab();
+}
+
+function updateFlashlightHandSize(val, fromInput) {
+  const size = Math.max(10, parseInt(val) || 44);
+  FLASHLIGHT.handSize = size;
+  const valEl = document.getElementById('fl-hand-val');
+  if (valEl && !fromInput) valEl.value = size;
+  const rangeEl = document.getElementById('fl-hand-range');
+  if (rangeEl) rangeEl.value = size;
+  const cur = document.getElementById('fl-custom-cursor');
+  if (cur) cur.style.fontSize = size + 'px';
 }
 
 function updateFlashlightRadius(val, fromInput) {
@@ -4084,6 +4096,46 @@ function updateBeamAngle(val) {
   if (valEl) valEl.textContent = FLASHLIGHT.beamAngle + '°';
   renderFlashlightTab();
 }
+
+// ── Lưu / tải cài đặt Soi Đèn bằng localStorage ──
+const FL_SETTINGS_KEY = 'flashlightSettings';
+
+function saveFlashlightSettings() {
+  try {
+    localStorage.setItem(FL_SETTINGS_KEY, JSON.stringify({
+      mode: FLASHLIGHT.mode,
+      radius: FLASHLIGHT.radius,
+      handSize: FLASHLIGHT.handSize || 44
+    }));
+  } catch (e) { /* storage unavailable */ }
+}
+
+(function initFlashlightSettingsPersistence() {
+  let saved = null;
+  try { saved = JSON.parse(localStorage.getItem(FL_SETTINGS_KEY) || 'null'); } catch (e) { }
+
+  if (saved) {
+    if (saved.mode) FLASHLIGHT.mode = saved.mode;
+    if (saved.radius) FLASHLIGHT.radius = saved.radius;
+    if (saved.handSize) FLASHLIGHT.handSize = saved.handSize;
+  }
+
+  const set = (id, v) => { const el = document.getElementById(id); if (el) el.value = v; };
+  set('fl-mode-select', FLASHLIGHT.mode);
+  set('fl-radius-val', FLASHLIGHT.radius);
+  set('fl-radius-range', FLASHLIGHT.radius);
+  set('fl-hand-val', FLASHLIGHT.handSize || 44);
+  set('fl-hand-range', FLASHLIGHT.handSize || 44);
+
+  // Lưu mỗi khi người dùng chỉnh bất kỳ cài đặt nào
+  ['fl-mode-select', 'fl-radius-val', 'fl-radius-range', 'fl-hand-val', 'fl-hand-range'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener('input', () => setTimeout(saveFlashlightSettings, 0));
+    el.addEventListener('change', () => setTimeout(saveFlashlightSettings, 0));
+  });
+})();
+
 
 // Init file listeners for Flashlight tab (Supports selecting 2 images at once)
 (function initFlashlightModule() {
@@ -4284,8 +4336,8 @@ function setupFlashlightSpotlightEvents(stageEl, maskCvs, colorCvs, W, H) {
       const torchHeadX = x;
       const torchHeadY = y;
 
-      const rStart = Math.max(12, rCanvas * 0.25);
-      const rEnd = rCanvas * 2.2;
+      const rStart = Math.max(12, rCanvas);
+      const rEnd = rCanvas * 1.3; // gần như song song, nở nhẹ
       const beamLength = Math.max(W, H) * 1.5;
 
       const endX = torchHeadX + Math.cos(beamRadAngle) * beamLength;
@@ -4321,12 +4373,12 @@ function setupFlashlightSpotlightEvents(stageEl, maskCvs, colorCvs, W, H) {
       mCtx.fill();
 
       // Soft circular tip glow
-      const tipGrad = mCtx.createRadialGradient(torchHeadX, torchHeadY, 0, torchHeadX, torchHeadY, rStart * 1.8);
+      const tipGrad = mCtx.createRadialGradient(torchHeadX, torchHeadY, 0, torchHeadX, torchHeadY, rStart);
       tipGrad.addColorStop(0, 'rgba(0, 0, 0, 1)');
       tipGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
       mCtx.fillStyle = tipGrad;
       mCtx.beginPath();
-      mCtx.arc(torchHeadX, torchHeadY, rStart * 1.8, 0, Math.PI * 2);
+      mCtx.arc(torchHeadX, torchHeadY, rStart, 0, Math.PI * 2);
       mCtx.fill();
     } else {
       // Mode 1: Circle Spotlight (viền tròn rõ nét, không nhòe)
@@ -4370,13 +4422,14 @@ function setupFlashlightSpotlightEvents(stageEl, maskCvs, colorCvs, W, H) {
     cursorEl = document.createElement('div');
     cursorEl.id = 'fl-custom-cursor';
     cursorEl.textContent = '\uD83D\uDC46';
-    cursorEl.style.cssText = 'position:absolute;left:0;top:0;font-size:44px;line-height:1;pointer-events:none;z-index:10;display:none;transform:translate(-50%,-8%);filter:drop-shadow(0 2px 4px rgba(0,0,0,.5));';
+    cursorEl.style.cssText = 'position:absolute;left:0;top:0;line-height:1;pointer-events:none;z-index:10;display:none;transform:translate(-50%,-8%);filter:drop-shadow(0 2px 4px rgba(0,0,0,.5));';
     stageEl.appendChild(cursorEl);
   }
   stageEl.style.cursor = 'none';
   stageEl.querySelectorAll('canvas').forEach(c => { c.style.cursor = 'none'; });
 
   const moveCursor = (e) => {
+    cursorEl.style.fontSize = (FLASHLIGHT.handSize || 44) + 'px';
     const { cssX, cssY } = getStageLocalCSS(e);
     const isRotated = document.body.classList.contains('recording-mode');
     const rect = maskCvs.getBoundingClientRect();

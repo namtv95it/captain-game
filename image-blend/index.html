@@ -450,35 +450,7 @@
           </div>
         </div>
 
-        <!-- Flashlight Beam Mode Selection -->
-        <div class="section-label"><i class="fa-solid fa-wand-magic-sparkles"></i> Kiểu chiếu Đèn Pin</div>
-        <div class="ctrl-card mb-3">
-          <select id="fl-mode-select" class="ctrl-select" onchange="updateFlashlightMode(this.value)">
-            <option value="circle">⭕ Hình tròn (Quầng sáng điểm)</option>
-            <option value="horizontal">📐 Vệt chiếu chéo góc nón (Từ đèn pin tỏa ra)</option>
-          </select>
-        </div>
-
-        <!-- Flashlight Radius / Beam Width Configuration -->
-        <div class="section-label"><i class="fa-solid fa-expand"></i> Độ rộng vệt sáng</div>
-        <div class="ctrl-card mb-3">
-          <div class="ctrl-item">
-            <label class="ctrl-lbl">Kích thước vệt sáng (Bán kính)</label>
-            <div style="position:relative;margin-bottom:10px;">
-              <input type="number" id="fl-radius-val" min="10" max="1000" value="200"
-                oninput="updateFlashlightRadius(this.value, true)" class="ctrl-input"
-                style="width:100%;box-sizing:border-box;font-size:1.1rem;font-weight:800;color:#4f46e5;text-align:center;padding:10px 44px 10px 14px;border:2px solid #c7d2fe;border-radius:12px;background:linear-gradient(135deg,#eef2ff,#f5f3ff);box-shadow:0 2px 8px rgba(99,102,241,0.12);outline:none;transition:border-color .2s, box-shadow .2s;"
-                onfocus="this.style.borderColor='#6366f1';this.style.boxShadow='0 0 0 4px rgba(99,102,241,0.2)'"
-                onblur="this.style.borderColor='#c7d2fe';this.style.boxShadow='0 2px 8px rgba(99,102,241,0.12)'" />
-              <span
-                style="position:absolute;right:16px;top:50%;transform:translateY(-50%);font-size:0.85rem;font-weight:700;color:#818cf8;pointer-events:none;">px</span>
-            </div>
-            <div style="display:flex;align-items:center;">
-              <input type="range" id="fl-radius-range" min="10" max="350" value="110"
-                oninput="updateFlashlightRadius(this.value)" style="width:100%;" />
-            </div>
-          </div>
-        </div>
+        <!-- Cài đặt Đèn Pin đã chuyển sang sidebar bên phải -->
 
         <!-- <div class="blend-ctrl-bar mt-4">
           <button class="btn-blend-run" id="btn-fl-run" onclick="startFlashlightAnimation()">
@@ -870,10 +842,10 @@
           <div class="ctrl-item">
             <label class="ctrl-lbl"><i class="fa-solid fa-tags"></i> Badge Type / Loại nhãn</label>
             <select class="ctrl-select" id="badge-type-select" onchange="refreshEmojiHeader()">
+              <option value="none" selected>Không có gì (Ẩn nhãn)</option>
               <option value="actions">Actions (Like / Comment / Share / Subscribe)</option>
               <option value="numbers">Numbers (1, 2, 3, 4)</option>
               <option value="hearts">Hearts (#1, #2, #3, #4)</option>
-              <option value="none">Không có gì (Ẩn nhãn)</option>
             </select>
           </div>
         </div>
@@ -1032,6 +1004,56 @@ LET ME KNOW IN THE COMMENTS!</textarea>
           <div class="action-row-sm">
             <button class="act-btn act-reset" onclick="resetAll()"><i class="fa-solid fa-rotate-left"></i>
               Reset</button>
+          </div>
+        </div>
+
+        <!-- Flashlight Beam Mode Selection -->
+        <div class="section-label"><i class="fa-solid fa-wand-magic-sparkles"></i> Kiểu chiếu Đèn Pin</div>
+        <div class="ctrl-card mb-3">
+          <select id="fl-mode-select" class="ctrl-select" onchange="updateFlashlightMode(this.value)">
+            <option value="circle">⭕ Hình tròn (Quầng sáng điểm)</option>
+            <option value="horizontal">📐 Vệt chiếu chéo góc nón (Từ đèn pin tỏa ra)</option>
+          </select>
+        </div>
+
+        <!-- Flashlight Radius / Beam Width Configuration -->
+        <div class="section-label"><i class="fa-solid fa-expand"></i> Độ rộng vệt sáng</div>
+        <div class="ctrl-card mb-3">
+          <div class="ctrl-item">
+            <label class="ctrl-lbl">Kích thước vệt sáng (Bán kính)</label>
+            <div style="position:relative;margin-bottom:10px;">
+              <input type="number" id="fl-radius-val" min="10" max="1000" value="200"
+                oninput="updateFlashlightRadius(this.value, true)" class="ctrl-input"
+                style="width:100%;box-sizing:border-box;font-size:1.1rem;font-weight:800;color:#4f46e5;text-align:center;padding:10px 44px 10px 14px;border:2px solid #c7d2fe;border-radius:12px;background:linear-gradient(135deg,#eef2ff,#f5f3ff);box-shadow:0 2px 8px rgba(99,102,241,0.12);outline:none;transition:border-color .2s, box-shadow .2s;"
+                onfocus="this.style.borderColor='#6366f1';this.style.boxShadow='0 0 0 4px rgba(99,102,241,0.2)'"
+                onblur="this.style.borderColor='#c7d2fe';this.style.boxShadow='0 2px 8px rgba(99,102,241,0.12)'" />
+              <span
+                style="position:absolute;right:16px;top:50%;transform:translateY(-50%);font-size:0.85rem;font-weight:700;color:#818cf8;pointer-events:none;">px</span>
+            </div>
+            <div style="display:flex;align-items:center;">
+              <input type="range" id="fl-radius-range" min="10" max="350" value="200"
+                oninput="updateFlashlightRadius(this.value)" style="width:100%;" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Hand Cursor Size -->
+        <div class="section-label"><i class="fa-solid fa-hand-pointer"></i> Kích thước bàn tay 👆</div>
+        <div class="ctrl-card mb-3">
+          <div class="ctrl-item">
+            <div style="position:relative;margin-bottom:10px;">
+              <input type="number" id="fl-hand-val" min="10" max="500" value="44"
+                oninput="updateFlashlightHandSize(this.value, true)" class="ctrl-input"
+                style="width:100%;box-sizing:border-box;font-size:1.1rem;font-weight:800;color:#4f46e5;text-align:center;padding:10px 44px 10px 14px;border:2px solid #c7d2fe;border-radius:12px;background:linear-gradient(135deg,#eef2ff,#f5f3ff);box-shadow:0 2px 8px rgba(99,102,241,0.12);outline:none;transition:border-color .2s, box-shadow .2s;"
+                onfocus="this.style.borderColor='#6366f1';this.style.boxShadow='0 0 0 4px rgba(99,102,241,0.2)'"
+                onblur="this.style.borderColor='#c7d2fe';this.style.boxShadow='0 2px 8px rgba(99,102,241,0.12)'" />
+              <span
+                style="position:absolute;right:16px;top:50%;transform:translateY(-50%);font-size:0.85rem;font-weight:700;color:#818cf8;pointer-events:none;">px</span>
+            </div>
+            <div style="display:flex;align-items:center;">
+              <input type="range" id="fl-hand-range" min="20" max="200" value="44"
+                oninput="updateFlashlightHandSize(this.value)" style="width:100%;" />
+            </div>
           </div>
         </div>
       </div>
