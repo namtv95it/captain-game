@@ -3897,13 +3897,13 @@ body.recording-mode .theater {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 16px 12px 20px;
+  padding: 0;
   background: transparent;
   z-index: 50;
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.35s ease;
-  gap: 16px;
+  gap: 0;
   overflow: hidden;
   width: 100%;
   height: 100%;
@@ -3978,12 +3978,14 @@ body.recording-mode .theater {
 
 /* Bottom Stage: Main Image with Mask (Vừa vặn trong khung quay 9:16) */
 .flashlight-bottom-stage {
-  position: relative;
+  position: absolute;
+  inset: 0;
   width: 100%;
-  margin-top: 30%;
-  aspect-ratio: 360 / 420;
+  height: 100%;
+  margin: 0 !important;
+  padding: 0 !important;
+  aspect-ratio: unset !important;
   max-height: none;
-  margin-bottom: 0;
   overflow: visible;
   background: transparent !important;
   border: none !important;
@@ -4006,6 +4008,7 @@ body.recording-mode .theater {
   inset: 0;
   width: 100%;
   height: 100%;
+  object-fit: contain;
   z-index: 1;
 }
 
@@ -4014,12 +4017,120 @@ body.recording-mode .theater {
   inset: 0;
   width: 100%;
   height: 100%;
+  object-fit: contain;
   z-index: 2;
 }
 
 .fl-beam-ring {
   display: none !important;
 }
+
+/* ── Shadow Match / Ghép Bóng Theater Mode ── */
+.shadowmatch-theater-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  background: transparent;
+  z-index: 50;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.35s ease;
+  gap: 0;
+  overflow: hidden;
+  width: 100%;
+  height: 100%;
+}
+
+.shadowmatch-theater-overlay.show {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Always hide emoji header bar in Shadow Match mode */
+.shadowmatch-theater-overlay.show~.emoji-header-bar,
+#theater:has(.shadowmatch-theater-overlay.show) #emoji-header-bar {
+  display: none !important;
+}
+
+.sm-stage {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: visible;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  touch-action: none !important;
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  -webkit-touch-callout: none !important;
+}
+
+.sm-layer-shadow {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  z-index: 1;
+}
+
+.sm-drag-container {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+}
+
+.sm-draggable-card {
+  position: absolute;
+  cursor: grab;
+  pointer-events: auto;
+  user-select: none;
+  touch-action: none;
+  box-sizing: border-box;
+}
+
+.sm-draggable-card.dropped {
+  border: 2px dashed rgba(99, 102, 241, 0.6);
+  border-radius: 8px;
+}
+
+.sm-draggable-card.dropped:hover,
+.sm-draggable-card.dropped.active {
+  border-color: #6366f1;
+}
+
+.sm-draggable-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+/* 4 Corner Resize Handles */
+.sm-resize-handle {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  background: #ffffff;
+  border: 2px solid #4f46e5;
+  border-radius: 50%;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  z-index: 20;
+}
+
+.sm-resize-handle.tl { top: -7px; left: -7px; cursor: nwse-resize; }
+.sm-resize-handle.tr { top: -7px; right: -7px; cursor: nesw-resize; }
+.sm-resize-handle.bl { bottom: -7px; left: -7px; cursor: nesw-resize; }
+.sm-resize-handle.br { bottom: -7px; right: -7px; cursor: nwse-resize; }
 
 /* =============================================================
    CLIMAX AUTOMATION 15S MODE (REVERSE CLIMAX & REVENGE)

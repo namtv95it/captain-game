@@ -51,6 +51,9 @@
         <button class="tab-btn" id="tab-btn-flashlight" onclick="switchTab('flashlight')">
           <i class="fa-solid fa-lightbulb"></i> Soi Đèn
         </button>
+        <button class="tab-btn" id="tab-btn-shadowmatch" onclick="switchTab('shadowmatch')">
+          <i class="fa-solid fa-ghost"></i> Ghép Bóng
+        </button>
         <button class="tab-btn" id="tab-btn-climax" onclick="switchTab('climax')">
           <i class="fa-solid fa-bolt-lightning"></i> Cứu Hero 22s
         </button>
@@ -450,7 +453,45 @@
           </div>
         </div>
 
-        <!-- Cài đặt Đèn Pin đã chuyển sang sidebar bên phải -->
+        <!-- Image Scale Configuration -->
+        <div class="section-label"><i class="fa-solid fa-up-right-and-down-left-from-center"></i> Kích thước hình ảnh (%)</div>
+        <div class="ctrl-card mb-3">
+          <div class="ctrl-item">
+            <div style="position:relative;margin-bottom:10px;">
+              <input type="number" id="fl-img-scale-val" min="20" max="300" value="100"
+                oninput="updateFlashlightImgScale(this.value, true)" class="ctrl-input"
+                style="width:100%;box-sizing:border-box;font-size:1.1rem;font-weight:800;color:#4f46e5;text-align:center;padding:10px 44px 10px 14px;border:2px solid #c7d2fe;border-radius:12px;background:linear-gradient(135deg,#eef2ff,#f5f3ff);box-shadow:0 2px 8px rgba(99,102,241,0.12);outline:none;transition:border-color .2s, box-shadow .2s;"
+                onfocus="this.style.borderColor='#6366f1';this.style.boxShadow='0 0 0 4px rgba(99,102,241,0.2)'"
+                onblur="this.style.borderColor='#c7d2fe';this.style.boxShadow='0 2px 8px rgba(99,102,241,0.12)'" />
+              <span
+                style="position:absolute;right:16px;top:50%;transform:translateY(-50%);font-size:0.85rem;font-weight:700;color:#818cf8;pointer-events:none;">%</span>
+            </div>
+            <div style="display:flex;align-items:center;">
+              <input type="range" id="fl-img-scale-range" min="20" max="300" value="100"
+                oninput="updateFlashlightImgScale(this.value)" style="width:100%;" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Image Vertical Position (OffsetY) Configuration -->
+        <div class="section-label"><i class="fa-solid fa-arrows-up-down"></i> Vị trí hình ảnh (Lên / Xuống)</div>
+        <div class="ctrl-card mb-3">
+          <div class="ctrl-item">
+            <div style="position:relative;margin-bottom:10px;">
+              <input type="number" id="fl-img-offsety-val" min="-300" max="300" value="0"
+                oninput="updateFlashlightImgOffsetY(this.value, true)" class="ctrl-input"
+                style="width:100%;box-sizing:border-box;font-size:1.1rem;font-weight:800;color:#4f46e5;text-align:center;padding:10px 44px 10px 14px;border:2px solid #c7d2fe;border-radius:12px;background:linear-gradient(135deg,#eef2ff,#f5f3ff);box-shadow:0 2px 8px rgba(99,102,241,0.12);outline:none;transition:border-color .2s, box-shadow .2s;"
+                onfocus="this.style.borderColor='#6366f1';this.style.boxShadow='0 0 0 4px rgba(99,102,241,0.2)'"
+                onblur="this.style.borderColor='#c7d2fe';this.style.boxShadow='0 2px 8px rgba(99,102,241,0.12)'" />
+              <span
+                style="position:absolute;right:16px;top:50%;transform:translateY(-50%);font-size:0.85rem;font-weight:700;color:#818cf8;pointer-events:none;">px</span>
+            </div>
+            <div style="display:flex;align-items:center;">
+              <input type="range" id="fl-img-offsety-range" min="-300" max="300" value="0"
+                oninput="updateFlashlightImgOffsetY(this.value)" style="width:100%;" />
+            </div>
+          </div>
+        </div>
 
         <!-- <div class="blend-ctrl-bar mt-4">
           <button class="btn-blend-run" id="btn-fl-run" onclick="startFlashlightAnimation()">
@@ -458,6 +499,73 @@
           </button>
         </div> -->
       </div> <!-- /#tab-content-flashlight -->
+
+      <!-- TAB 7: SHADOW MATCH / GHÉP BÓNG CONTENT -->
+      <div class="tab-content" id="tab-content-shadowmatch" style="display:none;">
+
+        <!-- Multi Image Upload Card -->
+        <div class="section-label"><i class="fa-solid fa-images"></i> Tải lên 3 hình ảnh PNG</div>
+        <div class="upload-card card-1 mb-3" onclick="document.getElementById('file-sm-multi').click()" style="cursor:pointer">
+          <input type="file" id="file-sm-multi" accept="image/*" multiple hidden />
+          <div class="card-tag tag-1"><i class="fa-solid fa-cloud-arrow-up"></i> Chọn các ảnh PNG</div>
+          <div class="card-empty" id="body-sm-multi">
+            <div class="empty-icon"><i class="fa-regular fa-images"></i></div>
+            <div class="empty-hint">Click để chọn các hình ảnh</div>
+          </div>
+          <div class="card-preview" id="prev-sm-multi" style="display:none">
+            <div id="sm-preview-list" style="display:flex;gap:8px;justify-content:center;align-items:center;width:100%;flex-wrap:wrap;"></div>
+            <button class="x-btn" onclick="event.stopPropagation();clearShadowMatchImages()"><i class="fa-solid fa-xmark"></i></button>
+          </div>
+        </div>
+
+        <!-- Shadow Target Select -->
+        <div class="section-label"><i class="fa-solid fa-user-ninja"></i> Chọn ảnh làm Bóng Đen</div>
+        <div class="ctrl-card mb-3">
+          <select id="sm-shadow-select" class="ctrl-select" onchange="updateShadowMatchTarget(this.value)">
+            <option value="0">Ảnh 1 (Mặc định)</option>
+            <option value="1">Ảnh 2</option>
+            <option value="2">Ảnh 3</option>
+          </select>
+        </div>
+
+        <!-- Image Scale Configuration -->
+        <div class="section-label"><i class="fa-solid fa-up-right-and-down-left-from-center"></i> Kích thước hình ảnh (%)</div>
+        <div class="ctrl-card mb-3">
+          <div class="ctrl-item">
+            <div style="position:relative;margin-bottom:10px;">
+              <input type="number" id="sm-img-scale-val" min="20" max="300" value="100"
+                oninput="updateShadowMatchImgScale(this.value, true)" class="ctrl-input"
+                style="width:100%;box-sizing:border-box;font-size:1.1rem;font-weight:800;color:#4f46e5;text-align:center;padding:10px 44px 10px 14px;border:2px solid #c7d2fe;border-radius:12px;background:linear-gradient(135deg,#eef2ff,#f5f3ff);box-shadow:0 2px 8px rgba(99,102,241,0.12);outline:none;transition:border-color .2s, box-shadow .2s;"
+                onfocus="this.style.borderColor='#6366f1';this.style.boxShadow='0 0 0 4px rgba(99,102,241,0.2)'"
+                onblur="this.style.borderColor='#c7d2fe';this.style.boxShadow='0 2px 8px rgba(99,102,241,0.12)'" />
+              <span style="position:absolute;right:16px;top:50%;transform:translateY(-50%);font-size:0.85rem;font-weight:700;color:#818cf8;pointer-events:none;">%</span>
+            </div>
+            <div style="display:flex;align-items:center;">
+              <input type="range" id="sm-img-scale-range" min="20" max="300" value="100"
+                oninput="updateShadowMatchImgScale(this.value)" style="width:100%;" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Image Vertical Position (OffsetY) Configuration -->
+        <div class="section-label"><i class="fa-solid fa-arrows-up-down"></i> Vị trí hình ảnh (Lên / Xuống)</div>
+        <div class="ctrl-card mb-3">
+          <div class="ctrl-item">
+            <div style="position:relative;margin-bottom:10px;">
+              <input type="number" id="sm-img-offsety-val" min="-300" max="300" value="0"
+                oninput="updateShadowMatchImgOffsetY(this.value, true)" class="ctrl-input"
+                style="width:100%;box-sizing:border-box;font-size:1.1rem;font-weight:800;color:#4f46e5;text-align:center;padding:10px 44px 10px 14px;border:2px solid #c7d2fe;border-radius:12px;background:linear-gradient(135deg,#eef2ff,#f5f3ff);box-shadow:0 2px 8px rgba(99,102,241,0.12);outline:none;transition:border-color .2s, box-shadow .2s;"
+                onfocus="this.style.borderColor='#6366f1';this.style.boxShadow='0 0 0 4px rgba(99,102,241,0.2)'"
+                onblur="this.style.borderColor='#c7d2fe';this.style.boxShadow='0 2px 8px rgba(99,102,241,0.12)'" />
+              <span style="position:absolute;right:16px;top:50%;transform:translateY(-50%);font-size:0.85rem;font-weight:700;color:#818cf8;pointer-events:none;">px</span>
+            </div>
+            <div style="display:flex;align-items:center;">
+              <input type="range" id="sm-img-offsety-range" min="-300" max="300" value="0"
+                oninput="updateShadowMatchImgOffsetY(this.value)" style="width:100%;" />
+            </div>
+          </div>
+        </div>
+      </div> <!-- /#tab-content-shadowmatch -->
 
       <!-- TAB 6: CLIMAX AUTOMATION 15S CONTENT -->
       <div class="tab-content" id="tab-content-climax" style="display:none;">
@@ -703,8 +811,17 @@
           <div class="flashlight-theater-overlay" id="flashlight-theater-overlay">
             <!-- Bottom Row: Main Blackout Image with Flashlight Reveal Mask -->
             <div class="flashlight-bottom-stage" id="flashlight-bottom-stage">
-              <canvas id="fl-color-canvas" class="fl-layer-color" width="360" height="420"></canvas>
-              <canvas id="fl-mask-canvas" class="fl-layer-mask" width="360" height="420"></canvas>
+              <canvas id="fl-color-canvas" class="fl-layer-color" width="1080" height="1920"></canvas>
+              <canvas id="fl-mask-canvas" class="fl-layer-mask" width="1080" height="1920"></canvas>
+            </div>
+          </div>
+
+          <!-- Shadow Match / Ghép Bóng Overlay Container (Tab 7) -->
+          <div class="shadowmatch-theater-overlay" id="shadowmatch-theater-overlay">
+            <div class="sm-stage" id="sm-stage">
+              <canvas id="sm-shadow-canvas" class="sm-layer-shadow" width="1080" height="1920"></canvas>
+              <!-- Draggable cards overlay container -->
+              <div id="sm-drag-container" class="sm-drag-container"></div>
             </div>
           </div>
 
@@ -1053,6 +1170,38 @@ LET ME KNOW IN THE COMMENTS!</textarea>
             <div style="display:flex;align-items:center;">
               <input type="range" id="fl-hand-range" min="20" max="200" value="44"
                 oninput="updateFlashlightHandSize(this.value)" style="width:100%;" />
+            </div>
+          </div>
+        </div>
+      </div> <!-- /#right-tab-content-flashlight -->
+
+      <!-- RIGHT SIDEBAR CONTENT: TAB 7 (SHADOW MATCH) -->
+      <div class="right-tab-content" id="right-tab-content-shadowmatch" style="display:none;">
+        <div class="section-label"><i class="fa-solid fa-play"></i> Điều khiển</div>
+        <div class="action-col">
+          <button class="act-btn act-blend" id="btn-sm-side" onclick="startShadowMatchAnimation()"><i
+              class="fa-solid fa-rocket"></i> Chạy Tìm Ảnh Theo Bóng</button>
+          <div class="action-row-sm">
+            <button class="act-btn act-reset" onclick="resetShadowMatchPositions()"><i class="fa-solid fa-rotate-left"></i>
+              Reset vị trí</button>
+          </div>
+        </div>
+
+        <!-- Hand Cursor Size -->
+        <div class="section-label"><i class="fa-solid fa-hand-pointer"></i> Kích thước bàn tay 👆</div>
+        <div class="ctrl-card mb-3">
+          <div class="ctrl-item">
+            <div style="position:relative;margin-bottom:10px;">
+              <input type="number" id="sm-hand-val" min="10" max="500" value="44"
+                oninput="updateShadowMatchHandSize(this.value, true)" class="ctrl-input"
+                style="width:100%;box-sizing:border-box;font-size:1.1rem;font-weight:800;color:#4f46e5;text-align:center;padding:10px 44px 10px 14px;border:2px solid #c7d2fe;border-radius:12px;background:linear-gradient(135deg,#eef2ff,#f5f3ff);box-shadow:0 2px 8px rgba(99,102,241,0.12);outline:none;transition:border-color .2s, box-shadow .2s;"
+                onfocus="this.style.borderColor='#6366f1';this.style.boxShadow='0 0 0 4px rgba(99,102,241,0.2)'"
+                onblur="this.style.borderColor='#c7d2fe';this.style.boxShadow='0 2px 8px rgba(99,102,241,0.12)'" />
+              <span style="position:absolute;right:16px;top:50%;transform:translateY(-50%);font-size:0.85rem;font-weight:700;color:#818cf8;pointer-events:none;">px</span>
+            </div>
+            <div style="display:flex;align-items:center;">
+              <input type="range" id="sm-hand-range" min="20" max="200" value="44"
+                oninput="updateShadowMatchHandSize(this.value)" style="width:100%;" />
             </div>
           </div>
         </div>
